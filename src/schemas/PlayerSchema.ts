@@ -1,20 +1,20 @@
 type Bar = {
     max: number,
-    min: number,
+    cur: number,
 }
 
 interface PlayerSchema {
     username: string,
-    location: { map: string, coordinates: [number, number] },
+    location: { map: string, coordinates: number[] },
     stats: {
         combat: {
             shield: number,
             health: Bar
             resources: {
-                mana: Bar,
-                msp: Bar,
-                psp: Bar,
-                soul: Bar,
+                mana?: Bar,
+                msp?: Bar,
+                psp?: Bar,
+                soul?: Bar,
             },
             attack: number,
             pAttack: number,

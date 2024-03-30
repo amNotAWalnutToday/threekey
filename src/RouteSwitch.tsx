@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from './pages/Home';
+import Combat from "./pages/Combat";
 
 export default function RouteSwitch() {
     return (
@@ -9,6 +10,12 @@ export default function RouteSwitch() {
                     path='/'
                     element={
                         <Home />
+                    }
+                />
+                <Route 
+                    path='/combat'
+                    element={
+                        <Combat />
                     }
                 />
             </Routes>

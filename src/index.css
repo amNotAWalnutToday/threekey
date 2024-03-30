@@ -11,3 +11,43 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.player {
+  position: absolute;
+  top: 500px;
+  width: 100px;
+  height: 100px;
+  background-color: white;
+}
+
+.enemy {
+  left: 500px;
+}
+
+.emptyBar {
+  transform: translateY(-25px);
+  width: 100px;
+  height: 15px;
+  background-color: rgba(218, 165, 32, 0.613);
+}
+
+.health {
+  background-color: #800;
+  height: 100%;
+}
+
+.fill {
+  background-color: aqua;
+  height: 100%;
+}
+
+.battleTimer {
+  width: 1000px;
+  height: 15px;
+  background-color: rgba(218, 165, 32, 0.613);
+}
+
+.cen-flex {
+  display: flex;
+  justify-content: center;
+}
