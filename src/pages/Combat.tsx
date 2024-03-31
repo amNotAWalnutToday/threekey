@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer, useCallback } from "react";
 import PlayerSchema from "../schemas/PlayerSchema";
+import FieldSchema from "../schemas/FieldSchema";
 import testdata from '../data/testdata.json';
 
 const battleTimer = {
@@ -14,6 +15,8 @@ const setBattleTimer = () => {
     battleTimer.done = false;
 }
 
+setBattleTimer();
+
 const cb = (attack) => {
     const { procTime } = battleTimer;
     const currentTime = Date.now();
@@ -25,33 +28,104 @@ const cb = (attack) => {
     if(battleTimer.done) setBattleTimer();
 }
 
+const enum ACTION_QUEUE_REDUCER_ACTIONS {
+    target,
+    CLEAR,
+}
+
+type ACTION_QUEUE_ACTIONS = {
+    type: ACTION_QUEUE_REDUCER_ACTIONS,
+    payload: {
+        action: any
+    } 
+}
+
+const actionQueueReducer = (state, action: ACTION_QUEUE_ACTIONS) => {
+    switch(action.type) {
+        case ACTION_QUEUE_REDUCER_ACTIONS.target:
+            console.log(state);
+            return [...state, {...action.payload.action}];
+        case ACTION_QUEUE_REDUCER_ACTIONS.CLEAR:
+            return [];
+        default:
+            return state;
+    }
+}
+
+const getPlayer = (players: PlayerSchema[], pid: string) => {
+    for(let i = 0; i < players.length; i++) {
+        if(pid === players[i].pid) return {state: players[i], index: i};
+    }
+    return {state: players[0], index: -1};
+}
+
+const enum PLAYERS_REDUCER_ACTIONS {
+    receive_damage,
+}
+
+type PLAYERS_ACTIONS = {
+    type: PLAYERS_REDUCER_ACTIONS,
+    payload: {
+        pid: string
+    } 
+}
+
+const playersReducer = (state, action: PLAYERS_ACTIONS) => {
+    const players = [...state];
+    const player = getPlayer(players, action.payload.pid);
+    if(player.index < 0) return state;
+
+    switch(action.type) {
+        case PLAYERS_REDUCER_ACTIONS.receive_damage:
+            players[player.index].stats.combat.health.cur -= 5;
+            return [...players];
+        default:
+            return state;
+    }
+}
+
 export default function Combat() {
     const [currentTime, setCurrentTime] = useState(0);
 
-    const [player, setPlayer] = useState<PlayerSchema>({
-        username: testdata.user1.username,
-        location: testdata.user1.location,
-        stats: testdata.user1.stats,
+    const [field, setField] = useState<FieldSchema>({
+        players: [testdata.user1, testdata.user2],
+        actionQueue: [],
     });
-    
-    const [enemy, setEnemy] = useState<PlayerSchema>({
-        username: testdata.user2.username,
-        location: testdata.user2.location,
-        stats: testdata.user2.stats,
-    });
+    const [actionQueue, dispatchActionQueue] = useReducer(actionQueueReducer, field.actionQueue);
+    const [players, dispatchPlayers] = useReducer(playersReducer, field.players);
 
-    const attack = () => {
-        const newEnemy = {...enemy};
-        newEnemy.stats.combat.health.cur -= player.stats.combat.attack;
-        setEnemy(() => newEnemy);
-    }
+    const [player, setPlayer] = useState<PlayerSchema>(testdata.user1);
+    
+    const [enemy, setEnemy] = useState<PlayerSchema>(testdata.user2);
+
+    const target = useCallback((targets: string[]) => {
+        const action = {
+            ability: "attack",
+            targets,
+        }
+        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action}});
+    }, [dispatchActionQueue]);
+
+    const attack = useCallback(() => {
+        players.forEach((player) => {
+            if(player.npc) {
+                dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: '1'}})
+            }
+        });
+        actionQueue.forEach((action) => {
+            dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: action.targets[0]}})
+        });
+        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.CLEAR, payload: {action: null}})
+    }, [actionQueue, players, dispatchPlayers]);
 
     useEffect(() => {
-        setInterval(() => {
+        const interval = setInterval(() => {
             cb(attack);
             setCurrentTime(battleTimer.initTime);
         }, 24);
-    }, []);
+
+        return () => clearInterval(interval);
+    }, [attack, target]);
 
     const getTime = () => {
         return currentTime / 10;
@@ -61,12 +135,16 @@ export default function Combat() {
         <div>
             <div className="player">
                 <div className="emptyBar">
-                    <div style={{width: player.stats.combat.health.cur}} className="health"></div>
+                    <div style={{width: player.stats.combat.health.cur}} className="health">
+                      <p style={{fontSize: "10px"}} >{player.stats.combat.health.cur} / {player.stats.combat.health.max}</p>
+                    </div>
                 </div>
             </div>
-            <div className="enemy player">
+            <div onClick={() => console.log(players[1])} className="enemy player">
                 <div className="emptyBar">
-                    <div style={{width: enemy.stats.combat.health.cur}} className="health"></div>
+                    <div style={{width: enemy.stats.combat.health.cur}} className="health">
+                        <p style={{fontSize: "10px"}} >{enemy.stats.combat.health.cur} / {enemy.stats.combat.health.max}</p>
+                    </div>
                 </div>
             </div>
             <div className="cen-flex">
@@ -74,7 +152,8 @@ export default function Combat() {
                     <div style={{width: getTime()}} className="fill"></div>
                 </div>
             </div>
-            <button onClick={attack}>Attack</button>
+            <button onClick={() => target(['2'])}>Attack</button>
+            <button onClick={() => attack()}>con</button>
         </div>
     )
 }
