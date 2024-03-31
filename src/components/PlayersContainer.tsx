@@ -4,9 +4,20 @@ import Player from "./Player";
 type Props = { 
     players: PlayerSchema[],
     sideIndex: number,
+    selectedTargets: string[],
+    selectPlayer: (player: { state: PlayerSchema, index: number } | null) => void,
+    selectTarget: (target: string) => void,
 }
 
-export default function PlayersContainer({players, sideIndex}: Props) {
+export default function PlayersContainer(
+    {
+        players, 
+        sideIndex, 
+        selectedTargets,
+        selectPlayer, 
+        selectTarget
+    }: Props
+){
     const mapPlayers = () => {
         const filteredPlayers = [...players].filter((player) => {
             return (sideIndex === 1 && player.npc) || (sideIndex === 2 && !player.npc);
@@ -18,6 +29,9 @@ export default function PlayersContainer({players, sideIndex}: Props) {
                     key={`player-${index}`}
                     player={player}
                     index={index}
+                    selectedTargets={selectedTargets}
+                    selectPlayer={selectPlayer}
+                    selectTarget={selectTarget}
                 />
             )
         });

@@ -2,8 +2,8 @@ import { useState, useEffect, useReducer, useCallback } from "react";
 import PlayerSchema from "../schemas/PlayerSchema";
 import FieldSchema from "../schemas/FieldSchema";
 import testdata from '../data/testdata.json';
-import Player from "../components/Player";
 import PlayersContainer from "../components/PlayersContainer";
+import AttackMenu from "../components/AttackMenu";
 
 const battleTimer = {
     initTime: 0,
@@ -89,12 +89,46 @@ const playersReducer = (state, action: PLAYERS_ACTIONS) => {
 export default function Combat() {
     const [currentTime, setCurrentTime] = useState(0);
 
+    /**GAME DATA*/
     const [field, setField] = useState<FieldSchema>({
         players: [testdata.user1, testdata.user2, testdata.user3],
         actionQueue: [],
     });
     const [actionQueue, dispatchActionQueue] = useReducer(actionQueueReducer, field.actionQueue);
     const [players, dispatchPlayers] = useReducer(playersReducer, field.players);
+
+    /**CLIENT STATE*/
+    const [selectedPlayer, setSelectedPlayer] = useState<{state: PlayerSchema, index: number} | null>(null);
+    const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
+
+    const selectPlayer = (player: { state: PlayerSchema, index: number } | null) => {
+        setSelectedPlayer((prev) => {
+            if(prev === null || player === null) return player;
+            else return prev.state.pid === player.state.pid ? null : player;
+        });
+        // if(selectedPlayer) {
+        //     setSelectedPlayer(() => null);
+        // }
+    }
+
+    const selectTarget = (target: string) => {
+        setSelectedTargets((prev) => {
+            if(!prev.length || prev[0] !== target) return [target];
+            else return [];    
+        });
+    }
+
+    const selectTargetByAbility = (ability: string) => {
+        const filteredPlayers = [...players].filter((player) => player.npc); 
+        if(ability === "single" && selectedTargets.length > 1) {
+            setSelectedTargets((prev) => [filteredPlayers[0].pid]);
+        }
+        else if(ability === "aoe") {
+            setSelectedTargets((prev) => {
+                return Array.from(filteredPlayers, (player) => player.pid);
+            });
+        }
+    }
 
     const target = useCallback((targets: string[]) => {
         const action = {
@@ -111,7 +145,9 @@ export default function Combat() {
             }
         });
         actionQueue.forEach((action) => {
-            dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: action.targets[0]}})
+            action.targets.forEach((target, i) => {
+                dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: action.targets[i]}})
+            });
         });
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.CLEAR, payload: {action: null}})
     }, [actionQueue, players, dispatchPlayers]);
@@ -129,14 +165,27 @@ export default function Combat() {
         return currentTime / 10;
     }
 
+    const props = {
+        players,
+        selectedTargets,
+        selectPlayer,
+        selectTarget,
+        selectTargetByAbility
+    }
+
     return (
         <div>
+            <AttackMenu 
+                {...props}
+                selectedPlayer={selectedPlayer}
+                target={target}
+            />
             <PlayersContainer
-                players={players} 
+                {...props}
                 sideIndex={1}
             />
             <PlayersContainer
-                players={players} 
+                {...props}
                 sideIndex={2}
             />
             <div className="cen-flex">
@@ -144,8 +193,7 @@ export default function Combat() {
                     <div style={{width: getTime()}} className="fill"></div>
                 </div>
             </div>
-            <button onClick={() => target(['2'])}>Attack</button>
-            <button onClick={() => attack()}>con</button>
+            <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button>
         </div>
     )
 }
