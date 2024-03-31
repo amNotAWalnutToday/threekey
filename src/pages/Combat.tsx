@@ -80,6 +80,7 @@ const playersReducer = (state, action: PLAYERS_ACTIONS) => {
     switch(action.type) {
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             players[player.index].stats.combat.health.cur -= 5;
+            player.state.stats.combat.health.cur <= 0 ? players[player.index].dead = true : null;
             return [...players];
         default:
             return state;
@@ -88,6 +89,7 @@ const playersReducer = (state, action: PLAYERS_ACTIONS) => {
 
 export default function Combat() {
     const [currentTime, setCurrentTime] = useState(0);
+    const [inProgress, setInProgress] = useState(true);
 
     /**GAME DATA*/
     const [field, setField] = useState<FieldSchema>({
@@ -138,9 +140,20 @@ export default function Combat() {
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action}});
     }, [dispatchActionQueue]);
 
+    const checkIfBattleOver = useCallback(() => {
+        const side1 = [...players].filter((p) => p.npc);
+        const side2 = [...players].filter((p) => !p.npc);
+        const count = [0, 0]
+        for(const p of side1) if(p.dead) count[0]++;
+        for(const p of side2) if(p.dead) count[1]++;
+        if(count[0] >= side1.length || count[1] >= side2.length) setInProgress(() => false);        
+    }, [players]);
+
     const attack = useCallback(() => {
+        checkIfBattleOver();
+
         players.forEach((player) => {
-            if(player.npc) {
+            if(player.npc && !player.dead) {
                 dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: '1'}})
             }
         });
@@ -149,17 +162,19 @@ export default function Combat() {
                 dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: action.targets[i]}})
             });
         });
-        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.CLEAR, payload: {action: null}})
-    }, [actionQueue, players, dispatchPlayers]);
+        
+        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.CLEAR, payload: {action: null}});
+    }, [actionQueue, players, dispatchPlayers, checkIfBattleOver]);
 
     useEffect(() => {
+        if(!inProgress) return;
         const interval = setInterval(() => {
             cb(attack);
             setCurrentTime(battleTimer.initTime);
         }, 24);
 
         return () => clearInterval(interval);
-    }, [attack, target]);
+    }, [attack, inProgress]);
 
     const getTime = () => {
         return currentTime / 10;

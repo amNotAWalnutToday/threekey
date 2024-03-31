@@ -9,6 +9,7 @@ interface PlayerSchema {
     username: string,
     pid: string,
     npc?: boolean,
+    dead?: boolean,
     location: { map: string, coordinates: number[] },
     abilities: AbilitySchema[],
     stats: {
