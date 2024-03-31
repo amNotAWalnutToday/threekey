@@ -12,9 +12,27 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.player {
+.side_1 {
   position: absolute;
-  top: 500px;
+  display: flex;
+  justify-content: space-around;
+  top: 250px;
+  left: 100px;
+  width: 1000px;
+  height: 100%;
+}
+
+.side_2 {
+  position: absolute;
+  display: flex;
+  justify-content: space-around;
+  bottom: 200px;
+  left: 100px;
+  width: 1000px;
+  height: 100px;
+}
+
+.player {
   width: 100px;
   height: 100px;
   background-color: white;

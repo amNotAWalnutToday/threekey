@@ -2,6 +2,8 @@ import { useState, useEffect, useReducer, useCallback } from "react";
 import PlayerSchema from "../schemas/PlayerSchema";
 import FieldSchema from "../schemas/FieldSchema";
 import testdata from '../data/testdata.json';
+import Player from "../components/Player";
+import PlayersContainer from "../components/PlayersContainer";
 
 const battleTimer = {
     initTime: 0,
@@ -88,15 +90,11 @@ export default function Combat() {
     const [currentTime, setCurrentTime] = useState(0);
 
     const [field, setField] = useState<FieldSchema>({
-        players: [testdata.user1, testdata.user2],
+        players: [testdata.user1, testdata.user2, testdata.user3],
         actionQueue: [],
     });
     const [actionQueue, dispatchActionQueue] = useReducer(actionQueueReducer, field.actionQueue);
     const [players, dispatchPlayers] = useReducer(playersReducer, field.players);
-
-    const [player, setPlayer] = useState<PlayerSchema>(testdata.user1);
-    
-    const [enemy, setEnemy] = useState<PlayerSchema>(testdata.user2);
 
     const target = useCallback((targets: string[]) => {
         const action = {
@@ -133,20 +131,14 @@ export default function Combat() {
 
     return (
         <div>
-            <div className="player">
-                <div className="emptyBar">
-                    <div style={{width: player.stats.combat.health.cur}} className="health">
-                      <p style={{fontSize: "10px"}} >{player.stats.combat.health.cur} / {player.stats.combat.health.max}</p>
-                    </div>
-                </div>
-            </div>
-            <div onClick={() => console.log(players[1])} className="enemy player">
-                <div className="emptyBar">
-                    <div style={{width: enemy.stats.combat.health.cur}} className="health">
-                        <p style={{fontSize: "10px"}} >{enemy.stats.combat.health.cur} / {enemy.stats.combat.health.max}</p>
-                    </div>
-                </div>
-            </div>
+            <PlayersContainer
+                players={players} 
+                sideIndex={1}
+            />
+            <PlayersContainer
+                players={players} 
+                sideIndex={2}
+            />
             <div className="cen-flex">
                 <div className="battleTimer">
                     <div style={{width: getTime()}} className="fill"></div>
