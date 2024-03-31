@@ -15,25 +15,28 @@ export default function AttackMenu(
         selectTargetByAbility
     }: Props
 ) {
+
+    const mapAbilities = () => {
+        return selectedPlayer?.state.abilities.map((ability, ind) => {
+            return (
+                <button 
+                    key={`ability-${ind}`}
+                    onClick={() => target(Array.from(selectedTargets))} 
+                    onMouseEnter={() => selectTargetByAbility(ability.type)}
+                    className="btn"
+                >
+                    {ability.name}
+                </button>
+            )
+        });
+    }
+
     return (
         <div className="sidemenu" >
             <div>
                 <p>{selectedPlayer?.state.username ?? "*_____*"}</p>
             </div> 
-            <button 
-                onClick={() => target(Array.from(selectedTargets[0]))} 
-                onMouseEnter={() => selectTargetByAbility('single')}
-                className="btn"
-            >
-                    Attack
-            </button>
-            <button 
-                onClick={() => target(Array.from(selectedTargets))} 
-                onMouseEnter={() => selectTargetByAbility('aoe')}
-                className="btn"
-            >
-                    AoE Attack
-            </button>
+            { mapAbilities() }
         </div>
     )
 }

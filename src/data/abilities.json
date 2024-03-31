@@ -1,0 +1,20 @@
+{
+    "naturalist": {
+        "plants": {
+
+        },
+        "insects": {
+
+        },
+        "monsters": {
+
+        },
+        "weather": [
+            {
+                "id": "nw01",
+                "name": "lightning",
+                "type": "single"
+            }
+        ]
+    }
+}

@@ -1,3 +1,5 @@
+import AbilitySchema from "./AbilitySchema";
+
 type Bar = {
     max: number,
     cur: number,
@@ -8,6 +10,7 @@ interface PlayerSchema {
     pid: string,
     npc?: boolean,
     location: { map: string, coordinates: number[] },
+    abilities: AbilitySchema[],
     stats: {
         combat: {
             shield: number,

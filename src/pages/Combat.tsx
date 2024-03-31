@@ -193,7 +193,7 @@ export default function Combat() {
                     <div style={{width: getTime()}} className="fill"></div>
                 </div>
             </div>
-            <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button>
+            {/* <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button> */}
         </div>
     )
 }
