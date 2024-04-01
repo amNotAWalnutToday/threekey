@@ -13,7 +13,14 @@
             {
                 "id": "nw01",
                 "name": "lightning",
-                "type": "single"
+                "type": "single",
+                "damage": {
+                    "type": "magic",
+                    "base": 5
+                },
+                "cost": {
+                    "ap": 10
+                }
             }
         ]
     }

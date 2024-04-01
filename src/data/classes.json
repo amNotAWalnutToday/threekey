@@ -1,0 +1,65 @@
+{
+    "naturalist": {
+        "stats": {
+            "combat": {
+                "shield": 0,
+                "health": {
+                    "max": 100,
+                    "cur": 100
+                },
+                "resources": {
+                    "mana": 100
+                },
+                "attack": 5,
+                "pAttack": 100,
+                "mAttack": 100,
+                "defence": 0,
+                "resistance": 0,
+                "speed": 10,
+                "debuffs": []
+            }
+        }
+    },
+    "spiritualist": {
+        "stats": {
+            "combat": {
+                "shield": 0,
+                "health": {
+                    "max": 100,
+                    "cur": 100
+                },
+                "resources": {
+                    "mana": 100
+                },
+                "attack": 5,
+                "pAttack": 100,
+                "mAttack": 100,
+                "defence": 0,
+                "resistance": 0,
+                "speed": 10,
+                "debuffs": []
+            }
+        }
+    },
+    "technologist": {
+        "stats": {
+            "combat": {
+                "shield": 0,
+                "health": {
+                    "max": 100,
+                    "cur": 100
+                },
+                "resources": {
+                    "mana": 100
+                },
+                "attack": 5,
+                "pAttack": 100,
+                "mAttack": 100,
+                "defence": 0,
+                "resistance": 0,
+                "speed": 10,
+                "debuffs": []
+            }
+        }
+    }
+}
