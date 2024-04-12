@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from './pages/Home';
 import Combat from "./pages/Combat";
+import Map from "./pages/Map";
 import CharacterCreate from "./pages/CharacterCreate";
 
 export default function RouteSwitch() {
@@ -23,6 +24,12 @@ export default function RouteSwitch() {
                     path='/create-character'
                     element={
                         <CharacterCreate />
+                    }
+                />
+                <Route 
+                    path='/map'
+                    element={
+                        <Map />
                     }
                 />
             </Routes>

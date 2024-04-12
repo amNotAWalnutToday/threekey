@@ -5,6 +5,7 @@ export default function Home() {
         <div>
             <Link to='/combat'> Fight!</Link>
             <Link to='/create-character'> create</Link>
+            <Link to='/map'> map</Link>
         </div>
     )
 }

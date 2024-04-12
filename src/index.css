@@ -99,3 +99,22 @@
   padding: 1rem 0;
   background-color: orangered;  
 }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, 32px);
+  grid-template-rows: repeat(10, 32px);
+  transform: rotateZ(0deg);
+}
+
+.water {
+  background-color: #06A;
+}
+
+.grass {
+  background-color: #0A6;
+}
+
+.dirt {
+  background-color: #a86c3b;
+}
