@@ -7,6 +7,7 @@ type action = {
 
 interface FieldSchema {
     players: PlayerSchema[],
+    enemies: any[],
     actionQueue: action[],
 }
 

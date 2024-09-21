@@ -2,13 +2,11 @@ interface AbilitySchema {
     id: string,
     type: string,
     name: string,
-    damage: {
-        type: string,
-        base: number
-    },
+    damage: number,
     cost: {
-        ap: number,
+        mana?: number,
     },
+    users: string,
 }
 
 export default AbilitySchema;

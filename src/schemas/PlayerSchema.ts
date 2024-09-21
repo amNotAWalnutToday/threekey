@@ -1,8 +1,11 @@
-import AbilitySchema from "./AbilitySchema";
-
 type Bar = {
     max: number,
     cur: number,
+}
+
+type AbilityRefSchema = {
+    id: string,
+    level: number,
 }
 
 interface PlayerSchema {
@@ -11,10 +14,11 @@ interface PlayerSchema {
     npc?: boolean,
     dead?: boolean,
     location: { map: string, coordinates: number[] },
-    abilities: AbilitySchema[],
+    abilities: AbilityRefSchema[],
+    inventory: string[], //IDS
     stats: {
         combat: {
-            shield: number,
+            shield: Bar,
             health: Bar
             resources: {
                 mana?: Bar,
@@ -23,10 +27,7 @@ interface PlayerSchema {
                 soul?: Bar,
             },
             attack: number,
-            pAttack: number,
-            mAttack: number,
             defence: number,
-            resistance: number,
             speed: number,
             debuffs: string[],
         },

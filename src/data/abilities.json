@@ -1,8 +1,61 @@
 {
-    "naturalist": {
-        "plants": {
-
+    "all": [
+        {
+            "id": "P01",
+            "name": "seed shot",
+            "type": "single",
+            "damage": 5,
+            "cost": {
+                "health": 5
+            },
+            "users": ["naturalist"]
         },
+        {
+            "id": "P02",
+            "name": "seed spread shot",
+            "type": "aoe",
+            "damage": 5,
+            "cost": {
+                "health": 10
+            },
+            "users": ["naturalist"]
+        },
+        {
+            "id": "P03",
+            "name": "meditate",
+            "type": "self",
+            "damage": 50,
+            "cost": {
+                "mana": 50
+            },
+            "users": ["naturalist"]
+        },
+        {
+            "id": "P04",
+            "name": "life transfer",
+            "type": "ally",
+            "damage": 25,
+            "cost": {
+                "health": 25
+            },
+            "users": ["naturalist"]
+        }
+    ],
+    "naturalist": {
+        "plants": [
+            {
+                "id": "p01",
+                "name": "seed shot",
+                "type": "single",
+                "damage": {
+                    "type": "physical",
+                    "base": 5
+                },
+                "cost": {
+                    "ap": 5
+                }
+            }
+        ],
         "insects": {
 
         },
