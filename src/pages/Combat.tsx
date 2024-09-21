@@ -2,6 +2,8 @@ import { useState, useEffect, useReducer, useCallback, useContext } from "react"
 import PlayerSchema from "../schemas/PlayerSchema";
 import FieldSchema from "../schemas/FieldSchema";
 import testdata from '../data/testdata.json';
+import enemyData from '../data/enemies.json';
+import abiltyData from '../data/abilities.json';
 import PlayersContainer from "../components/PlayersContainer";
 import AttackMenu from "../components/AttackMenu";
 import UserContext from "../data/Context";
@@ -67,13 +69,21 @@ const getPlayer = (players: PlayerSchema[], pid: string) => {
     return {state: players[0], index: -1};
 }
 
+const getAbility = (id: string) => {
+    for(const ability of abiltyData.all) {
+        if(id === ability.id) return ability;
+    }
+}
+
 const enum PLAYERS_REDUCER_ACTIONS {
+    add_player,
     receive_damage,
 }
 
 type PLAYERS_ACTIONS = {
     type: PLAYERS_REDUCER_ACTIONS,
     payload: {
+        playerObj?: PlayerSchema,
         amount?: number,
         pid: string
     } 
@@ -81,11 +91,12 @@ type PLAYERS_ACTIONS = {
 
 const playersReducer = (state, action: PLAYERS_ACTIONS) => {
     const players = [...state];
-    const { amount, pid } = action.payload;
+    const { amount, pid, playerObj } = action.payload;
     const player = getPlayer(players, pid);
-    if(player.index < 0) return state;
-
+    // if(player.index < 0) return state;
     switch(action.type) {
+        case PLAYERS_REDUCER_ACTIONS.add_player:
+            return [...players, {...playerObj}];
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             players[player.index].stats.combat.health.cur -= amount ?? 0;
             player.state.stats.combat.health.cur <= 0 ? players[player.index].dead = true : null;
@@ -104,7 +115,7 @@ export default function Combat() {
     /**GAME DATA*/
     const [field, setField] = useState<FieldSchema>({
         players: [user],
-        enemies: [testdata.user2],
+        enemies: [],
         actionQueue: [],
     });
     const [actionQueue, dispatchActionQueue] = useReducer(actionQueueReducer, field.actionQueue);
@@ -150,6 +161,36 @@ export default function Combat() {
         }
     }
 
+    const spawnEnemy = useCallback(() => {
+        const enemyList = enemyData.all;
+        const { attack, defence, speed, debuffs, name } = enemyList[0];
+        const health = {
+            max: enemyList[0].health,
+            cur: enemyList[0].health
+        }
+        
+        const abilities = [];
+        for(const id of enemyList[0].abilities) abilities.push(getAbility(id));
+        
+        const newEnemy = {
+            name,
+            pid: `E${enemies.length}`,
+            npc: true,
+            dead: false,
+            stats: {
+                combat: {
+                    health,
+                    abilities,
+                    attack,
+                    defence,
+                    speed, 
+                    debuffs,
+                },
+            },
+        }
+        dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.add_player, payload: {playerObj: newEnemy}})
+    }, [enemies]);
+
     const target = useCallback((targets: string[]) => {
         const action = {
             ability: "attack",
@@ -189,7 +230,7 @@ export default function Combat() {
         enemies.forEach((enemy) => {
             const action = {
                 ability: "attack",
-                user: "2",
+                user: enemy.pid,
                 targets: [user.pid],
             }
             dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action }});
@@ -240,6 +281,8 @@ export default function Combat() {
                 </div>
             </div>
             {/* <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button> */}
-        </div>
+            <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log({enemies, players})}>enemies</button>
+            <button style={{position: "absolute", zIndex: 5, transform: "translateY(100px)"}} onClick={() => spawnEnemy()}>spawn enemies</button>
+            </div>
     )
 }

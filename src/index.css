@@ -121,6 +121,7 @@
 
 .damaged {
   animation: damageReceived 1s 1 alternate;
+  word-break: break-all;
 }
 
 @keyframes damageReceived {

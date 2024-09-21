@@ -23,7 +23,7 @@ export default function PlayersContainer(
             return (sideIndex === 1 && player.npc) || (sideIndex === 2 && !player.npc);
         });
 
-        return filteredPlayers.map((player, index) => {
+        return players.map((player, index) => {
             return (
                 <Player 
                     key={`player-${index}`}
