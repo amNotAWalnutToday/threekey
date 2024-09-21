@@ -1,4 +1,5 @@
 import PlayerSchema from "../schemas/PlayerSchema"
+import { useEffect, useState } from "react";
 
 type Props = {
     player: PlayerSchema,
@@ -17,6 +18,8 @@ export default function Player(
         selectTarget
     }: Props
 ) {
+    const [status, setStatus] = useState('');
+
     const checkIfTargeted = () => {
         for(let i = 0; i < selectedTargets.length; i++) {
             if(selectedTargets[i] === player.pid) return true;
@@ -24,9 +27,14 @@ export default function Player(
         return false;
     }
 
+    useEffect(() => {
+        setStatus('damaged');
+        setTimeout(() => setStatus(''), 1500);
+    }, [player.stats.combat.health.cur]);
+
     return (
         <div 
-            className={`player ${checkIfTargeted() ? "target" : ""}`} 
+            className={`player ${status} ${checkIfTargeted() ? "target" : ""}`} 
             onClick={() => selectPlayer({state: player, index})}
             onContextMenu={(e) => {
                 e.preventDefault();
