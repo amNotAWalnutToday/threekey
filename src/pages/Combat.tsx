@@ -114,6 +114,7 @@ const getPlayer = (players: PlayerSchema[], pid: string) => {
     for(let i = 0; i < players.length; i++) {
         if(pid === players[i].pid) return {state: players[i], index: i};
     }
+    console.log('b');
     return {state: players[0], index: -1};
 }
 
@@ -126,6 +127,7 @@ const getAbility = (id: string) => {
 const enum PLAYERS_REDUCER_ACTIONS {
     add_player,
     receive_damage,
+    play__attack_animation,
 }
 
 type PLAYERS_ACTIONS = {
@@ -133,7 +135,8 @@ type PLAYERS_ACTIONS = {
     payload: {
         playerObj?: PlayerSchema,
         amount?: number,
-        pid: string
+        pid: string,
+        otherPlayers?: PlayerSchema[],
     } 
 }
 
@@ -148,6 +151,9 @@ const playersReducer = (state, action: PLAYERS_ACTIONS) => {
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             players[player.index].stats.combat.health.cur -= amount ?? 0;
             player.state.stats.combat.health.cur <= 0 ? players[player.index].dead = true : null;
+            return [...players];
+        case PLAYERS_REDUCER_ACTIONS.play__attack_animation:
+            players[player.index].isAttacking += 1;
             return [...players];
         default:
             return state;
@@ -225,6 +231,7 @@ export default function Combat() {
             pid: `E${enemies.length}`,
             npc: true,
             dead: false,
+            isAttacking: 0,
             stats: {
                 combat: {
                     health,
@@ -266,8 +273,14 @@ export default function Combat() {
             const target = getPlayer([...players, ...enemies], targetRef);
             const targetStats = target.state.stats.combat;
             const amount = user.stats.combat.attack - targetStats.defence;
-            if(target.state.npc) dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: targets[i], amount}}); 
-            else dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: targets[i], amount }})
+            if(target.state.npc) {
+                dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: targets[i], amount}}); 
+                dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.play__attack_animation, payload: { pid: userId }});
+            }
+            else {
+                dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: targets[i], amount }})
+                dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.play__attack_animation, payload: { pid: userId }});
+            }
         });
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: {action: null}});
     }, [players, enemies]);

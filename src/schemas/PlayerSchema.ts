@@ -13,6 +13,7 @@ interface PlayerSchema {
     pid: string,
     npc?: boolean,
     dead?: boolean,
+    isAttacking: number,
     location: { map: string, coordinates: number[] },
     abilities: AbilityRefSchema[],
     inventory: string[], //IDS

@@ -54,6 +54,7 @@
   height: 100px;
 }
 
+.enemy,
 .player {
   width: 100px;
   height: 100px;
@@ -119,14 +120,53 @@
   background-color: #a86c3b;
 }
 
-.damaged {
-  animation: damageReceived 1s 1 alternate;
-  word-break: break-all;
+.damaged.player {
+  animation: damageReceived 1s 1 linear;
+}
+
+.damaged.enemy {
+  animation: damageReceived 1s 1 linear;
+}
+
+.attacking.enemy {
+  animation: sendAttackEnemy 0.33s 1 linear;
+}
+
+.attacking.player {
+  animation: sendAttackPlayer 0.33s 1 linear;
+}
+
+@keyframes sendAttackEnemy {
+  0% {
+    transform : translateY(0px);
+  }
+
+  50% {
+    transform : translateY(12px);
+  }
+
+  100% {
+    transform : translateY(0px);
+  }
+}
+
+@keyframes sendAttackPlayer {
+  0% {
+    transform : translateY(0px);
+  }
+
+  50% {
+    transform : translateY(-12px);
+  }
+
+  100% {
+    transform : translateY(0px);
+  }
 }
 
 @keyframes damageReceived {
   0% {
-    transform: translate(-4px, -4px);
+    transform: scale(0.9);
     filter: drop-shadow(16px 16px 16px crimson);
   }
 

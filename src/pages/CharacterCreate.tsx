@@ -29,6 +29,7 @@ export default function CharacterCreate() {
             pid: "1",
             npc: false,
             dead: false,
+            isAttacking: 0,
             stats,
             abilities,
         }

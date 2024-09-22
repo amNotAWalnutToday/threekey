@@ -32,9 +32,15 @@ export default function Player(
         setTimeout(() => setStatus(''), 600);
     }, [player.stats.combat.health.cur]);
 
+    useEffect(() => {
+        console.log('a');
+        setStatus('attacking');
+        setTimeout(() => setStatus(''), 600);
+    }, [player.isAttacking]);
+
     return (
         <div 
-            className={`player ${status} ${checkIfTargeted() ? "target" : ""}`} 
+            className={`${player.npc ? "enemy" : "player"} ${status} ${checkIfTargeted() ? "target" : ""}`} 
             onClick={() => selectPlayer({state: player, index})}
             onContextMenu={(e) => {
                 e.preventDefault();
