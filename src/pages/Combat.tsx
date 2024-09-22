@@ -30,13 +30,13 @@ const setBattleTimer = (timer: { initTime: number, procTime: number, done: boole
 
 setBattleTimer(battleTimer);
 
-const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue) => {
+const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue) => {
     const { procTime } = battleTimer;
     const currentTime = Date.now();
     battleTimer.initTime = procTime - currentTime;
     if(currentTime > procTime) { 
         if(actionQueue.length > 0) {
-            takeAction(actionQueue, attack);
+            takeAction(actionQueue, attack, sortQueue);
             return;
         }
         enemySelectAttack();
@@ -46,27 +46,30 @@ const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue) => {
     if(battleTimer.done) setBattleTimer(battleTimer);
 }
 
-const takeAction = (actionQueue, attack) => {
+const takeAction = (actionQueue, attack, sortQueue) => {
     const { procTime } = actionTimer;
     const currentTime = Date.now();
 
     if(currentTime > procTime) {
         const updatedQueue = [...actionQueue];
-        const thisAction = updatedQueue.pop();
-        attack(thisAction.user, thisAction.targets);
+        const thisAction = updatedQueue.shift();
         setBattleTimer(actionTimer);
+        if(thisAction.ability === "sort") return sortQueue();
+        attack(thisAction.user, thisAction.targets);
     }
 }
 
 const enum ACTION_QUEUE_REDUCER_ACTIONS {
     target,
     REMOVE_TOP,
+    SORT_BY_SPEED,
     CLEAR,
 }
 
 type ACTION_QUEUE_ACTIONS = {
     type: ACTION_QUEUE_REDUCER_ACTIONS,
     payload: {
+        players?: PlayerSchema[],
         action: {
             ability: string,
             user: string, 
@@ -75,16 +78,31 @@ type ACTION_QUEUE_ACTIONS = {
     } 
 }
 
+const sortBySpeed = (actionQueue, players) => {
+    const updatedQueue = [];
+    const playersSortedBySpeed = [...players].sort((p1, p2) => p2.stats.combat.speed - p1.stats.combat.speed);
+
+    for(const player of playersSortedBySpeed) {
+        for(const action of actionQueue) {
+            if(action.user === player.pid) updatedQueue.push(action);
+        }
+    }
+
+    return updatedQueue;
+}
+
 const actionQueueReducer = (state, action: ACTION_QUEUE_ACTIONS) => {
     const updatedQueue = [...state];
 
     switch(action.type) {
         case ACTION_QUEUE_REDUCER_ACTIONS.target:
-            console.log(state);
+            // console.log(state);
             return [...state, {...action.payload.action}];
         case ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP:
-            updatedQueue.pop();
+            updatedQueue.shift();
             return [...updatedQueue];
+        case ACTION_QUEUE_REDUCER_ACTIONS.SORT_BY_SPEED:
+            return sortBySpeed(updatedQueue, action.payload.players ?? []) ?? [];
         case ACTION_QUEUE_REDUCER_ACTIONS.CLEAR:
             return [];
         default:
@@ -213,7 +231,7 @@ export default function Combat() {
                     abilities,
                     attack,
                     defence,
-                    speed, 
+                    speed: ((enemies.length + 1) * 10) - speed, 
                     debuffs,
                 },
             },
@@ -255,6 +273,7 @@ export default function Combat() {
     }, [players, enemies]);
 
     const enemySelectAttack = useCallback(() => {
+        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action: {ability: 'sort', user: 'N/A', targets: [] },  }})
         enemies.forEach((enemy) => {
             const action = {
                 ability: "attack",
@@ -265,15 +284,19 @@ export default function Combat() {
         })
     }, [enemies, user]);
 
+    const sortQueue = useCallback(() => {
+        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.SORT_BY_SPEED, payload: { players: [...players, ...enemies], action: null }})
+    }, [players, enemies]);
+
     useEffect(() => {
         if(!inProgress) return;
         const interval = setInterval(() => {
-            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue);
+            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue);
             setCurrentTime(battleTimer.initTime);
         }, 24);
 
         return () => clearInterval(interval);
-    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue]);
+    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue]);
 
     const getTime = () => {
         return currentTime / 10;
@@ -312,6 +335,11 @@ export default function Combat() {
             <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log({enemies, players})}>enemies</button>
             <button style={{position: "absolute", zIndex: 5, transform: "translateY(100px)"}} onClick={() => spawnEnemy()}>spawn enemies</button>
             <button style={{position: "absolute", zIndex: 5, transform: "translateY(200px)"}} onClick={() => setInProgress((e) => !e)}>pause</button>        
+            <button style={{position: "absolute", zIndex: 5, transform: "translateY(300px)"}} onClick={() => { 
+                    sortBySpeed(actionQueue, [...players, ...enemies]);
+                    console.log(actionQueue);
+                }}
+            >sort</button>        
         </div>
     )
 }
