@@ -11,31 +11,56 @@ import UserContext from "../data/Context";
 const battleTimer = {
     initTime: 0,
     procTime: 0,
+    delay: 10000,
     done: true,
 }
 
-const setBattleTimer = () => {
-    const time = Date.now();
-    battleTimer.procTime = time + 10000;
-    battleTimer.done = false;
+const actionTimer = {
+    initTime: 0,
+    procTime: 0,
+    delay: 700,
+    done: true,
 }
 
-setBattleTimer();
+const setBattleTimer = (timer: { initTime: number, procTime: number, done: boolean, delay: number }) => {
+    const time = Date.now();
+    timer.procTime = time + timer.delay;
+    timer.done = false;
+}
 
-const cb = (attack, enemySelectAttack) => {
+setBattleTimer(battleTimer);
+
+const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue) => {
     const { procTime } = battleTimer;
     const currentTime = Date.now();
     battleTimer.initTime = procTime - currentTime;
     if(currentTime > procTime) { 
-        attack();
+        if(actionQueue.length > 0) {
+            takeAction(actionQueue, attack);
+            return;
+        }
         enemySelectAttack();
         battleTimer.done = true;
     }
-    if(battleTimer.done) setBattleTimer();
+    if(battleTimer.initTime > 9000) checkIfBattleOver();
+    if(battleTimer.done) setBattleTimer(battleTimer);
+}
+
+const takeAction = (actionQueue, attack) => {
+    const { procTime } = actionTimer;
+    const currentTime = Date.now();
+
+    if(currentTime > procTime) {
+        const updatedQueue = [...actionQueue];
+        const thisAction = updatedQueue.pop();
+        attack(thisAction.user, thisAction.targets);
+        setBattleTimer(actionTimer);
+    }
 }
 
 const enum ACTION_QUEUE_REDUCER_ACTIONS {
     target,
+    REMOVE_TOP,
     CLEAR,
 }
 
@@ -51,10 +76,15 @@ type ACTION_QUEUE_ACTIONS = {
 }
 
 const actionQueueReducer = (state, action: ACTION_QUEUE_ACTIONS) => {
+    const updatedQueue = [...state];
+
     switch(action.type) {
         case ACTION_QUEUE_REDUCER_ACTIONS.target:
             console.log(state);
             return [...state, {...action.payload.action}];
+        case ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP:
+            updatedQueue.pop();
+            return [...updatedQueue];
         case ACTION_QUEUE_REDUCER_ACTIONS.CLEAR:
             return [];
         default:
@@ -189,6 +219,7 @@ export default function Combat() {
             },
         }
         dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.add_player, payload: {playerObj: newEnemy}})
+        setInProgress(() => true);
     }, [enemies]);
 
     const target = useCallback((targets: string[]) => {
@@ -206,25 +237,22 @@ export default function Combat() {
         const count = [0, 0]
         for(const p of side1) if(p.dead) count[0]++;
         for(const p of side2) if(p.dead) count[1]++;
-        if(count[0] >= side1.length || count[1] >= side2.length) setInProgress(() => false);        
+        if(count[0] >= side1.length || count[1] >= side2.length) {
+            setInProgress(() => false);
+        }        
     }, [players, enemies]);
 
-    const attack = useCallback(() => {
-        checkIfBattleOver();
-
-        actionQueue.forEach((action) => {
-            const user = getPlayer([...players, ...enemies], action.user).state;
-            action.targets.forEach((targetRef: string, i: number) => {
-                const target = getPlayer([...players, ...enemies], targetRef);
-                const targetStats = target.state.stats.combat;
-                const amount = user.stats.combat.attack - targetStats.defence;
-                if(target.state.npc) dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: action.targets[i], amount}}); 
-                else dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: action.targets[i], amount }})
-            });
+    const attack = useCallback((userId: string, targets: string[]) => {
+        const user = getPlayer([...players, ...enemies], userId).state;
+        targets.forEach((targetRef: string, i: number) => {
+            const target = getPlayer([...players, ...enemies], targetRef);
+            const targetStats = target.state.stats.combat;
+            const amount = user.stats.combat.attack - targetStats.defence;
+            if(target.state.npc) dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: targets[i], amount}}); 
+            else dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: targets[i], amount }})
         });
-        
-        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.CLEAR, payload: {action: null}});
-    }, [actionQueue, players, enemies, dispatchPlayers, checkIfBattleOver]);
+        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: {action: null}});
+    }, [players, enemies]);
 
     const enemySelectAttack = useCallback(() => {
         enemies.forEach((enemy) => {
@@ -240,12 +268,12 @@ export default function Combat() {
     useEffect(() => {
         if(!inProgress) return;
         const interval = setInterval(() => {
-            cb(attack, enemySelectAttack);
+            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue);
             setCurrentTime(battleTimer.initTime);
         }, 24);
 
         return () => clearInterval(interval);
-    }, [attack, inProgress, enemySelectAttack]);
+    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue]);
 
     const getTime = () => {
         return currentTime / 10;
@@ -283,6 +311,7 @@ export default function Combat() {
             {/* <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button> */}
             <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log({enemies, players})}>enemies</button>
             <button style={{position: "absolute", zIndex: 5, transform: "translateY(100px)"}} onClick={() => spawnEnemy()}>spawn enemies</button>
-            </div>
+            <button style={{position: "absolute", zIndex: 5, transform: "translateY(200px)"}} onClick={() => setInProgress((e) => !e)}>pause</button>        
+        </div>
     )
 }

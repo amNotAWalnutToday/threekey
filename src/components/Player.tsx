@@ -29,7 +29,7 @@ export default function Player(
 
     useEffect(() => {
         setStatus('damaged');
-        setTimeout(() => setStatus(''), 1500);
+        setTimeout(() => setStatus(''), 600);
     }, [player.stats.combat.health.cur]);
 
     return (
