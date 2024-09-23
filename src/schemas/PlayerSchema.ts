@@ -1,3 +1,5 @@
+import AbilitySchema from "./AbilitySchema";
+
 type Bar = {
     max: number,
     cur: number,
@@ -15,7 +17,7 @@ interface PlayerSchema {
     dead?: boolean,
     isAttacking: number,
     location: { map: string, coordinates: number[] },
-    abilities: AbilityRefSchema[],
+    abilities: AbilitySchema[],
     inventory: string[], //IDS
     stats: {
         combat: {

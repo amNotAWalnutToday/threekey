@@ -1,5 +1,6 @@
-import PlayerSchema from "../schemas/PlayerSchema"
 import { useEffect, useState } from "react";
+import PlayerSchema from "../schemas/PlayerSchema";
+import ResourceBar from "./ResourceBar";
 
 type Props = {
     player: PlayerSchema,
@@ -19,6 +20,7 @@ export default function Player(
     }: Props
 ) {
     const [status, setStatus] = useState('');
+    const [prevHealth, setPrevHealth] = useState(player.stats.combat.health.cur);
 
     const checkIfTargeted = () => {
         for(let i = 0; i < selectedTargets.length; i++) {
@@ -28,12 +30,15 @@ export default function Player(
     }
 
     useEffect(() => {
-        setStatus('damaged');
+        if(player.stats.combat.health.cur < prevHealth) setStatus('damaged');
+        else if(player.stats.combat.health.cur > prevHealth) setStatus('healed');
+        else return;
+
+        setPrevHealth(player.stats.combat.health.cur);
         setTimeout(() => setStatus(''), 600);
-    }, [player.stats.combat.health.cur]);
+    }, [player.stats.combat.health.cur, prevHealth]);
 
     useEffect(() => {
-        console.log('a');
         setStatus('attacking');
         setTimeout(() => setStatus(''), 600);
     }, [player.isAttacking]);
@@ -47,11 +52,18 @@ export default function Player(
                 selectTarget(player.pid)
             }}
         >
-            <div className="emptyBar">
-                <div style={{width: 100 / player.stats.combat.health.max * player.stats.combat.health.cur}} className="health">
-                    <p style={{fontSize: "10px", whiteSpace: "nowrap", marginLeft: "10px"}} >{player.stats.combat.health.cur} / {player.stats.combat.health.max}</p>
-                </div>
-            </div>
+            <ResourceBar
+                max={player.stats.combat.health.max}
+                cur={player.stats.combat.health.cur}
+                type={"health"}
+                index={1}
+            />
+            <ResourceBar
+                max={player.stats.combat.resources?.mana?.max}
+                cur={player.stats.combat.resources?.mana?.cur}
+                type={"mana"}
+                index={5}
+            />
         </div>
     )
 }

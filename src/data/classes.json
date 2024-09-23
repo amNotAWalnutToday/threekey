@@ -11,10 +11,13 @@
                     "cur": 100
                 },
                 "resources": {
-                    "mana": 100
+                    "mana": {
+                        "max": 10,
+                        "cur": 10
+                    }
                 },
                 "attack": 5,
-                "defence": 0,
+                "defence": 1,
                 "speed": 10,
                 "debuffs": []
             }

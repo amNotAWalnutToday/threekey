@@ -1,14 +1,10 @@
 import PlayerSchema from "./PlayerSchema";
-
-type action = {
-    ability: string,
-    targets: string[],
-}
+import ActionSchema from "./ActionSchema";
 
 interface FieldSchema {
     players: PlayerSchema[],
     enemies: any[],
-    actionQueue: action[],
+    actionQueue: ActionSchema[],
 }
 
 export default FieldSchema;

@@ -7,6 +7,8 @@ import abiltyData from '../data/abilities.json';
 import PlayersContainer from "../components/PlayersContainer";
 import AttackMenu from "../components/AttackMenu";
 import UserContext from "../data/Context";
+import AbilitySchema from "../schemas/AbilitySchema";
+import ActionSchema from "../schemas/ActionSchema";
 
 const battleTimer = {
     initTime: 0,
@@ -30,7 +32,7 @@ const setBattleTimer = (timer: { initTime: number, procTime: number, done: boole
 
 setBattleTimer(battleTimer);
 
-const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue) => {
+const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue: ActionSchema[], sortQueue) => {
     const { procTime } = battleTimer;
     const currentTime = Date.now();
     battleTimer.initTime = procTime - currentTime;
@@ -46,7 +48,7 @@ const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue
     if(battleTimer.done) setBattleTimer(battleTimer);
 }
 
-const takeAction = (actionQueue, attack, sortQueue) => {
+const takeAction = (actionQueue: ActionSchema[], attack, sortQueue) => {
     const { procTime } = actionTimer;
     const currentTime = Date.now();
 
@@ -54,8 +56,8 @@ const takeAction = (actionQueue, attack, sortQueue) => {
         const updatedQueue = [...actionQueue];
         const thisAction = updatedQueue.shift();
         setBattleTimer(actionTimer);
-        if(thisAction.ability === "sort") return sortQueue();
-        attack(thisAction.user, thisAction.targets);
+        if(thisAction?.ability === "sort") return sortQueue();
+        attack(thisAction?.user, thisAction?.targets, getAbility(thisAction?.ability ?? ''));
     }
 }
 
@@ -91,7 +93,7 @@ const sortBySpeed = (actionQueue, players) => {
     return updatedQueue;
 }
 
-const actionQueueReducer = (state, action: ACTION_QUEUE_ACTIONS) => {
+const actionQueueReducer = (state: ActionSchema[], action: ACTION_QUEUE_ACTIONS) => {
     const updatedQueue = [...state];
 
     switch(action.type) {
@@ -114,19 +116,28 @@ const getPlayer = (players: PlayerSchema[], pid: string) => {
     for(let i = 0; i < players.length; i++) {
         if(pid === players[i].pid) return {state: players[i], index: i};
     }
-    console.log('b');
     return {state: players[0], index: -1};
 }
 
 const getAbility = (id: string) => {
     for(const ability of abiltyData.all) {
-        if(id === ability.id) return ability;
+        if(id === ability.id || id === ability.name) return ability;
     }
+}
+
+const getAbilityCosts = (abilityId: string) => {
+    const ability = getAbility(abilityId);
+    if(!ability) return []; 
+
+    const usedResources = [];
+    for(const cost in ability.cost) usedResources.push(cost);
+    return usedResources;
 }
 
 const enum PLAYERS_REDUCER_ACTIONS {
     add_player,
     receive_damage,
+    resource_change,
     play__attack_animation,
 }
 
@@ -135,22 +146,28 @@ type PLAYERS_ACTIONS = {
     payload: {
         playerObj?: PlayerSchema,
         amount?: number,
+        damageType?: string,
+        resource?: string,
         pid: string,
-        otherPlayers?: PlayerSchema[],
     } 
 }
 
 const playersReducer = (state, action: PLAYERS_ACTIONS) => {
     const players = [...state];
-    const { amount, pid, playerObj } = action.payload;
+    const { amount, pid, resource, playerObj, damageType } = action.payload;
     const player = getPlayer(players, pid);
-    // if(player.index < 0) return state;
+
     switch(action.type) {
         case PLAYERS_REDUCER_ACTIONS.add_player:
             return [...players, {...playerObj}];
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
-            players[player.index].stats.combat.health.cur -= amount ?? 0;
+            if(!damageType || !amount) return state;
+            players[player.index].stats.combat.health.cur -= damageType === "heal" ? amount * -1 : amount ?? 0;
             player.state.stats.combat.health.cur <= 0 ? players[player.index].dead = true : null;
+            return [...players];
+        case PLAYERS_REDUCER_ACTIONS.resource_change:
+            if(resource === "mana"  ) players[player.index].stats.combat.resources.mana.cur -= amount ?? 0;
+            if(resource === "health") players[player.index].stats.combat.health.cur -= amount ?? 0
             return [...players];
         case PLAYERS_REDUCER_ACTIONS.play__attack_animation:
             players[player.index].isAttacking += 1;
@@ -247,11 +264,28 @@ export default function Combat() {
         setInProgress(() => true);
     }, [enemies]);
 
-    const target = useCallback((targets: string[]) => {
+    const matchKeyToAmount = (key: string, ability: AbilitySchema) => {
+        switch(key) {
+            case "mana":
+                return ability.cost.mana;
+            case "health":
+                return ability.cost.health;
+        }
+        return;
+    }
+
+    const target = useCallback((targets: string[], ability: AbilitySchema) => {
         const action = {
-            ability: "attack",
+            ability: ability.name,
             user: user.pid,
             targets,
+        }
+        for(const resourceName of getAbilityCosts(ability.id)) {
+            const amount = matchKeyToAmount(resourceName, ability);
+            dispatchPlayers({
+                type: PLAYERS_REDUCER_ACTIONS.resource_change, 
+                payload: { pid: user.pid, amount: amount ? amount / 2 : 0, resource: resourceName  }
+            });
         }
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action}});
     }, [dispatchActionQueue, user]);
@@ -267,19 +301,54 @@ export default function Combat() {
         }        
     }, [players, enemies]);
 
-    const attack = useCallback((userId: string, targets: string[]) => {
+    const getDamageFormula = (attack, defence, abilityDamage) => {
+        const damage = Math.floor(((attack / 4) * abilityDamage)) - defence;
+        return damage > 0 ? damage : 1;
+    }
+
+    const attack = useCallback((userId: string, targets: string[], ability: AbilitySchema) => {
         const user = getPlayer([...players, ...enemies], userId).state;
+        const { damageType } = ability;
+
         targets.forEach((targetRef: string, i: number) => {
             const target = getPlayer([...players, ...enemies], targetRef);
             const targetStats = target.state.stats.combat;
-            const amount = user.stats.combat.attack - targetStats.defence;
-            if(target.state.npc) {
-                dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: targets[i], amount}}); 
-                dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.play__attack_animation, payload: { pid: userId }});
+            const amount = (
+                damageType === "heal" 
+                    ? ability.damage / 2
+                    : getDamageFormula(user.stats.combat.attack, targetStats.defence, ability.damage)
+            );
+
+            if(target.state.npc && !user.npc) {
+                // player attacks enemy //
+                dispatchEnemies({
+                    type: PLAYERS_REDUCER_ACTIONS.receive_damage, 
+                    payload: { pid: targets[i], amount, damageType }
+                }); 
+                dispatchPlayers({
+                    type: PLAYERS_REDUCER_ACTIONS.play__attack_animation, 
+                    payload: { pid: userId }
+                });
             }
-            else {
-                dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.receive_damage, payload: {pid: targets[i], amount }})
-                dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.play__attack_animation, payload: { pid: userId }});
+            else if(!target.state.npc && user.npc) {
+                // enemy attacks player //
+                dispatchPlayers({
+                    type: PLAYERS_REDUCER_ACTIONS.receive_damage,
+                    payload: {pid: targets[i], amount, damageType }})
+                dispatchEnemies({
+                    type: PLAYERS_REDUCER_ACTIONS.play__attack_animation, 
+                    payload: { pid: userId }
+                });
+            }
+            else if(!target.state.npc && !user.npc) {
+                // player attacks ally //
+                dispatchPlayers({
+                    type: PLAYERS_REDUCER_ACTIONS.receive_damage,
+                    payload: { pid: targets[i], amount, damageType }
+                });
+            }
+            else if(target.state.npc && user.npc) {
+                // enemey attacks enemy //
             }
         });
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: {action: null}});
@@ -289,7 +358,7 @@ export default function Combat() {
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action: {ability: 'sort', user: 'N/A', targets: [] },  }})
         enemies.forEach((enemy) => {
             const action = {
-                ability: "attack",
+                ability: "seed shot",
                 user: enemy.pid,
                 targets: [user.pid],
             }

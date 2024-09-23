@@ -4,6 +4,7 @@
             "id": "P01",
             "name": "seed shot",
             "type": "single",
+            "damageType": "damage",
             "damage": 5,
             "cost": {
                 "health": 5
@@ -14,6 +15,7 @@
             "id": "P02",
             "name": "seed spread shot",
             "type": "aoe",
+            "damageType": "damage",
             "damage": 5,
             "cost": {
                 "health": 10
@@ -24,9 +26,10 @@
             "id": "P03",
             "name": "meditate",
             "type": "self",
+            "damageType": "heal",
             "damage": 50,
             "cost": {
-                "mana": 50
+                "mana": 5
             },
             "users": ["naturalist"]
         },
@@ -34,6 +37,7 @@
             "id": "P04",
             "name": "life transfer",
             "type": "ally",
+            "damageType": "heal",
             "damage": 25,
             "cost": {
                 "health": 25

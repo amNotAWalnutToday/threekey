@@ -56,6 +56,9 @@
 
 .enemy,
 .player {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   width: 100px;
   height: 100px;
   background-color: white;
@@ -66,20 +69,26 @@
 }
 
 .emptyBar {
-  transform: translateY(-35px);
+  transform: translateY(-40px);
   width: 100px;
   height: 15px;
   background-color: rgba(218, 165, 32, 0.613);
 }
 
-.health {
+.health_fill {
   background-color: #800;
   height: 100%;
   transition: width 0.5s ease-in-out;
 }
 
+.mana_fill {
+  background-color: #06A;
+  height: 100%;
+  transition: width 0.5s ease-in-out;
+}
+
 .fill {
-  background-color: aqua;
+  background-color: rgba(0, 174, 255, 0.754);
   height: 100%;
 }
 
@@ -120,12 +129,12 @@
   background-color: #a86c3b;
 }
 
-.damaged.player {
+.damaged.player, .damaged.enemy {
   animation: damageReceived 1s 1 linear;
 }
 
-.damaged.enemy {
-  animation: damageReceived 1s 1 linear;
+.healed.player, .healed.enemy {
+  animation: healingReceived 1s 1 linear;
 }
 
 .attacking.enemy {
@@ -168,6 +177,17 @@
   0% {
     transform: scale(0.9);
     filter: drop-shadow(16px 16px 16px crimson);
+  }
+
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes healingReceived {
+  0% {
+    transform: scale(1.1);
+    filter: drop-shadow(16px 16px 16px springgreen);
   }
 
   100% {
