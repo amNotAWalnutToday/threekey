@@ -72,15 +72,11 @@ type ACTION_QUEUE_ACTIONS = {
     type: ACTION_QUEUE_REDUCER_ACTIONS,
     payload: {
         players?: PlayerSchema[],
-        action: {
-            ability: string,
-            user: string, 
-            targets: number[],
-        }
+        action?: ActionSchema
     } 
 }
 
-const sortBySpeed = (actionQueue, players) => {
+const sortBySpeed = (actionQueue: ActionSchema[], players: PlayerSchema[]) => {
     const updatedQueue = [];
     const playersSortedBySpeed = [...players].sort((p1, p2) => p2.stats.combat.speed - p1.stats.combat.speed);
 
@@ -98,8 +94,8 @@ const actionQueueReducer = (state: ActionSchema[], action: ACTION_QUEUE_ACTIONS)
 
     switch(action.type) {
         case ACTION_QUEUE_REDUCER_ACTIONS.target:
-            // console.log(state);
-            return [...state, {...action.payload.action}];
+            if(action.payload.action) updatedQueue.push(action.payload.action);
+            return [...updatedQueue];
         case ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP:
             updatedQueue.shift();
             return [...updatedQueue];
@@ -152,14 +148,15 @@ type PLAYERS_ACTIONS = {
     } 
 }
 
-const playersReducer = (state, action: PLAYERS_ACTIONS) => {
+const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
     const players = [...state];
     const { amount, pid, resource, playerObj, damageType } = action.payload;
     const player = getPlayer(players, pid);
 
     switch(action.type) {
         case PLAYERS_REDUCER_ACTIONS.add_player:
-            return [...players, {...playerObj}];
+            if(playerObj) players.push(playerObj);
+            return [...players];
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             if(!damageType || !amount) return state;
             players[player.index].stats.combat.health.cur -= damageType === "heal" ? amount * -1 : amount ?? 0;
@@ -185,7 +182,7 @@ export default function Combat() {
 
     /**GAME DATA*/
     const [field, setField] = useState<FieldSchema>({
-        players: [user],
+        players: [user, testdata.ally_1],
         enemies: [],
         actionQueue: [],
     });
@@ -216,19 +213,19 @@ export default function Combat() {
 
     const selectTargetByAbility = (ability: string) => {
         const filteredPlayers = [...enemies]; 
-        if(ability === "single" && selectedTargets.length > 1) {
-            setSelectedTargets((prev) => [filteredPlayers[0].pid]);
+        if(ability === "single") {
+            setSelectedTargets(() => [filteredPlayers[0].pid]);
         }
         else if(ability === "aoe") {
-            setSelectedTargets((prev) => {
+            setSelectedTargets(() => {
                 return Array.from(filteredPlayers, (player) => player.pid);
             });
         } else if(ability === "ally") {
-            setSelectedTargets((prev) => {
-                return [...players][0].pid;
+            setSelectedTargets(() => {
+                return [[...players].filter((p) => p.pid !== user.pid)[0].pid];
             })
         } else if(ability === "self") {
-            setSelectedTargets((prev) => user.pid);
+            setSelectedTargets(() => [user.pid]);
         }
     }
 
@@ -238,6 +235,10 @@ export default function Combat() {
         const health = {
             max: enemyList[0].health,
             cur: enemyList[0].health
+        }
+        const mana = {
+            max: 0,
+            cur: 0,
         }
         
         const abilities = [];
@@ -252,6 +253,7 @@ export default function Combat() {
             stats: {
                 combat: {
                     health,
+                    mana,
                     abilities,
                     attack,
                     defence,
@@ -301,7 +303,7 @@ export default function Combat() {
         }        
     }, [players, enemies]);
 
-    const getDamageFormula = (attack, defence, abilityDamage) => {
+    const getDamageFormula = (attack: number, defence: number, abilityDamage: number) => {
         const damage = Math.floor(((attack / 4) * abilityDamage)) - defence;
         return damage > 0 ? damage : 1;
     }
@@ -351,7 +353,7 @@ export default function Combat() {
                 // enemey attacks enemy //
             }
         });
-        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: {action: null}});
+        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: {}});
     }, [players, enemies]);
 
     const enemySelectAttack = useCallback(() => {
@@ -360,14 +362,14 @@ export default function Combat() {
             const action = {
                 ability: "seed shot",
                 user: enemy.pid,
-                targets: [user.pid],
+                targets: [`${user.pid}`],
             }
             dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action }});
         })
     }, [enemies, user]);
 
     const sortQueue = useCallback(() => {
-        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.SORT_BY_SPEED, payload: { players: [...players, ...enemies], action: null }})
+        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.SORT_BY_SPEED, payload: { players: [...players, ...enemies] }})
     }, [players, enemies]);
 
     useEffect(() => {

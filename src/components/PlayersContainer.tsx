@@ -19,9 +19,9 @@ export default function PlayersContainer(
     }: Props
 ){
     const mapPlayers = () => {
-        const filteredPlayers = [...players].filter((player) => {
-            return (sideIndex === 1 && player.npc) || (sideIndex === 2 && !player.npc);
-        });
+        // const filteredPlayers = [...players].filter((player) => {
+        //     return (sideIndex === 1 && player.npc) || (sideIndex === 2 && !player.npc);
+        // });
 
         return players.map((player, index) => {
             return (

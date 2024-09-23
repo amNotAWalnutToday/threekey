@@ -24,10 +24,10 @@ interface PlayerSchema {
             shield: Bar,
             health: Bar
             resources: {
-                mana?: Bar,
-                msp?: Bar,
-                psp?: Bar,
-                soul?: Bar,
+                mana: Bar,
+                msp: Bar,
+                psp: Bar,
+                soul: Bar,
             },
             attack: number,
             defence: number,

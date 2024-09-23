@@ -4,7 +4,7 @@ import AbilitySchema from "../schemas/AbilitySchema";
 type Props = {
     selectedPlayer: { state: PlayerSchema, index: number } | null
     selectedTargets: string[],
-    target: (targets: string[]) => void;
+    target: (targets: string[], ability: AbilitySchema) => void;
     selectTargetByAbility: (ability: string) => void;
 }
 

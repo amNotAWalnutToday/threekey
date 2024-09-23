@@ -3,7 +3,7 @@ import ActionSchema from "./ActionSchema";
 
 interface FieldSchema {
     players: PlayerSchema[],
-    enemies: any[],
+    enemies: PlayerSchema[],
     actionQueue: ActionSchema[],
 }
 
