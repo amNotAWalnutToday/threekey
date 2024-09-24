@@ -32,7 +32,14 @@ const setBattleTimer = (timer: { initTime: number, procTime: number, done: boole
 
 setBattleTimer(battleTimer);
 
-const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue: ActionSchema[], sortQueue) => {
+const cb = (
+    attack: (userId: string, targets: string[], ability: AbilitySchema) => void, 
+    enemySelectAttack: () => void, 
+    checkIfBattleOver: () => void, 
+    actionQueue: ActionSchema[], 
+    sortQueue: () => void,
+    endTurn: () => void,
+) => {
     const { procTime } = battleTimer;
     const currentTime = Date.now();
     battleTimer.initTime = procTime - currentTime;
@@ -42,6 +49,7 @@ const cb = (attack, enemySelectAttack, checkIfBattleOver, actionQueue: ActionSch
             return;
         }
         enemySelectAttack();
+        endTurn();
         battleTimer.done = true;
     }
     if(battleTimer.initTime > 9000) checkIfBattleOver();
@@ -130,6 +138,26 @@ const getAbilityCosts = (abilityId: string) => {
     return usedResources;
 }
 
+const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
+    const { health, resources } = player.stats.combat;
+    const { mana } = resources;
+
+    if(health.cur <= 0) { 
+        players[index].dead = true;
+        players[index].stats.combat.health.cur = 0;
+    } else if(health.cur > health.max) {
+        players[index].stats.combat.health.cur = health.max;
+    }
+
+    if(mana.cur <= 0) {
+        players[index].stats.combat.resources.mana.cur = 0;
+    } else if(mana.cur > mana.max) {
+        players[index].stats.combat.resources.mana.cur = mana.max;
+    }
+
+    return [...players];
+}
+
 const enum PLAYERS_REDUCER_ACTIONS {
     add_player,
     receive_damage,
@@ -160,12 +188,11 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             if(!damageType || !amount) return state;
             players[player.index].stats.combat.health.cur -= damageType === "heal" ? amount * -1 : amount ?? 0;
-            player.state.stats.combat.health.cur <= 0 ? players[player.index].dead = true : null;
-            return [...players];
+            return assignMaxOrMinStat(player.state, players, player.index);
         case PLAYERS_REDUCER_ACTIONS.resource_change:
             if(resource === "mana"  ) players[player.index].stats.combat.resources.mana.cur -= amount ?? 0;
             if(resource === "health") players[player.index].stats.combat.health.cur -= amount ?? 0
-            return [...players];
+            return assignMaxOrMinStat(player.state, players, player.index);
         case PLAYERS_REDUCER_ACTIONS.play__attack_animation:
             players[player.index].isAttacking += 1;
             return [...players];
@@ -214,6 +241,7 @@ export default function Combat() {
     const selectTargetByAbility = (ability: string) => {
         const filteredPlayers = [...enemies]; 
         if(ability === "single") {
+            if(!filteredPlayers.length) return;
             setSelectedTargets(() => [filteredPlayers[0].pid]);
         }
         else if(ability === "aoe") {
@@ -253,7 +281,9 @@ export default function Combat() {
             stats: {
                 combat: {
                     health,
-                    mana,
+                    resources: {
+                        mana,
+                    },
                     abilities,
                     attack,
                     defence,
@@ -356,6 +386,19 @@ export default function Combat() {
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: {}});
     }, [players, enemies]);
 
+    const endTurn = useCallback(() => {
+        players.forEach((player, index) => {
+            dispatchPlayers({
+                type: PLAYERS_REDUCER_ACTIONS.resource_change, 
+                payload: { 
+                    pid: player.pid, 
+                    resource: "mana",
+                    amount: -1 * Math.floor(player.stats.combat.resources.mana.max / 10)
+                }
+            });
+        });      
+    }, [players]);
+
     const enemySelectAttack = useCallback(() => {
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action: {ability: 'sort', user: 'N/A', targets: [] },  }})
         enemies.forEach((enemy) => {
@@ -375,12 +418,12 @@ export default function Combat() {
     useEffect(() => {
         if(!inProgress) return;
         const interval = setInterval(() => {
-            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue);
+            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn);
             setCurrentTime(battleTimer.initTime);
         }, 24);
 
         return () => clearInterval(interval);
-    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue]);
+    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn]);
 
     const getTime = () => {
         return currentTime / 10;
