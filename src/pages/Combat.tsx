@@ -1,4 +1,5 @@
 import { useState, useEffect, useReducer, useCallback, useContext } from "react";
+import combatFns from '../utils/combatFns';
 import PlayerSchema from "../schemas/PlayerSchema";
 import FieldSchema from "../schemas/FieldSchema";
 import testdata from '../data/testdata.json';
@@ -9,6 +10,11 @@ import AttackMenu from "../components/AttackMenu";
 import UserContext from "../data/Context";
 import AbilitySchema from "../schemas/AbilitySchema";
 import ActionSchema from "../schemas/ActionSchema";
+
+const { 
+    getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
+    createAction, getTargets,
+} = combatFns;
 
 const battleTimer = {
     initTime: 0,
@@ -116,48 +122,6 @@ const actionQueueReducer = (state: ActionSchema[], action: ACTION_QUEUE_ACTIONS)
     }
 }
 
-const getPlayer = (players: PlayerSchema[], pid: string) => {
-    for(let i = 0; i < players.length; i++) {
-        if(pid === players[i].pid) return {state: players[i], index: i};
-    }
-    return {state: players[0], index: -1};
-}
-
-const getAbility = (id: string) => {
-    for(const ability of abiltyData.all) {
-        if(id === ability.id || id === ability.name) return ability;
-    }
-}
-
-const getAbilityCosts = (abilityId: string) => {
-    const ability = getAbility(abilityId);
-    if(!ability) return []; 
-
-    const usedResources = [];
-    for(const cost in ability.cost) usedResources.push(cost);
-    return usedResources;
-}
-
-const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
-    const { health, resources } = player.stats.combat;
-    const { mana } = resources;
-
-    if(health.cur <= 0) { 
-        players[index].dead = true;
-        players[index].stats.combat.health.cur = 0;
-    } else if(health.cur > health.max) {
-        players[index].stats.combat.health.cur = health.max;
-    }
-
-    if(mana.cur <= 0) {
-        players[index].stats.combat.resources.mana.cur = 0;
-    } else if(mana.cur > mana.max) {
-        players[index].stats.combat.resources.mana.cur = mana.max;
-    }
-
-    return [...players];
-}
-
 const enum PLAYERS_REDUCER_ACTIONS {
     add_player,
     receive_damage,
@@ -259,39 +223,10 @@ export default function Combat() {
 
     const spawnEnemy = useCallback(() => {
         const enemyList = enemyData.all;
-        const { attack, defence, speed, debuffs, name } = enemyList[0];
-        const health = {
-            max: enemyList[0].health,
-            cur: enemyList[0].health
-        }
-        const mana = {
-            max: 0,
-            cur: 0,
-        }
-        
-        const abilities = [];
-        for(const id of enemyList[0].abilities) abilities.push(getAbility(id));
-        
-        const newEnemy = {
-            name,
-            pid: `E${enemies.length}`,
-            npc: true,
-            dead: false,
-            isAttacking: 0,
-            stats: {
-                combat: {
-                    health,
-                    resources: {
-                        mana,
-                    },
-                    abilities,
-                    attack,
-                    defence,
-                    speed: ((enemies.length + 1) * 10) - speed, 
-                    debuffs,
-                },
-            },
-        }
+        const { attack, defence, speed, name, health, abilities } = enemyList[0];
+                
+        const newEnemy = createEnemy(name, `E${enemies.length}`, health, abilities, attack, defence, speed); 
+
         dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.add_player, payload: {playerObj: newEnemy}})
         setInProgress(() => true);
     }, [enemies]);
@@ -307,11 +242,7 @@ export default function Combat() {
     }
 
     const target = useCallback((targets: string[], ability: AbilitySchema) => {
-        const action = {
-            ability: ability.name,
-            user: user.pid,
-            targets,
-        }
+        const action = createAction(ability.name, user.pid, targets);
         for(const resourceName of getAbilityCosts(ability.id)) {
             const amount = matchKeyToAmount(resourceName, ability);
             dispatchPlayers({
@@ -381,6 +312,10 @@ export default function Combat() {
             }
             else if(target.state.npc && user.npc) {
                 // enemey attacks enemy //
+                dispatchEnemies({
+                    type: PLAYERS_REDUCER_ACTIONS.receive_damage,
+                    payload: { pid: targets[i], amount, damageType }
+                });
             }
         });
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: {}});
@@ -402,14 +337,13 @@ export default function Combat() {
     const enemySelectAttack = useCallback(() => {
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action: {ability: 'sort', user: 'N/A', targets: [] },  }})
         enemies.forEach((enemy) => {
-            const action = {
-                ability: "seed shot",
-                user: enemy.pid,
-                targets: [`${user.pid}`],
-            }
+            const ran = Math.floor(Math.random() * enemy.abilities.length);
+            const abilityName = enemy.abilities[ran].name;
+            const targets = getTargets(abilityName, players, enemies, enemy.pid);
+            const action = createAction(abilityName, enemy.pid, [...targets]);
             dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action }});
-        })
-    }, [enemies, user]);
+        });
+    }, [players, enemies]);
 
     const sortQueue = useCallback(() => {
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.SORT_BY_SPEED, payload: { players: [...players, ...enemies] }})
