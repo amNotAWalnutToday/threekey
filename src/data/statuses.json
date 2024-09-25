@@ -23,6 +23,14 @@
             "amount": 100,
             "affects": ["speed"],
             "refs": ["I02"]
+        },
+        {
+            "name": "stung",
+            "type": "debuff",
+            "duration": 5,
+            "amount": 10,
+            "affects": ["attack", "defence"],
+            "refs": ["I03"]
         }
     ]
 }

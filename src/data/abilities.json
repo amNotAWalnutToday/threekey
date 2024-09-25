@@ -76,6 +76,17 @@
                 "mana": 2
             },
             "users": ["naturalist"]
+        },
+        {
+            "id": "I03",
+            "name": "wasp sting",
+            "type": "single",
+            "damageType": "status",
+            "damage": 5,
+            "cost": {
+                "mana": 5
+            },
+            "users": ["naturalist"]
         }
     ]
 }

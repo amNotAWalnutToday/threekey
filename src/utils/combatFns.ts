@@ -80,9 +80,11 @@ export default (() => {
     const assignBuffs = (status: StatusSchema[], stat: string, amount: number) => {
         for(const state of status) { 
             for(const affected of state.affects) {
-                if(affected === stat) amount = amount + state.amount;
+                const updatedAmount = state.type === "buff" ? state.amount : (state.amount * -1);
+                if(affected === stat) amount = amount + updatedAmount;
             }
         }
+        
         return amount;
     }
     
