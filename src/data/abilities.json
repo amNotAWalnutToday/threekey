@@ -9,6 +9,7 @@
             "cost": {
                 "health": 5
             },
+            "av": 1,
             "users": ["naturalist"]
         },
         {
@@ -20,6 +21,7 @@
             "cost": {
                 "health": 10
             },
+            "av": 1,
             "users": ["naturalist"]
         },
         {
@@ -31,6 +33,7 @@
             "cost": {
                 "mana": 5
             },
+            "av": 1,
             "users": ["naturalist"]
         },
         {
@@ -42,6 +45,7 @@
             "cost": {
                 "health": 25
             },
+            "av": 1,
             "users": ["naturalist"]
         },
         {
@@ -53,6 +57,7 @@
             "cost": {
                 "mana": 2
             },
+            "av": 1,
             "users": ["naturalist"]
         },
         {
@@ -64,6 +69,7 @@
             "cost": {
                 "mana": 2
             },
+            "av": 1,
             "users": ["naturalist"]
         },
         {
@@ -75,6 +81,7 @@
             "cost": {
                 "mana": 2
             },
+            "av": 1,
             "users": ["naturalist"]
         },
         {
@@ -86,6 +93,7 @@
             "cost": {
                 "mana": 5
             },
+            "av": 1,
             "users": ["naturalist"]
         }
     ]

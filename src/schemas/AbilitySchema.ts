@@ -8,6 +8,7 @@ interface AbilitySchema {
         health?: number,
         mana?: number,
     },
+    av: number,
     users: string[],
 }
 

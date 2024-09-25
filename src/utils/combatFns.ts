@@ -57,6 +57,14 @@ export default (() => {
         return {state: statuses[0], index: -1};
     }
 
+    const getActionValue = (player: PlayerSchema) => {
+        let speed = player.stats.combat.speed; 
+        speed = assignBuffs(player.status, 'speed', speed);
+
+        const av = Math.floor(speed / 10);
+        return av > 0 && speed > 0 ? av : 1;
+    }
+
     const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
         const { health, resources } = player.stats.combat;
         const { mana } = resources;
@@ -181,6 +189,7 @@ export default (() => {
         getAbility,
         getAbilityCosts,
         getStatus,
+        getActionValue,
         assignMaxOrMinStat,
         assignBuffs,
         createEnemy,

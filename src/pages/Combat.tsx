@@ -15,7 +15,7 @@ import StatusSchema from "../schemas/StatusSchema";
 
 const { 
     getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
-    createAction, getTargets, createStatus, getStatus, assignBuffs,
+    createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
 } = combatFns;
 
 const battleTimer = {
@@ -197,6 +197,7 @@ export default function Combat() {
 
     const [currentTime, setCurrentTime] = useState(0);
     const [inProgress, setInProgress] = useState(true);
+    const [actionValue, setActionValue] = useState(0);
 
     /**GAME DATA*/
     const [field, setField] = useState<FieldSchema>({
@@ -276,6 +277,7 @@ export default function Combat() {
     }
 
     const target = useCallback((targets: string[], ability: AbilitySchema) => {
+        if(ability.av > actionValue) return;
         const action = createAction(ability.name, user.pid, targets);
         for(const resourceName of getAbilityCosts(ability.id)) {
             const amount = matchKeyToAmount(resourceName, ability);
@@ -284,8 +286,9 @@ export default function Combat() {
                 payload: { pid: user.pid, amount: amount, resource: resourceName  }
             });
         }
+        setActionValue((prev) => prev - ability.av);
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action}});
-    }, [dispatchActionQueue, user]);
+    }, [dispatchActionQueue, user, actionValue]);
 
     const checkIfBattleOver = useCallback(() => {
         const side1 = [...enemies];
@@ -472,17 +475,22 @@ export default function Combat() {
         enemies.forEach((enemy) => {
             procDot(enemy);
         });
-    }, [players, enemies, procDot]);
+        setActionValue(() => getActionValue(getPlayer(players, user.pid).state));
+    }, [players, enemies, procDot, user]);
 
     const enemySelectAttack = useCallback(() => {
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action: {ability: 'sort', user: 'N/A', targets: [] },  }})
         enemies.forEach((enemy) => {
             if(enemy.dead) return;
-            const ran = Math.floor(Math.random() * enemy.abilities.length);
-            const abilityName = enemy.abilities[ran].name;
-            const targets = getTargets(abilityName, enemy.abilities[ran].type === 'ally' ? enemies : players, enemy.pid);
-            const action = createAction(abilityName, enemy.pid, [...targets]);
-            dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action }});
+            let av = getActionValue(enemy);
+            while(av > 0) {
+                const ran = Math.floor(Math.random() * enemy.abilities.length);
+                const ability = enemy.abilities[ran];
+                const targets = getTargets(ability.name, enemy.abilities[ran].type === 'ally' ? enemies : players, enemy.pid);
+                const action = createAction(ability.name, enemy.pid, [...targets]); 
+                dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action }});
+                av -= ability.av;
+            }
         });
     }, [players, enemies]);
 
@@ -530,7 +538,7 @@ export default function Combat() {
             />
             <div className="cen-flex">
                 <div className="battleTimer">
-                    <div style={{width: getTime()}} className="fill"></div>
+                    <div style={{width: getTime()}} className="fill">{actionValue}AV</div>
                 </div>
             </div>
             {/* <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button> */}

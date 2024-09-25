@@ -20,7 +20,7 @@
             "name": "moth wings",
             "type": "buff",
             "duration": 5,
-            "amount": 100,
+            "amount": 10,
             "affects": ["speed"],
             "refs": ["I02"]
         },
