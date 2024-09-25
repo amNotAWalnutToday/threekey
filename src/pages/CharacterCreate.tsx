@@ -25,7 +25,7 @@ export default function CharacterCreate() {
         const { stats } = {...classes.naturalist};
         const abilities = assignAbilities("naturalist");
         const player = {
-            username: playerName,
+            name: playerName,
             pid: "1",
             npc: false,
             dead: false,

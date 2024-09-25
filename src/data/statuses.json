@@ -3,8 +3,26 @@
         {
             "name": "poison",
             "type": "dot",
-            "duration": 6,
-            "amount": 1 
+            "duration": 3,
+            "amount": 1,
+            "affects": [],
+            "refs": ["P05"]
+        },
+        {
+            "name": "beetle armour",
+            "type": "buff",
+            "duration": 5,
+            "amount": 1,
+            "affects": ["defence"],
+            "refs": ["I01"]
+        },
+        {
+            "name": "moth wings",
+            "type": "buff",
+            "duration": 5,
+            "amount": 100,
+            "affects": ["speed"],
+            "refs": ["I02"]
         }
     ]
 }

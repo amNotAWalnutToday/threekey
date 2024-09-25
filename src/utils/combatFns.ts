@@ -1,6 +1,7 @@
 import PlayerSchema from "../schemas/PlayerSchema";
 import abiltyData from '../data/abilities.json';
 import StatusSchema from "../schemas/StatusSchema";
+import AbilitySchema from "../schemas/AbilitySchema";
 
 export default (() => {
     const getPlayer = (players: PlayerSchema[], pid: string) => {
@@ -10,7 +11,7 @@ export default (() => {
         return {state: players[0], index: -1};
     }
 
-    const getTargets = (abilityName: string, players: PlayerSchema[], enemies, userPid: string) => {
+    const getTargets = (abilityName: string, players: PlayerSchema[], userPid: string) => {
         const ability = getAbility(abilityName);
         
         if(ability?.type === "single") {
@@ -20,6 +21,10 @@ export default (() => {
             return Array.from([...players], (p) => p.pid);
         } else if(ability?.type === "self") {
             return [userPid];
+        } else if(ability?.type === "ally") {
+            const ran = Math.floor(Math.random() * (players.length - 1));
+            const targets = [...players].filter((p) => p.pid !== userPid);
+            return targets.length ? [targets[ran].pid] : [];
         }
 
         return [];
@@ -45,9 +50,9 @@ export default (() => {
             if(name === statuses[i].name) return {state: statuses[i], index: i};
         }
         for(let i = 0; i < statuses.length; i++) {
-            const poisons = ['P05'];
-            console.log(statuses);
-            for(const p of poisons) if(p === name) return {state: statuses[i], index: i};
+           for(let j = 0; j < statuses[i].refs.length; j++) {
+                if(name === statuses[i].refs[j]) return {state: statuses[i], index: i}
+           }
         }
         return {state: statuses[0], index: -1};
     }
@@ -72,6 +77,16 @@ export default (() => {
         return [...players];
     }
 
+    const assignBuffs = (status: StatusSchema[], stat: string, amount: number) => {
+        for(const state of status) { 
+            for(const affected of state.affects) {
+                if(affected === stat) amount = amount + state.amount;
+            }
+        }
+        return amount;
+    }
+    
+
     const createEnemy = (
         name: string, pid: string, maxHealth: number, abilityIds: string[],
         attack: number, defence: number, speed: number, 
@@ -80,17 +95,26 @@ export default (() => {
             max: maxHealth,
             cur: maxHealth,
         }
+        const shield = {
+            max: maxHealth,
+            cur: maxHealth,
+        }
         const mana = {
             max: 0,
             cur: 0,
         }
 
-        const abilities = [];
-        for(const id of abilityIds) abilities.push(getAbility(id));
+        const abilities: AbilitySchema[] = [];
+        for(const id of abilityIds) {
+            const ability = getAbility(id);
+            if(ability) abilities.push(ability);
+        }
 
-        const enemy = {
+        const enemy: PlayerSchema = {
             name,
             pid,
+            inventory: [],
+            location: { map: '', coordinates: [] },
             npc: true,
             dead: false,
             isAttacking: 0,
@@ -99,8 +123,21 @@ export default (() => {
             stats: {
                 combat: {
                     health,
+                    shield,
                     resources: {
-                        mana
+                        mana,
+                        psp: {
+                            max: 0,
+                            cur: 0,
+                        },
+                        msp: {
+                            max: 0,
+                            cur: 0
+                        },
+                        soul: {
+                            max: 0,
+                            cur: 0
+                        }
                     },
                     attack,
                     defence,
@@ -122,12 +159,14 @@ export default (() => {
         return action;
     }
 
-    const createStatus = (name: string, type: "dot" | "buff" | "debuff", amount: number, duration: number) => {
+    const createStatus = (name: string, type: "dot" | "buff" | "debuff", amount: number, duration: number, affects: string[], refs: string[]) => {
         const status = {
             name,
             type,
             amount,
             duration,
+            affects,
+            refs,
         }
 
         return status;
@@ -141,6 +180,7 @@ export default (() => {
         getAbilityCosts,
         getStatus,
         assignMaxOrMinStat,
+        assignBuffs,
         createEnemy,
         createAction,
         createStatus,

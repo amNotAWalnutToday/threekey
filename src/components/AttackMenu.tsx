@@ -60,7 +60,7 @@ export default function AttackMenu(
     return (
         <div className="sidemenu" >
             <div>
-                <p>{selectedPlayer?.state.username ?? "*_____*"}</p>
+                <p>{selectedPlayer?.state.name ?? "*_____*"}</p>
             </div> 
             { mapAbilities() }
         </div>

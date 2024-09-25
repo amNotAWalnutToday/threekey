@@ -4,8 +4,8 @@
             "id": "001",
             "name": "sproutling",
             "abilities": [
-                "P05",
-                "P05"
+                "I02",
+                "I02"
             ],
             "shield": 0,
             "health": 30,

@@ -46,10 +46,32 @@
         },
         {
             "id": "P05",
-            "name": "Poison thorn",
+            "name": "poison thorn",
             "type": "single",
             "damageType": "status",
             "damage": 2,
+            "cost": {
+                "mana": 2
+            },
+            "users": ["naturalist"]
+        },
+        {
+            "id": "I01",
+            "name": "beetle armour",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "mana": 2
+            },
+            "users": ["naturalist"]
+        },
+        {
+            "id": "I02",
+            "name": "moth wings",
+            "type": "ally",
+            "damageType": "status",
+            "damage": 0,
             "cost": {
                 "mana": 2
             },

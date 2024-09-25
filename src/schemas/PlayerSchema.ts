@@ -12,7 +12,7 @@ type AbilityRefSchema = {
 }
 
 interface PlayerSchema {
-    username: string,
+    name: string,
     pid: string,
     npc?: boolean,
     dead?: boolean,
