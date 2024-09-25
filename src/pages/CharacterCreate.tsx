@@ -30,6 +30,7 @@ export default function CharacterCreate() {
             npc: false,
             dead: false,
             isAttacking: 0,
+            status: [],
             stats,
             abilities,
         }

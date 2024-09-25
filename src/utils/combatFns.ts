@@ -1,5 +1,6 @@
 import PlayerSchema from "../schemas/PlayerSchema";
 import abiltyData from '../data/abilities.json';
+import StatusSchema from "../schemas/StatusSchema";
 
 export default (() => {
     const getPlayer = (players: PlayerSchema[], pid: string) => {
@@ -37,6 +38,18 @@ export default (() => {
         const usedResources = [];
         for(const cost in ability.cost) usedResources.push(cost);
         return usedResources;
+    }
+
+    const getStatus = (statuses: StatusSchema[], name: string) => {
+        for(let i = 0; i < statuses.length; i++) {
+            if(name === statuses[i].name) return {state: statuses[i], index: i};
+        }
+        for(let i = 0; i < statuses.length; i++) {
+            const poisons = ['P05'];
+            console.log(statuses);
+            for(const p of poisons) if(p === name) return {state: statuses[i], index: i};
+        }
+        return {state: statuses[0], index: -1};
     }
 
     const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
@@ -82,6 +95,7 @@ export default (() => {
             dead: false,
             isAttacking: 0,
             abilities,
+            status: [],
             stats: {
                 combat: {
                     health,
@@ -91,7 +105,6 @@ export default (() => {
                     attack,
                     defence,
                     speed,
-                    debuffs: [],
                 }
             }
         }
@@ -109,14 +122,27 @@ export default (() => {
         return action;
     }
 
+    const createStatus = (name: string, type: "dot" | "buff" | "debuff", amount: number, duration: number) => {
+        const status = {
+            name,
+            type,
+            amount,
+            duration,
+        }
+
+        return status;
+    }
+
 
     return {
         getPlayer,
         getTargets,
         getAbility,
         getAbilityCosts,
+        getStatus,
         assignMaxOrMinStat,
         createEnemy,
         createAction,
+        createStatus,
     }
 })();

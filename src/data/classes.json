@@ -30,8 +30,7 @@
                 },
                 "attack": 5,
                 "defence": 1,
-                "speed": 10,
-                "debuffs": []
+                "speed": 10
             }
         }
     },
@@ -51,8 +50,7 @@
                 },
                 "attack": 5,
                 "defence": 0,
-                "speed": 10,
-                "debuffs": []
+                "speed": 10
             }
         }
     },
@@ -72,8 +70,7 @@
                 },
                 "attack": 5,
                 "defence": 0,
-                "speed": 10,
-                "debuffs": []
+                "speed": 10
             }
         }
     }

@@ -43,42 +43,17 @@
                 "health": 25
             },
             "users": ["naturalist"]
+        },
+        {
+            "id": "P05",
+            "name": "Poison thorn",
+            "type": "single",
+            "damageType": "status",
+            "damage": 2,
+            "cost": {
+                "mana": 2
+            },
+            "users": ["naturalist"]
         }
-    ],
-    "naturalist": {
-        "plants": [
-            {
-                "id": "p01",
-                "name": "seed shot",
-                "type": "single",
-                "damage": {
-                    "type": "physical",
-                    "base": 5
-                },
-                "cost": {
-                    "ap": 5
-                }
-            }
-        ],
-        "insects": {
-
-        },
-        "monsters": {
-
-        },
-        "weather": [
-            {
-                "id": "nw01",
-                "name": "lightning",
-                "type": "single",
-                "damage": {
-                    "type": "magic",
-                    "base": 5
-                },
-                "cost": {
-                    "ap": 10
-                }
-            }
-        ]
-    }
+    ]
 }

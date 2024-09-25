@@ -1,7 +1,7 @@
 interface AbilitySchema {
     id: string,
     type: string,
-    damageType: "damage" | "heal",
+    damageType: "damage" | "heal" | "status",
     name: string,
     damage: number,
     cost: {

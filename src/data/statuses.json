@@ -1,0 +1,10 @@
+{
+    "all": [
+        {
+            "name": "poison",
+            "type": "dot",
+            "duration": 6,
+            "amount": 1 
+        }
+    ]
+}

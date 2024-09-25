@@ -1,4 +1,5 @@
 import AbilitySchema from "./AbilitySchema";
+import StatusSchema from "./StatusSchema";
 
 type Bar = {
     max: number,
@@ -19,6 +20,7 @@ interface PlayerSchema {
     location: { map: string, coordinates: number[] },
     abilities: AbilitySchema[],
     inventory: string[], //IDS
+    status: StatusSchema[],
     stats: {
         combat: {
             shield: Bar,
@@ -32,7 +34,6 @@ interface PlayerSchema {
             attack: number,
             defence: number,
             speed: number,
-            debuffs: string[],
         },
     }  
 }

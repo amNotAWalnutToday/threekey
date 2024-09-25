@@ -4,7 +4,7 @@ import RouteSwitch from './RouteSwitch'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <RouteSwitch />
-  </React.StrictMode>,
+  // </React.StrictMode>,
 )
