@@ -12,11 +12,14 @@ import UserContext from "../data/Context";
 import AbilitySchema from "../schemas/AbilitySchema";
 import ActionSchema from "../schemas/ActionSchema";
 import StatusSchema from "../schemas/StatusSchema";
+import accountFns from '../utils/accountFns';
+import { ref, set } from "firebase/database";
 
 const { 
     getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
 } = combatFns;
+const { db } = accountFns;
 
 const battleTimer = {
     initTime: 0,
@@ -549,7 +552,12 @@ export default function Combat() {
                     sortBySpeed(actionQueue, [...players, ...enemies]);
                     console.log(actionQueue);
                 }}
-            >sort</button>        
+            >sort</button>   
+            <button style={{position: "absolute", zIndex: 5, transform: "translateY(400px)"}} onClick={() => { 
+                    const test = ref(db, `/test`);
+                    set(test, 'success');
+                }}
+            >dbtest</button>        
         </div>
     )
 }
