@@ -22,7 +22,7 @@ export default function PlayersContainer(
         // const filteredPlayers = [...players].filter((player) => {
         //     return (sideIndex === 1 && player.npc) || (sideIndex === 2 && !player.npc);
         // });
-
+        if(!players.length) return;
         return players.map((player, index) => {
             return (
                 <Player 

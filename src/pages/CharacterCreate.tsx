@@ -1,41 +1,18 @@
 import { useState, useContext } from 'react';
-import classes from '../data/classes.json';
-import abilities from '../data/abilities.json';
+import combatFns from '../utils/combatFns';
 import UserContext from '../data/Context';
 
+const { createPlayer } = combatFns;
+
 export default function CharacterCreate() {
-    const { user, setUser } = useContext(UserContext);
+    const { user, setUser, setCharacter } = useContext(UserContext);
 
     const [playerName, setPlayerName] = useState("");
     const [selectedClass, setSelectedClass] = useState("");
 
-    const assignAbilities = (playerClass: string) => {
-        const usableAbilities = [];
-
-        for(const ability of abilities.all) {
-            for(const users of ability.users) {
-                if(users === playerClass) usableAbilities.push(ability);
-            }
-        }
-
-        return usableAbilities;
-    }
-
     const createClass = () => {
-        const { stats } = {...classes.naturalist};
-        const abilities = assignAbilities("naturalist");
-        const player = {
-            name: playerName,
-            pid: "1",
-            npc: false,
-            dead: false,
-            isAttacking: 0,
-            status: [],
-            stats,
-            abilities,
-        }
-        setUser(() => player);
-        console.log(user);
+        const player = createPlayer(playerName, user.uid, 'naturalist');
+        setCharacter(player);
     }
 
     return (

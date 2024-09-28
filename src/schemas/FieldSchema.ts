@@ -5,6 +5,7 @@ interface FieldSchema {
     players: PlayerSchema[],
     enemies: PlayerSchema[],
     actionQueue: ActionSchema[],
+    id: string,
 }
 
 export default FieldSchema;

@@ -64,7 +64,7 @@ export default function Player(
                 type={"mana"}
                 index={5}
             />
-            { player.status.map((status, index) => {
+            { player?.status?.map((status, index) => {
                 return (
                     <div key={`${player.pid}-${index}`} >
                         <p style={{fontSize: "30px", color: "red"}} >{status.name}: {status.duration}</p>

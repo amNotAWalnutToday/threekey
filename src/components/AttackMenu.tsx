@@ -40,6 +40,7 @@ export default function AttackMenu(
     }
 
     const mapAbilities = () => {
+        if(!selectedPlayer?.state) return;
         return selectedPlayer?.state.abilities.map((ability, ind) => {
             return (
                 <button 
@@ -60,7 +61,7 @@ export default function AttackMenu(
     return (
         <div className="sidemenu" >
             <div>
-                <p>{selectedPlayer?.state.name ?? "*_____*"}</p>
+                <p>{selectedPlayer?.state?.name ?? "*_____*"}</p>
             </div> 
             { mapAbilities() }
         </div>

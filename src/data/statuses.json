@@ -5,7 +5,7 @@
             "type": "dot",
             "duration": 3,
             "amount": 1,
-            "affects": [],
+            "affects": [""],
             "refs": ["P05"]
         },
         {

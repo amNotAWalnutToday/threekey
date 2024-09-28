@@ -5,13 +5,18 @@ import Home from './pages/Home';
 import Combat from "./pages/Combat";
 import Map from "./pages/Map";
 import CharacterCreate from "./pages/CharacterCreate";
+import Town from "./pages/Town";
+import PlayerSchema from "./schemas/PlayerSchema";
+import UserSchema from "./schemas/UserSchema";
 
 export default function RouteSwitch() {
-    const [user, setUser] = useState();
+    const [user, setUser] = useState<UserSchema>();
+    const [character, setCharacter] = useState<PlayerSchema>();
+    const [party, setParty] = useState<PlayerSchema[]>([]);
 
     return (
         <Router basename="threekey" >
-            <UserContext.Provider value={{ user, setUser }}>
+            <UserContext.Provider value={{ user, setUser, character, setCharacter, party, setParty }}>
                 <Routes>
                     <Route 
                         path='/'
@@ -35,6 +40,12 @@ export default function RouteSwitch() {
                         path='/map'
                         element={
                             <Map />
+                        }
+                    />
+                    <Route 
+                        path='/town'
+                        element={
+                            <Town />
                         }
                     />
                 </Routes>
