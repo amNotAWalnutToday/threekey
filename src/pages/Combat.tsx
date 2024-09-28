@@ -211,7 +211,7 @@ export default function Combat() {
 
     /**GAME DATA*/
     const [field, setField] = useState<FieldSchema>({
-        id: '',
+        id: party[0].pid,
         start: false,
         joinedPlayers: 0,
         players: [],
@@ -239,7 +239,7 @@ export default function Combat() {
         if(enemies.length) dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.REPLACE_ALL, payload: { pid: '' , replaceArr: enemies }});
         if(actionQueue.length) dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REPLACE, payload: { replacement: actionQueue }});
         setField((prev) => {
-            return Object.assign({}, prev, { id: fieldId, start, joinedPlayers })
+            return Object.assign({}, prev, { id: fieldId.length ? fieldId : prev.id, start, joinedPlayers })
         })
     }
 
@@ -300,7 +300,7 @@ export default function Combat() {
         const enemyList = enemyData.all;
         const { attack, defence, speed, name, health, abilities } = enemyList[0];
                 
-        const newEnemy = createEnemy(name, `E${enemies.length}`, health, abilities, attack, defence, speed); 
+        const newEnemy = createEnemy(name, `E${enemies.length}`, health, abilities, attack, defence, speed, []); 
 
         dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.add_player, payload: {pid: newEnemy.pid, playerObj: newEnemy}})
     }, [enemies]);
@@ -368,6 +368,7 @@ export default function Combat() {
         userId: string, damageType: string, amount: number, targets: string[],
         i: number, abilityId: string,
     ) => {
+        if(!isHost) return;
         dispatchPlayers({
             type: PLAYERS_REDUCER_ACTIONS.receive_damage,
             payload: { pid: targets[i], amount, damageType }
@@ -409,6 +410,7 @@ export default function Combat() {
         userId: string, damageType: string, amount: number, targets: string[], 
         i: number, abilityId: string,
     ) => {
+        if(!isHost) return;
         dispatchEnemies({
             type: PLAYERS_REDUCER_ACTIONS.receive_damage,
             payload: { pid: targets[i], amount, damageType }

@@ -11,7 +11,7 @@ import UserSchema from "./schemas/UserSchema";
 
 export default function RouteSwitch() {
     const [user, setUser] = useState<UserSchema>();
-    const [character, setCharacter] = useState<PlayerSchema>();
+    const [character, setCharacter] = useState<PlayerSchema>({} as PlayerSchema);
     const [party, setParty] = useState<PlayerSchema[]>([]);
 
     return (

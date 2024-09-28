@@ -1,11 +1,12 @@
 import { createContext } from 'react';
 import PlayerSchema from '../schemas/PlayerSchema';
+import UserSchema from '../schemas/UserSchema';
 
 interface UserContextInterface {
-    user: any,
-    setUser: any,
-    character: any,
-    setCharacter: any,
+    user: UserSchema | undefined,
+    setUser: React.Dispatch<React.SetStateAction<UserSchema | undefined>>,
+    character: PlayerSchema,
+    setCharacter: React.Dispatch<React.SetStateAction<PlayerSchema>>,
     party: PlayerSchema[],
     setParty: React.Dispatch<React.SetStateAction<PlayerSchema[]>>,
 }

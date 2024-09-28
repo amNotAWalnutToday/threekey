@@ -1,4 +1,4 @@
-import { ref, set, get, child, onValue } from "firebase/database";
+import { ref, set, get, child } from "firebase/database";
 import accountFns from "./accountFns";
 import PlayerSchema from "../schemas/PlayerSchema";
 

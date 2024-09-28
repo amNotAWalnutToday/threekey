@@ -6,6 +6,8 @@ interface FieldSchema {
     enemies: PlayerSchema[],
     actionQueue: ActionSchema[],
     id: string,
+    joinedPlayers: number,
+    start: boolean,
 }
 
 export default FieldSchema;

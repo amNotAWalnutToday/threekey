@@ -1,5 +1,6 @@
 import PlayerSchema from "../schemas/PlayerSchema";
 import StatusSchema from "../schemas/StatusSchema";
+import ActionSchema from "../schemas/ActionSchema";
 import AbilitySchema from "../schemas/AbilitySchema";
 import FieldSchema from "../schemas/FieldSchema";
 import enemyData from '../data/enemies.json';
@@ -7,7 +8,6 @@ import abiltyData from '../data/abilities.json';
 import classData from '../data/classes.json';
 import accountFns from '../utils/accountFns';
 import { set, ref, get, child, onValue } from "firebase/database";
-import ActionSchema from "../schemas/ActionSchema";
 
 const { db } = accountFns;
 
@@ -87,6 +87,7 @@ export default (() => {
         if(mana.cur <= 0) {
             players[index].stats.combat.resources.mana.cur = 0;
         } else if(mana.cur > mana.max) {
+            console.log(player, players, index);
             players[index].stats.combat.resources.mana.cur = mana.max;
         }
     
@@ -116,7 +117,11 @@ export default (() => {
         return usableAbilities;
     }
 
-    const createPlayer = (name: string, pid: string, playerClass: string, combatStats, status) => {
+    const createPlayer = (
+        name: string, pid: string, playerClass: string, 
+        combatStats: typeof classData.naturalist.stats, 
+        status: StatusSchema[]
+    ) => {
         const stats = combatStats ? combatStats : classData.naturalist.stats;
         const abilities = assignAbilities(playerClass);
         const player: PlayerSchema = {
@@ -137,7 +142,7 @@ export default (() => {
 
     const createEnemy = (
         name: string, pid: string, maxHealth: number, abilityIds: string[],
-        attack: number, defence: number, speed: number, status,
+        attack: number, defence: number, speed: number, status: StatusSchema[],
     ) => {
         const health = {
             max: maxHealth,
@@ -227,6 +232,7 @@ export default (() => {
             actionQueue: [],
             start: false,
             joinedPlayers: 0,
+            id: '',
         }
         const partyRef = ref(db, `party/${players[0].pid}`);
         await get(partyRef).then( async (snapshot) => {
@@ -244,9 +250,10 @@ export default (() => {
 
         enemies.forEach((enemy) => {
             field.enemies.push(enemy);
-        })
+        });
 
-        uploadField({ ...field, actionQueue: false });
+        field.id = field.players[0].pid;
+        uploadField(field);
         return field;
     }
 
@@ -342,8 +349,8 @@ export default (() => {
     const uploadField = async (field: FieldSchema) => {
         const fieldRef = ref(db, `/fields`);
         const updatedField = { ...field };
-        if(!updatedField.actionQueue.length) updatedField.actionQueue = false;
-        await set(fieldRef, field);
+        // if(!updatedField.actionQueue.length) updatedField.actionQueue = false;
+        await set(fieldRef, Object.assign({}, updatedField, {actionQueue: field.actionQueue.length ? field.actionQueue : false}));
     }
 
     const uploadActionQueue = async (actionQueue: ActionSchema[]) => {
@@ -353,12 +360,12 @@ export default (() => {
 
     const uploadPlayer = async (player: PlayerSchema, index: number) => {
         const playerRef = ref(db, `/fields/players/${index}`);
-        await set(playerRef, assignMaxOrMinStat(player, [player], index)[0]);
+        await set(playerRef, assignMaxOrMinStat(player, [player], 0)[0]);
     }
 
     const uploadEnemy = async (enemy: PlayerSchema, index: number) => {
         const enemyRef = ref(db, `/fields/enemies/${index}`);
-        await set(enemyRef, enemy);
+        await set(enemyRef, assignMaxOrMinStat(enemy, [enemy], 0)[0]);
     }
 
 
