@@ -19,7 +19,6 @@ export default (() => {
                 for(const party of parties) {
                     for(const player of party) {
                         if(player.pid === pid) setParty(party);
-                        console.log(party);
                     }
                 }
                 setParties(parties);

@@ -87,7 +87,6 @@ export default (() => {
         if(mana.cur <= 0) {
             players[index].stats.combat.resources.mana.cur = 0;
         } else if(mana.cur > mana.max) {
-            console.log(player, players, index);
             players[index].stats.combat.resources.mana.cur = mana.max;
         }
     
@@ -238,7 +237,6 @@ export default (() => {
         await get(partyRef).then( async (snapshot) => {
             const data = await snapshot.val();
             for(const p in data) field.players.push(data[p]);
-            console.log(field);
         });
 
         const enemyList = enemyData.all;
@@ -253,7 +251,7 @@ export default (() => {
         });
 
         field.id = field.players[0].pid;
-        uploadField(field);
+        uploadField(field, field.players[0].pid);
         return field;
     }
 
@@ -278,10 +276,10 @@ export default (() => {
         party: PlayerSchema[],
     ) => {
         try {
-            const fieldRef = ref(db, `/fields`);
-            const playersRef = ref(db, '/fields/players');
-            const enemyRef = ref(db, '/fields/enemies');
-            const actionRef = ref(db, '/fields/actionQueue');
+            const fieldRef = ref(db, `/fields/${party[0].pid}`);
+            const playersRef = ref(db, `/fields/${party[0].pid}/players`);
+            const enemyRef = ref(db, `/fields/${party[0].pid}/enemies`);
+            const actionRef = ref(db, `/fields/${party[0].pid}/actionQueue`);
             await get(fieldRef).then( async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedPlayers = populatePlayers(data.players);
@@ -321,50 +319,51 @@ export default (() => {
     const upload = async (
         type: string, 
         payload: { 
+            fieldId: string,
             field?: FieldSchema,
             actionQueue?: ActionSchema[],
             player?: { state: PlayerSchema, index: number },
         }
     ) => {
-        const { field, actionQueue, player } = payload;
+        const { fieldId, field, actionQueue, player } = payload;
 
         switch(type) {
             case "field":
-                uploadField(field ?? {} as FieldSchema);
+                uploadField(field ?? {} as FieldSchema, fieldId);
                 break;
             case "actionQueue":
-                uploadActionQueue(actionQueue ?? []);
+                uploadActionQueue(actionQueue ?? [], fieldId);
                 break;
             case "player":
                 if(!player) return console.error("No Player");
-                uploadPlayer(player.state, player.index);
+                uploadPlayer(player.state, player.index, fieldId);
                 break;
             case "enemy":
                 if(!player) return console.error("No Enemy");
-                uploadEnemy(player.state, player.index);
+                uploadEnemy(player.state, player.index, fieldId);
                 break;
         }
     }
 
-    const uploadField = async (field: FieldSchema) => {
-        const fieldRef = ref(db, `/fields`);
+    const uploadField = async (field: FieldSchema, fieldId: string) => {
+        const fieldRef = ref(db, `/fields/${fieldId}`);
         const updatedField = { ...field };
         // if(!updatedField.actionQueue.length) updatedField.actionQueue = false;
         await set(fieldRef, Object.assign({}, updatedField, {actionQueue: field.actionQueue.length ? field.actionQueue : false}));
     }
 
-    const uploadActionQueue = async (actionQueue: ActionSchema[]) => {
-        const actionQueueRef = ref(db, `/fields/actionQueue`);
+    const uploadActionQueue = async (actionQueue: ActionSchema[], fieldId: string) => {
+        const actionQueueRef = ref(db, `/fields/${fieldId}/actionQueue`);
         await set(actionQueueRef, actionQueue.length ? actionQueue : false);
     }
 
-    const uploadPlayer = async (player: PlayerSchema, index: number) => {
-        const playerRef = ref(db, `/fields/players/${index}`);
+    const uploadPlayer = async (player: PlayerSchema, index: number, fieldId: string) => {
+        const playerRef = ref(db, `/fields/${fieldId}/players/${index}`);
         await set(playerRef, assignMaxOrMinStat(player, [player], 0)[0]);
     }
 
-    const uploadEnemy = async (enemy: PlayerSchema, index: number) => {
-        const enemyRef = ref(db, `/fields/enemies/${index}`);
+    const uploadEnemy = async (enemy: PlayerSchema, index: number, fieldId: string) => {
+        const enemyRef = ref(db, `/fields/${fieldId}/enemies/${index}`);
         await set(enemyRef, assignMaxOrMinStat(enemy, [enemy], 0)[0]);
     }
 
