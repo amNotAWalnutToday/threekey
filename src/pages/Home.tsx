@@ -12,6 +12,7 @@ export default function Home() {
             <Link to='/create-character'> create</Link>
             <Link to='/map'> map</Link>
             <Link to='/town'> town</Link>
+            <Link to='/dungeon'> Dungeon</Link>
             <button 
                 onClick={() => {
                     setUser(() => testdata.tsuki);

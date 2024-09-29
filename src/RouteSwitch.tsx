@@ -6,6 +6,7 @@ import Combat from "./pages/Combat";
 import Map from "./pages/Map";
 import CharacterCreate from "./pages/CharacterCreate";
 import Town from "./pages/Town";
+import Dungeon from "./pages/Dungeon";
 import PlayerSchema from "./schemas/PlayerSchema";
 import UserSchema from "./schemas/UserSchema";
 
@@ -46,6 +47,12 @@ export default function RouteSwitch() {
                         path='/town'
                         element={
                             <Town />
+                        }
+                    />
+                    <Route 
+                        path='/dungeon'
+                        element={
+                            <Dungeon />
                         }
                     />
                 </Routes>

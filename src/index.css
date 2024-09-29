@@ -112,8 +112,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(10, 32px);
-  grid-template-rows: repeat(10, 32px);
+  grid-template-columns: repeat(10, 64px);
+  grid-template-rows: repeat(10, 64px);
   transform: rotateZ(0deg);
 }
 
