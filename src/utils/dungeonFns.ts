@@ -18,6 +18,61 @@ export default (() => {
         }
     }
 
+    const rotate = (neighbours: number[][], middle: number[], facing: string) => {
+        if(facing === 'north') return neighbours;
+        return neighbours.map((XY) => {
+            // Translate to origin
+            const [x, y] = [XY[0], XY[1]];
+            const translatedX = x - middle[0];
+            const translatedY = y - middle[1];
+            
+            let rotatedX, rotatedY;
+
+            // Rotate based on facing direction
+            if (facing === 'west') {
+                rotatedX = translatedY;
+                rotatedY = -translatedX;
+            } else if (facing === 'east') {
+                rotatedX = -translatedY;
+                rotatedY = translatedX;
+            } else if (facing === 'south') {
+                rotatedX = -translatedX;
+                rotatedY = -translatedY;
+            }
+            
+            // Translate back
+            if(!rotatedX || !rotatedY) return [-1, -1];
+            return [rotatedX + middle[0], rotatedY + middle[1]];
+        });
+    };
+
+    const getTileNeighbours = (tiles: TileSchema[], XY: number[], facing: string) => {
+        const neighbours = [
+            [XY[0] +1, XY[1] + 1],
+            [XY[0], XY[1] + 1],
+            [XY[0] - 1, XY[1] + 1],
+            [XY[0] + 1, XY[1]],
+            [XY[0], XY[1]],
+            [XY[0] - 1, XY[1]],
+            [XY[0] + 1, XY[1] - 1],
+            [XY[0], XY[1] - 1],
+            [XY[0] - 1, XY[1] - 1],
+        ];
+        const rotatedNeighbours = rotate(neighbours, XY, facing);
+
+        const populatedTiles = [];
+        for(const neighbour of rotatedNeighbours) {
+            const tile = getTile(tiles, { XY: neighbour });
+            if(!tile) {
+                populatedTiles.push({type: 'wall'} as TileSchema);
+                continue;
+            }
+            populatedTiles.push(tile.state);
+        }
+
+        return populatedTiles;
+    }
+
     const getKey = (XY: number[]) => `${XY[0]}x${XY[1]}`;
     
     const assignPaths = (tiles: TileSchema[], start: number[], target: number[]) => {
@@ -113,7 +168,7 @@ export default (() => {
         tiles[downStairsRan].type = 'downstairs',
         
         setFloor(() => { 
-            assignPaths([...tiles] ?? [], tiles[upstairsRan].XY, tiles[downStairsRan].XY);
+            assignPaths([...tiles], tiles[upstairsRan].XY, tiles[downStairsRan].XY);
             for(const coords of totalRooms) {
                 assignPaths([...tiles], tiles[upstairsRan].XY, coords);
                 const neighbours = [
@@ -138,10 +193,13 @@ export default (() => {
                 number: 1,
                 biome: ''
             };
-        })
+        });
+        return tiles;
     }
 
     return {
-        createFloor
+        getTile,
+        getTileNeighbours,
+        createFloor,
     }
 })();

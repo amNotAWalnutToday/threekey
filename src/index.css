@@ -117,6 +117,12 @@
   transform: rotateZ(0deg);
 }
 
+.minimap {
+  display : grid;
+  grid-template-columns: repeat(3, 32px);
+  grid-template-rows: repeat(3, 32px);
+}
+
 .water {
   background-color: #06A;
 }
