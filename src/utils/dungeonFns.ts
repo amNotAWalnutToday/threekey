@@ -41,7 +41,7 @@ export default (() => {
             }
             
             // Translate back
-            if(!rotatedX || !rotatedY) return [-1, -1];
+            if(rotatedX === undefined || rotatedY === undefined) return [-1, -1];
             return [rotatedX + middle[0], rotatedY + middle[1]];
         });
     };
@@ -148,6 +148,7 @@ export default (() => {
     }
 
     const createFloor = (
+        characterLocation: number[],
         setFloor: React.Dispatch<React.SetStateAction<FloorSchema>>
     ) => {
         const tiles: TileSchema[] = [];
@@ -162,12 +163,13 @@ export default (() => {
                 tiles.push(tile);
             }
         }
-        const upstairsRan = Math.floor(Math.random() * tiles.length);
         const downStairsRan = Math.floor(Math.random() * tiles.length);
+        const upstairsTile = getTile(tiles, { XY: characterLocation });
+        const upstairsRan = upstairsTile?.index ?? Math.floor(Math.random() * tiles.length);
         tiles[upstairsRan].type = 'upstairs',
         tiles[downStairsRan].type = 'downstairs',
         
-        setFloor(() => { 
+        setFloor((prev) => { 
             assignPaths([...tiles], tiles[upstairsRan].XY, tiles[downStairsRan].XY);
             for(const coords of totalRooms) {
                 assignPaths([...tiles], tiles[upstairsRan].XY, coords);
@@ -190,7 +192,7 @@ export default (() => {
             }
             return {
                 tiles,
-                number: 1,
+                number: prev.number ? prev.number + 1 : 1,
                 biome: ''
             };
         });

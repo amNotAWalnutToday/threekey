@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TileSchema from '../schemas/TileSchema';
 import FloorSchema from '../schemas/FloorSchema';
 import dungeonFns from '../utils/dungeonFns';
@@ -8,8 +9,10 @@ const { getTile, getTileNeighbours, createFloor } = dungeonFns;
 export default function Dungeon() {
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
     const [minimap, setMinimap] = useState<TileSchema[]>([]);
-    const [location, setLocation] = useState({map: "", coords: [0, 0]});
+    const [location, setLocation] = useState({map: "floor_1", coords: [1, 1]});
     const [facing, setFacing] = useState('north');
+
+    const navigate = useNavigate();
     
     const mapFloor = () => {
         return floor?.tiles?.map((tile, index) => {
@@ -93,8 +96,22 @@ export default function Dungeon() {
         return '';
     }
 
+    const leaveFloor = () => {
+        if(floor.number === 1) {
+            navigate('/town');
+        } else {
+            setFloor((prev) => {
+                return Object.assign({}, prev, {number: prev.number - 1});
+            });
+        }
+    }
+
+    const nextFloor = () => {
+        createFloor(location.coords, setFloor);
+    }
+
     useEffect(() => {
-        const tiles = createFloor(setFloor);
+        const tiles = createFloor(location.coords, setFloor);
         const start = getTile(tiles, { type: 'upstairs' });
         if(!start) return;
         setLocation((prev) => {
@@ -124,6 +141,26 @@ export default function Dungeon() {
                 turn right
             </button>
             <div className="minimap">{ mapMinimap() }</div>
+            {
+                floor.tiles &&
+                getTile(floor.tiles, { XY: location.coords })?.state.type === 'upstairs'
+                &&
+                <button
+                onClick={leaveFloor}
+                >
+                    Go Up
+                </button>
+            }
+            {
+                floor.tiles &&
+                getTile(floor.tiles, { XY: location.coords })?.state.type === 'downstairs'
+                &&
+                <button
+                    onClick={nextFloor}
+                >
+                    Go Down
+                </button>
+            }
         </div>
     )
 }
