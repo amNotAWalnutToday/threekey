@@ -129,7 +129,7 @@ export default (() => {
             npc: false,
             dead: false,
             isAttacking: 0,
-            location: { map: "", coordinates: [0, 0] },
+            location: { map: "", XY: [0, 0] },
             inventory: [],
             status: status ?? [],
             stats,
@@ -166,7 +166,7 @@ export default (() => {
             name,
             pid,
             inventory: [],
-            location: { map: '', coordinates: [] },
+            location: { map: '', XY: [] },
             npc: true,
             dead: false,
             isAttacking: 0,
@@ -224,7 +224,7 @@ export default (() => {
         return status;
     }
 
-    const initiateBattle = async (players: PlayerSchema[]) => {
+    const initiateBattle = async (players: PlayerSchema[], enemyIds: string[]) => {
         const field: FieldSchema = {
             players: [],
             enemies: [],
@@ -240,11 +240,16 @@ export default (() => {
         });
 
         const enemyList = enemyData.all;
-        const { attack, defence, speed, name, health, abilities } = enemyList[0];
-        
         const enemies = [];
-        const newEnemy = createEnemy(name, `E${field.enemies.length}`, health, abilities, attack, defence, speed, []); 
-        enemies.push(newEnemy);
+        for(let i = 0; i < enemyIds.length; i++) {
+            for(const enemy of enemyList) {
+                if(enemy.id === enemyIds[i]) {
+                    const { attack, defence, speed, name, health, abilities } = enemy;
+                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, []); 
+                    enemies.push(newEnemy);
+                }    
+            }
+        } 
 
         enemies.forEach((enemy) => {
             field.enemies.push(enemy);

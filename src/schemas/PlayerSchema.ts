@@ -17,7 +17,7 @@ interface PlayerSchema {
     npc?: boolean,
     dead?: boolean,
     isAttacking: number,
-    location: { map: string, coordinates: number[] },
+    location: { map: string, XY: number[] },
     abilities: AbilitySchema[],
     inventory: string[], //IDS
     status: StatusSchema[],

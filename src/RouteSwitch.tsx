@@ -14,10 +14,11 @@ export default function RouteSwitch() {
     const [user, setUser] = useState<UserSchema>();
     const [character, setCharacter] = useState<PlayerSchema>({} as PlayerSchema);
     const [party, setParty] = useState<PlayerSchema[]>([]);
+    const [enemies, setEnemies] = useState([]);
 
     return (
         <Router basename="threekey" >
-            <UserContext.Provider value={{ user, setUser, character, setCharacter, party, setParty }}>
+            <UserContext.Provider value={{ user, setUser, character, setCharacter, party, setParty, enemies, setEnemies }}>
                 <Routes>
                     <Route 
                         path='/'

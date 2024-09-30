@@ -199,9 +199,14 @@ export default (() => {
         return tiles;
     }
 
+    const createUIEnemy = (id: string) => {
+        return id; 
+    }
+
     return {
         getTile,
         getTileNeighbours,
         createFloor,
+        createUIEnemy,
     }
 })();

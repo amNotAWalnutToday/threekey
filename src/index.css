@@ -135,6 +135,10 @@
   background-color: #a86c3b;
 }
 
+.wall {
+  background-color: #111;
+}
+
 .damaged.player, .damaged.enemy {
   animation: damageReceived 1s 1 linear;
 }

@@ -1,15 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TileSchema from '../schemas/TileSchema';
 import FloorSchema from '../schemas/FloorSchema';
 import dungeonFns from '../utils/dungeonFns';
+import UserContext from '../data/Context';
+import enemydata from '../data/enemies.json';
 
-const { getTile, getTileNeighbours, createFloor } = dungeonFns;
+const { getTile, getTileNeighbours, createFloor, createUIEnemy } = dungeonFns;
 
 export default function Dungeon() {
+    const { character, enemies, setEnemies } = useContext(UserContext);
+
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
     const [minimap, setMinimap] = useState<TileSchema[]>([]);
-    const [location, setLocation] = useState({map: "floor_1", coords: [1, 1]});
+    const [location, setLocation] = useState(character.location ?? {map: "floor_1", XY: [1, 1]});
     const [facing, setFacing] = useState('north');
 
     const navigate = useNavigate();
@@ -19,7 +23,7 @@ export default function Dungeon() {
             return (
                 <div  
                     key={`tile-${index}`}
-                    className={`${tile.type !== "" ? 'dirt' : 'water'}`}
+                    className={`${tile.type !== "" ? 'dirt' : 'wall'}`}
                 >
                     <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p>
                     <p>{tile.type}</p>
@@ -33,7 +37,7 @@ export default function Dungeon() {
             return  tile.type !== 'wall' ? (
                 <div  
                     key={`tile-${index}`}
-                    className={`${tile.type !== "" ? 'dirt' : 'water'}`}
+                    className={`${tile.type !== "" ? 'dirt' : 'wall'}`}
                 >
                     <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p>
                     <p>{tile.type}</p>
@@ -41,7 +45,7 @@ export default function Dungeon() {
             ) : (
                 <div
                     key={`tile-${index}`}
-                    className='grass'
+                    className='wall'
                 >
 
                 </div>
@@ -50,7 +54,7 @@ export default function Dungeon() {
     }
 
     const move = (dir: string) => {
-        const tile = getTile(floor.tiles, { XY: location.coords })?.state;
+        const tile = getTile(floor.tiles, { XY: location.XY })?.state;
         if(!tile) return;
         let x = tile.XY[0];
         let y = tile.XY[1];
@@ -58,15 +62,15 @@ export default function Dungeon() {
         else if(dir === 'down') y -= 1;
         else if(dir === 'left') x -= 1;
         else if(dir === 'right') x += 1;
-        console.log(x, y, location);
         const targetTile = getTile(floor.tiles, { XY: [x, y] });
         if(!targetTile) return;
         if(targetTile.state.type === '') return;
         setLocation((prev) => { 
-            const newLocation = Object.assign({}, prev, {coords: [x, y]});
-            assignMinimap(floor.tiles, getTile(floor.tiles, { XY: newLocation.coords })?.state.XY ?? [0,0], facing);
+            const newLocation = Object.assign({}, prev, {XY: [x, y]});
+            assignMinimap(floor.tiles, getTile(floor.tiles, { XY: newLocation.XY })?.state.XY ?? [0,0], facing);
             return newLocation;
         });
+        getEncounters();
     }
 
     const assignMinimap = (tiles: TileSchema[], startXY: number[], facing: string) => {
@@ -83,7 +87,7 @@ export default function Dungeon() {
         setFacing((prev) => {
             const currentIndex = directions.indexOf(prev);
             const newIndex = (currentIndex + (dir === 'left' ? -1 : 1) + directions.length) % 4;
-            assignMinimap(floor.tiles, getTile(floor.tiles, { XY: location.coords })?.state.XY ?? [0,0], directions[newIndex]);
+            assignMinimap(floor.tiles, getTile(floor.tiles, { XY: location.XY })?.state.XY ?? [0,0], directions[newIndex]);
             return directions[newIndex];
         });
     }
@@ -107,11 +111,25 @@ export default function Dungeon() {
     }
 
     const nextFloor = () => {
-        createFloor(location.coords, setFloor);
+        createFloor(location.XY, setFloor);
+    }
+
+    const getEncounters = () => {
+        const encountered = Math.floor(Math.random() * 3);
+        if(encountered === 1) {
+            setEnemies(() => {
+                const ran = Math.floor(Math.random() * 3);
+                const enemies = [];
+                for(let i = 0; i < ran; i++) enemies.push(createUIEnemy(enemydata.all[0].id));
+                return enemies;
+            });
+        } else {
+            setEnemies(() => []);
+        }
     }
 
     useEffect(() => {
-        const tiles = createFloor(location.coords, setFloor);
+        const tiles = createFloor(location.XY, setFloor);
         const start = getTile(tiles, { type: 'upstairs' });
         if(!start) return;
         setLocation((prev) => {
@@ -123,7 +141,7 @@ export default function Dungeon() {
     return (
         <div>
             <div className="grid">{ mapFloor() }</div>
-            <p>Location: [{location.coords[0]},{location.coords[1]}]</p>
+            <p>Location: [{location.XY[0]},{location.XY[1]}]</p>
             <p>Facing: {facing}</p>
             <button
                 onClick={() => turn('left')}
@@ -143,7 +161,7 @@ export default function Dungeon() {
             <div className="minimap">{ mapMinimap() }</div>
             {
                 floor.tiles &&
-                getTile(floor.tiles, { XY: location.coords })?.state.type === 'upstairs'
+                getTile(floor.tiles, { XY: location.XY })?.state.type === 'upstairs'
                 &&
                 <button
                 onClick={leaveFloor}
@@ -153,7 +171,7 @@ export default function Dungeon() {
             }
             {
                 floor.tiles &&
-                getTile(floor.tiles, { XY: location.coords })?.state.type === 'downstairs'
+                getTile(floor.tiles, { XY: location.XY })?.state.type === 'downstairs'
                 &&
                 <button
                     onClick={nextFloor}
@@ -161,6 +179,20 @@ export default function Dungeon() {
                     Go Down
                 </button>
             }
+            {
+                enemies.length &&
+                <button
+                    onClick={() => navigate('../combat')}
+                >
+                    Enter Combat
+                </button>
+            }   
+            
+            <button
+                    onClick={() => console.log(enemies)}
+                >
+                    check enemies
+                </button>
         </div>
     )
 }

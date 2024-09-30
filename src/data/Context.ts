@@ -9,6 +9,8 @@ interface UserContextInterface {
     setCharacter: React.Dispatch<React.SetStateAction<PlayerSchema>>,
     party: PlayerSchema[],
     setParty: React.Dispatch<React.SetStateAction<PlayerSchema[]>>,
+    enemies: any,
+    setEnemies: any,
 }
 
 const UserContext = createContext({} as UserContextInterface);
