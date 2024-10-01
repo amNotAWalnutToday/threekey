@@ -8,6 +8,9 @@ import abiltyData from '../data/abilities.json';
 import classData from '../data/classes.json';
 import accountFns from '../utils/accountFns';
 import { set, ref, get, child, onValue } from "firebase/database";
+import FloorSchema from "../schemas/FloorSchema";
+import UserSchema from "../schemas/UserSchema";
+import PartySchema from "../schemas/PartySchema";
 
 const { db } = accountFns;
 
@@ -119,7 +122,7 @@ export default (() => {
     const createPlayer = (
         name: string, pid: string, playerClass: string, 
         combatStats: typeof classData.naturalist.stats, 
-        status: StatusSchema[]
+        status: StatusSchema[], location: { map: string, XY: number[] },
     ) => {
         const stats = combatStats ? combatStats : classData.naturalist.stats;
         const abilities = assignAbilities(playerClass);
@@ -129,7 +132,7 @@ export default (() => {
             npc: false,
             dead: false,
             isAttacking: 0,
-            location: { map: "", XY: [0, 0] },
+            location: location ?? { map: "-1", XY: [1, 1] },
             inventory: [],
             status: status ?? [],
             stats,
@@ -233,10 +236,12 @@ export default (() => {
             joinedPlayers: 0,
             id: '',
         }
+
+        console.log(players, 'current');
         const partyRef = ref(db, `party/${players[0].pid}`);
         await get(partyRef).then( async (snapshot) => {
-            const data = await snapshot.val();
-            for(const p in data) field.players.push(data[p]);
+            const data: PartySchema = await snapshot.val();
+            for(const p in data.players) field.players.push(data.players[p]);
         });
 
         const enemyList = enemyData.all;
@@ -255,14 +260,14 @@ export default (() => {
             field.enemies.push(enemy);
         });
 
-        field.id = field.players[0].pid;
-        uploadField(field, field.players[0].pid);
+        field.id = players[0].pid;
+        uploadField(field, players[0].pid);
         return field;
     }
 
     const populatePlayers = (players: PlayerSchema[]) => {
         return Array.from(players, (player: PlayerSchema) => {
-            return createPlayer(player.name, player.pid, 'naturalist', player.stats, player.status);
+            return createPlayer(player.name, player.pid, 'naturalist', player.stats, player.status, player.location);
         });
     }
 
@@ -278,25 +283,26 @@ export default (() => {
 
     const connectToBattle = async (
         initialize: (players: PlayerSchema[], enemies: PlayerSchema[], actionQueue: ActionSchema[], fieldId: string, start: boolean, joinedPlayers: number) => void,
-        party: PlayerSchema[],
+        party: PartySchema,
     ) => {
         try {
-            const fieldRef = ref(db, `/fields/${party[0].pid}`);
-            const playersRef = ref(db, `/fields/${party[0].pid}/players`);
-            const enemyRef = ref(db, `/fields/${party[0].pid}/enemies`);
-            const actionRef = ref(db, `/fields/${party[0].pid}/actionQueue`);
+            console.log(party, party.players[0].pid);
+            const fieldRef = ref(db, `/fields/${party.players[0].pid}`);
+            const playersRef = ref(db, `/fields/${party.players[0].pid}/players`);
+            const enemyRef = ref(db, `/fields/${party.players[0].pid}/enemies`);
+            const actionRef = ref(db, `/fields/${party.players[0].pid}/actionQueue`);
             await get(fieldRef).then( async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedPlayers = populatePlayers(data.players);
                 const updatedEnemies = populateEnemies(data.enemies);
                 const joinedPlayers = data.joinedPlayers + 1;
                 await set(child(fieldRef, '/joinedPlayers'), joinedPlayers);
-                const shouldStart = joinedPlayers === party.length;
+                const shouldStart = joinedPlayers === party.players.length;
                 initialize(updatedPlayers ?? [], updatedEnemies ?? [], data.actionQueue ?? [], data.id, shouldStart, joinedPlayers);
             });
             await onValue(fieldRef, async (snapshot) => {
                 const data = await snapshot.val();
-                const shouldStart = data.joinedPlayers === party.length;
+                const shouldStart = data.joinedPlayers === party.players.length;
                 initialize([], [], [], '', shouldStart, data.joinedPlayers);
             });
             await onValue(playersRef, async (snapshot) => {
@@ -327,10 +333,12 @@ export default (() => {
             fieldId: string,
             field?: FieldSchema,
             actionQueue?: ActionSchema[],
+            user?: UserSchema,
             player?: { state: PlayerSchema, index: number },
+            floor?: FloorSchema,
         }
     ) => {
-        const { fieldId, field, actionQueue, player } = payload;
+        const { fieldId, field, actionQueue, player, floor, user } = payload;
 
         switch(type) {
             case "field":
@@ -346,6 +354,14 @@ export default (() => {
             case "enemy":
                 if(!player) return console.error("No Enemy");
                 uploadEnemy(player.state, player.index, fieldId);
+                break;
+            case "floor":
+                if(!floor) return console.error("No Floor");
+                uploadFloor(floor);
+                break;
+            case "character":
+                if(!player || !user) return; 
+                uploadCharacter(user, player.state, player.index);
                 break;
         }
     }
@@ -372,6 +388,15 @@ export default (() => {
         await set(enemyRef, assignMaxOrMinStat(enemy, [enemy], 0)[0]);
     }
 
+    const uploadFloor = async (floor: FloorSchema) => {
+        const floorRef = ref(db, `/dungeon/${floor.number}`);
+        await set(floorRef, floor);
+    }
+
+    const uploadCharacter = async (user: UserSchema, player: PlayerSchema, index: number) => {
+        const characterRef = ref(db, `/users/${user.uid}/characters/${index}`);
+        await set(characterRef, player);
+    }
 
     return {
         getPlayer,

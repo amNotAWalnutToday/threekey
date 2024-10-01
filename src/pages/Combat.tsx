@@ -217,7 +217,7 @@ export default function Combat() {
 
     /**GAME DATA*/
     const [field, setField] = useState<FieldSchema>({
-        id: party[0].pid,
+        id: party.players[0].pid,
         start: false,
         joinedPlayers: 0,
         players: [],
@@ -231,7 +231,7 @@ export default function Combat() {
     /**CLIENT STATE*/
     const [selectedPlayer, setSelectedPlayer] = useState<{state: PlayerSchema, index: number} | null>({ state: players[0], index: 0 });
     const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
-    const [isHost, setIsHost] = useState(party[0].pid === character.pid);
+    const [isHost, setIsHost] = useState(party.players[0].pid === character.pid);
 
     const initialize = (
         players: PlayerSchema[], 

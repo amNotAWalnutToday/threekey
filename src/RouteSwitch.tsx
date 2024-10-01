@@ -4,16 +4,17 @@ import UserContext from "./data/Context";
 import Home from './pages/Home';
 import Combat from "./pages/Combat";
 import Map from "./pages/Map";
-import CharacterCreate from "./pages/CharacterCreate";
+import CharacterSelect from "./pages/CharacterSelect";
 import Town from "./pages/Town";
 import Dungeon from "./pages/Dungeon";
 import PlayerSchema from "./schemas/PlayerSchema";
 import UserSchema from "./schemas/UserSchema";
+import PartySchema from "./schemas/PartySchema";
 
 export default function RouteSwitch() {
     const [user, setUser] = useState<UserSchema>();
     const [character, setCharacter] = useState<PlayerSchema>({} as PlayerSchema);
-    const [party, setParty] = useState<PlayerSchema[]>([]);
+    const [party, setParty] = useState<PartySchema>({} as PartySchema);
     const [enemies, setEnemies] = useState([]);
 
     return (
@@ -33,9 +34,9 @@ export default function RouteSwitch() {
                         }
                     />
                     <Route 
-                        path='/create-character'
+                        path='/characters'
                         element={
-                            <CharacterCreate />
+                            <CharacterSelect />
                         }
                     />
                     <Route 
@@ -57,7 +58,7 @@ export default function RouteSwitch() {
                         }
                     />
                 </Routes>
-            </UserContext.Provider>.
+            </UserContext.Provider>
         </Router>
     );
 }

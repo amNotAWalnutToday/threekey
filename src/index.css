@@ -1,4 +1,27 @@
 :root {
+  --orange: orangered;
+  --black: #111;
+  --black-fade: #1119;
+  --black-fade-light: #121212df;
+  --black-tooltip: #123f;
+  --black-shine: radial-gradient(#121212, #122);
+  --white-fade: #fbfdfb99;
+  --white: #fbfdfe;
+  --light-pink: #faf;
+  --light-green: #4fa;
+  --light-blue: #4cf;
+  --light-purple: #9af;
+  --crimson: crimson;
+  --silver: #c0c0c0;
+  --golden: goldenrod;
+  --gold: gold;
+  --golden_highlight: rgba(184, 142, 35, 0.9);
+  --golden_fade: var(--orange);
+  --brown: rgba(114, 87, 18, 0.9);
+  
+  --outline_gold_inset: 2px inset var(--golden);
+  --border_gold_outset: 2px outset var(--gold);
+
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.5;
 

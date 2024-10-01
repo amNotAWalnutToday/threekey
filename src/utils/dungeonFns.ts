@@ -1,5 +1,9 @@
+import { get, ref } from "firebase/database";
+import accountFns from "./accountFns";
 import TileSchema from "../schemas/TileSchema";
 import FloorSchema from "../schemas/FloorSchema";
+
+const { db } = accountFns;
 
 type Coords = {
     x: number,
@@ -16,6 +20,18 @@ export default (() => {
                 if(tiles[i].type === search.type) return { state: tiles[i], index: i};
             }
         }
+    }
+
+    const getFloor = async (floorNum: number) => {
+        const floorRef = ref(db, `/dungeon/${floorNum}/`);
+        let floor;
+        await get(floorRef).then(async(snapshot) => {
+            const data = await snapshot.val();
+            if(!data) return;
+            floor = data;
+        });
+
+        return floor;
     }
 
     const rotate = (neighbours: number[][], middle: number[], facing: string) => {
@@ -149,7 +165,7 @@ export default (() => {
 
     const createFloor = (
         characterLocation: number[],
-        setFloor: React.Dispatch<React.SetStateAction<FloorSchema>>
+        setFloor: React.Dispatch<React.SetStateAction<FloorSchema>>,
     ) => {
         const tiles: TileSchema[] = [];
         const totalRooms: number[][] = [];
@@ -169,34 +185,32 @@ export default (() => {
         tiles[upstairsRan].type = 'upstairs',
         tiles[downStairsRan].type = 'downstairs',
         
-        setFloor((prev) => { 
-            assignPaths([...tiles], tiles[upstairsRan].XY, tiles[downStairsRan].XY);
-            for(const coords of totalRooms) {
-                assignPaths([...tiles], tiles[upstairsRan].XY, coords);
-                const neighbours = [
-                    [coords[0], coords[1] - 1],
-                    [coords[0] - 1, coords[1]],
-                    [coords[0], coords[1] + 1],
-                    [coords[0] + 1, coords[1]],
-                    [coords[0] - 1, coords[1] - 1],
-                    [coords[0] + 1, coords[1] + 1],
-                    [coords[0] - 1, coords[1] + 1],
-                    [coords[0] + 1, coords[1] - 1],
-                ];
-                for(const neighbour of neighbours) {
-                    const tile = getTile(tiles, { XY: neighbour });
-                    if(!tile) continue;
-                    if(tile.state.type !== '') continue; 
-                    tiles[tile.index].type = 'room';
-                }
+        assignPaths([...tiles], tiles[upstairsRan].XY, tiles[downStairsRan].XY);
+        for(const coords of totalRooms) {
+            assignPaths([...tiles], tiles[upstairsRan].XY, coords);
+            const neighbours = [
+                [coords[0], coords[1] - 1],
+                [coords[0] - 1, coords[1]],
+                [coords[0], coords[1] + 1],
+                [coords[0] + 1, coords[1]],
+                [coords[0] - 1, coords[1] - 1],
+                [coords[0] + 1, coords[1] + 1],
+                [coords[0] - 1, coords[1] + 1],
+                [coords[0] + 1, coords[1] - 1],
+            ];
+            for(const neighbour of neighbours) {
+                const tile = getTile(tiles, { XY: neighbour });
+                if(!tile) continue;
+                if(tile.state.type !== '') continue; 
+                tiles[tile.index].type = 'room';
             }
-            return {
-                tiles,
-                number: prev.number ? prev.number + 1 : 1,
-                biome: ''
-            };
-        });
-        return tiles;
+        } 
+
+        return {
+            tiles, 
+            number: 0,
+            biome: ''
+        };
     }
 
     const createUIEnemy = (id: string) => {
@@ -205,6 +219,7 @@ export default (() => {
 
     return {
         getTile,
+        getFloor,
         getTileNeighbours,
         createFloor,
         createUIEnemy,

@@ -3,17 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import TileSchema from '../schemas/TileSchema';
 import FloorSchema from '../schemas/FloorSchema';
 import dungeonFns from '../utils/dungeonFns';
+import combatFns from '../utils/combatFns';
+import partyFns from '../utils/partyFns';
 import UserContext from '../data/Context';
 import enemydata from '../data/enemies.json';
 
-const { getTile, getTileNeighbours, createFloor, createUIEnemy } = dungeonFns;
+const { connectParty, uploadParty } = partyFns;
+const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy } = dungeonFns;
+const { upload } = combatFns;
 
 export default function Dungeon() {
-    const { character, enemies, setEnemies } = useContext(UserContext);
+    const { character, enemies, setEnemies, setParty, party } = useContext(UserContext);
 
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
     const [minimap, setMinimap] = useState<TileSchema[]>([]);
-    const [location, setLocation] = useState(character.location ?? {map: "floor_1", XY: [1, 1]});
+    const [location, setLocation] = useState(character.location ?? {map: "1", XY: [1, 1]});
     const [facing, setFacing] = useState('north');
 
     const navigate = useNavigate();
@@ -65,11 +69,12 @@ export default function Dungeon() {
         const targetTile = getTile(floor.tiles, { XY: [x, y] });
         if(!targetTile) return;
         if(targetTile.state.type === '') return;
-        setLocation((prev) => { 
-            const newLocation = Object.assign({}, prev, {XY: [x, y]});
-            assignMinimap(floor.tiles, getTile(floor.tiles, { XY: newLocation.XY })?.state.XY ?? [0,0], facing);
-            return newLocation;
-        });
+        uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: [x, y] } });
+        // setLocation((prev) => { 
+        //     const newLocation = Object.assign({}, prev, {XY: [x, y]});
+        //     assignMinimap(floor.tiles, getTile(floor.tiles, { XY: newLocation.XY })?.state.XY ?? [0,0], facing);
+        //     return newLocation;
+        // });
         getEncounters();
     }
 
@@ -101,24 +106,32 @@ export default function Dungeon() {
     }
 
     const leaveFloor = () => {
-        if(floor.number === 1) {
+        if(floor.number <= 0) {
             navigate('/town');
         } else {
-            setFloor((prev) => {
-                return Object.assign({}, prev, {number: prev.number - 1});
-            });
+            nextFloor('down');
         }
     }
 
-    const nextFloor = () => {
-        createFloor(location.XY, setFloor);
+    const nextFloor = async (dir: string) => {
+        const newMapLocation = dir === 'up' ? Number(party.location.map) + 1 : Number(party.location.map) - 1;
+        let newFloor;
+        newFloor = await getFloor(newMapLocation) 
+        if(!newFloor) newFloor = createFloor(party.location.XY, setFloor);
+        newFloor.number = newMapLocation;
+        setFloor(() => newFloor);
+        upload('floor', { floor: newFloor, fieldId: '' });
+        const start = getTile(newFloor.tiles, { type: "upstairs" })?.state;
+        if(!start) return newFloor;
+        uploadParty('location', { partyId: party.players[0].pid, location: { map: `${newMapLocation}`, XY: start.XY } });
+        return newFloor;
     }
 
     const getEncounters = () => {
         const encountered = Math.floor(Math.random() * 3);
         if(encountered === 1) {
             setEnemies(() => {
-                const ran = Math.floor(Math.random() * 3);
+                const ran = Math.floor(Math.random() * 4);
                 const enemies = [];
                 for(let i = 0; i < ran; i++) enemies.push(createUIEnemy(enemydata.all[0].id));
                 return enemies;
@@ -128,15 +141,44 @@ export default function Dungeon() {
         }
     }
 
-    useEffect(() => {
-        const tiles = createFloor(location.XY, setFloor);
-        const start = getTile(tiles, { type: 'upstairs' });
+    const initializeDungeon = async () => {
+        await connectParty(party.players[0].pid, setParty);
+        let newFloor;
+        newFloor = await getFloor(Number(party.location.map));
+        console.log(newFloor);
+        if(!newFloor) { 
+            newFloor = createFloor(party.location.XY, setFloor);
+            newFloor.number = Number(party.location.map);
+            upload('floor', { floor: newFloor, fieldId: '' });
+        }
+        const start = getTile(newFloor.tiles, { type: 'upstairs' });
         if(!start) return;
-        setLocation((prev) => {
-            return Object.assign({}, prev, {coords: start?.state.XY});
-        });
-        assignMinimap(tiles, start.state.XY, facing);
+        setFloor(() => newFloor);
+        uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: start.state.XY } });
+        assignMinimap(newFloor.tiles, start.state.XY, facing);
+    }
+
+    useEffect(() => {
+        initializeDungeon();
     }, []);
+
+    const changeFloor = async () => {
+        const nextFloor = await getFloor(Number(party.location.map));
+        console.log(nextFloor);
+        if(!nextFloor) return;
+        setFloor(() => nextFloor);
+    }
+
+    useEffect(() => {
+        setLocation(() => {
+            console.log(floor, party);
+            if(`${floor.number}` !== party.location.map) {
+                changeFloor();
+            }
+            if(floor.tiles) assignMinimap(floor.tiles, party.location.XY, facing);
+            return party.location;
+        });
+    }, [party.location]);
 
     return (
         <div>
@@ -174,7 +216,7 @@ export default function Dungeon() {
                 getTile(floor.tiles, { XY: location.XY })?.state.type === 'downstairs'
                 &&
                 <button
-                    onClick={nextFloor}
+                    onClick={() => nextFloor('up')}
                 >
                     Go Down
                 </button>

@@ -1,36 +1,61 @@
-import { Link } from "react-router-dom"
-import { useContext } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { useContext, useState } from "react"
 import UserContext from "../data/Context"
 import testdata from '../data/testdata.json';
+import accountFns from "../utils/accountFns";
+
+const { createAccountAnon } = accountFns;
 
 export default function Home() {
-    const { character, setUser, setCharacter } = useContext(UserContext);
-    
+    const { character, setUser, setCharacter, user } = useContext(UserContext);
+    const navigate = useNavigate();
+
+    const [signingIn, setSigningIn] = useState(false);
+
     return (
         <div>
-            <Link to='/combat'> Fight!</Link>
-            <Link to='/create-character'> create</Link>
-            <Link to='/map'> map</Link>
-            <Link to='/town'> town</Link>
-            <Link to='/dungeon'> Dungeon</Link>
-            <button 
-                onClick={() => {
-                    setUser(() => testdata.tsuki);
-                    setCharacter(() => testdata.tsuki.characters[0]);
-                    console.log(character);
-                }}
-            >
-                Select Tsuki
-            </button>
-            <button 
-                onClick={() => {
-                    setUser(() => testdata.werly);
-                    setCharacter(() => testdata.werly.characters[0]);
-                    console.log(character);
-                }}
-            >
-                Select Werly
-            </button>
+            <div className='main_menu' >
+                <div className='menu'>
+                    {
+                    !user
+                    ?
+                    <button
+                        className={`menu_link ${signingIn ? "disabled" : ""}`}
+                        onClick={(async () => {
+                            await createAccountAnon(setUser);
+                            setSigningIn(() => true);
+                        })}
+                    >
+                        { !signingIn ? "Play as Guest" : "Please Wait.." }
+                    </button>
+                    :
+                    <button
+                        className='menu_link'
+                        onClick={() => navigate('/characters')}
+                    >
+                        Continue to Game
+                    </button>
+                    }
+                </div>
+                <button 
+                    onClick={() => {
+                        setUser(() => testdata.tsuki);
+                        setCharacter(() => testdata.tsuki.characters[0]);
+                        console.log(character);
+                    }}
+                >
+                    Select Tsuki
+                </button>
+                <button 
+                    onClick={() => {
+                        setUser(() => testdata.werly);
+                        setCharacter(() => testdata.werly.characters[0]);
+                        console.log(character);
+                    }}
+                >
+                    Select Werly
+                </button>
+            </div>
         </div>
     )
 }

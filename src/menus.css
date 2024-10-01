@@ -1,0 +1,41 @@
+.main_menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem 2.5rem;
+    min-width: 320px;
+    max-width: 600px;
+    outline: var(--outline_gold_inset);
+    outline-offset: 2px;
+    border: var(--border_gold_outset);
+    border-radius: 3px;
+    background-color: var(--black);
+    box-shadow: 0px 12px 32px var(--black);
+}
+
+.menu_link {
+    padding: 0.5rem 1rem;
+    color: white;
+    background-color: var(--orange);
+    border-radius: 25px;
+    text-align: center;
+}
+
+.menu_link.disabled {
+    background-color: #1119;
+    opacity: 50%;
+    padding-right: 1rem;
+    cursor: not-allowed;
+}
+
+button:hover {
+    cursor: pointer;
+}
