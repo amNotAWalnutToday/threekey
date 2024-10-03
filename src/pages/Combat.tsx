@@ -15,14 +15,16 @@ import ActionSchema from "../schemas/ActionSchema";
 import StatusSchema from "../schemas/StatusSchema";
 import PLAYERS_REDUCER_ACTIONS from "../schemas/reducers/PLAYER_REDUCER_ACTIONS";
 import accountFns from '../utils/accountFns';
+import partyFns from "../utils/partyFns";
 import { ref, set } from "firebase/database";
 
 const { 
     getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
-    initiateBattle, connectToBattle, upload,
+    initiateBattle, connectToBattle, upload, getLoot, assignItem,
 } = combatFns;
 const { db } = accountFns;
+const { uploadParty } = partyFns;
 
 const battleTimer = {
     initTime: 0,
@@ -572,12 +574,6 @@ export default function Combat() {
             setLoading(() => false);
         }
         await connectToBattle(initialize, party);
-        // newField.players.forEach((player) => {
-        //     dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.add_player, payload: { pid: player.pid, playerObj: player }});
-        // });
-        // newField.enemies.forEach((enemy) => {
-        //     dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.add_player, payload: { pid: enemy.pid, playerObj: enemy }});
-        // });
     }
 
     useEffect(() => {
@@ -594,6 +590,23 @@ export default function Combat() {
 
         return () => clearInterval(interval);
     }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn]);
+
+    const lootAndSync = async () => {
+        const loot = getLoot(field.enemies);
+        for(const item of loot) {
+            const ran = Math.floor(Math.random() * field.players.length);
+            const player = assignItem(field.players[ran], item);
+            if(!player) return;
+            await upload("player", { fieldId: field.id, player: { state: player, index: ran} });
+        }
+        await uploadParty("players", { partyId: field.id, players: field.players });
+    }
+
+    useEffect(() => {
+        if(isWon && isHost) {
+            lootAndSync();
+        }
+    }, [isWon]);
 
     const getTime = () => {
         return currentTime / 10;

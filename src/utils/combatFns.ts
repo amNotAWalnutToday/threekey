@@ -4,6 +4,7 @@ import ActionSchema from "../schemas/ActionSchema";
 import AbilitySchema from "../schemas/AbilitySchema";
 import FieldSchema from "../schemas/FieldSchema";
 import enemyData from '../data/enemies.json';
+import itemData from '../data/items.json';
 import abiltyData from '../data/abilities.json';
 import classData from '../data/classes.json';
 import accountFns from '../utils/accountFns';
@@ -76,6 +77,33 @@ export default (() => {
         return av > 0 && speed > 0 ? av : 1;
     }
 
+    const getLoot = (enemies: PlayerSchema[]) => {
+        const loot = [];
+        for(const enemy of enemies) {
+            const ran = Math.floor(Math.random() * enemy.inventory.length);
+            if(ran < enemy.inventory.length) {
+                loot.push(enemy.inventory[ran]);
+            }
+        }
+        return loot;
+    }
+
+    const assignItem = (player: PlayerSchema, item: {id:string, amount:number}) => {
+        const fullItem = populateItem(item);
+        let inInventory = false;
+        for(let i = 0; i < player.inventory.length; i++) {
+            if(!fullItem) return;
+            if(player.inventory[i].id === item.id) {
+                const stackedAmount = player.inventory[i].amount + item.amount;
+                if(stackedAmount >= fullItem.stack) player.inventory[i].amount = fullItem.stack;
+                else player.inventory[i].amount += item.amount;
+                inInventory = true;
+            }
+        }
+        if(!inInventory) player.inventory.push(item);
+        return player;
+    }
+
     const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
         const { health, resources } = player.stats.combat;
         const { mana } = resources;
@@ -123,6 +151,7 @@ export default (() => {
         name: string, pid: string, playerClass: string, 
         combatStats: typeof classData.naturalist.stats, 
         status: StatusSchema[], location: { map: string, XY: number[] },
+        inventory: { id: string, amount: number }[],
     ) => {
         const stats = combatStats ? combatStats : classData.naturalist.stats;
         const abilities = assignAbilities(playerClass);
@@ -133,7 +162,7 @@ export default (() => {
             dead: false,
             isAttacking: 0,
             location: location ?? { map: "-1", XY: [1, 1] },
-            inventory: [],
+            inventory: inventory ?? [],
             status: status ?? [],
             stats,
             abilities,
@@ -145,7 +174,7 @@ export default (() => {
     const createEnemy = (
         name: string, pid: string, maxHealth: number, abilityIds: string[],
         attack: number, defence: number, speed: number, status: StatusSchema[],
-        dead: boolean,
+        dead: boolean, inventory: {id: string, amount: number}[],
     ) => {
         const health = {
             max: maxHealth,
@@ -169,7 +198,7 @@ export default (() => {
         const enemy: PlayerSchema = {
             name,
             pid,
-            inventory: [],
+            inventory: inventory ?? [],
             location: { map: '', XY: [] },
             npc: true,
             dead,
@@ -249,8 +278,8 @@ export default (() => {
         for(let i = 0; i < enemyIds.length; i++) {
             for(const enemy of enemyList) {
                 if(enemy.id === enemyIds[i]) {
-                    const { attack, defence, speed, name, health, abilities } = enemy;
-                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false); 
+                    const { attack, defence, speed, name, health, abilities, inventory } = enemy;
+                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory); 
                     enemies.push(newEnemy);
                 }    
             }
@@ -267,15 +296,21 @@ export default (() => {
 
     const populatePlayers = (players: PlayerSchema[]) => {
         return Array.from(players, (player: PlayerSchema) => {
-            return createPlayer(player.name, player.pid, 'naturalist', player.stats, player.status, player.location);
+            return createPlayer(player.name, player.pid, 'naturalist', player.stats, player.status, player.location, player.inventory);
         });
+    }
+
+    const populateItem = (item: { id: string, amount: number }) => {
+        for(const fullItem of itemData) {
+            if(item.id === fullItem.id) return fullItem;
+        }
     }
 
     const populateEnemies = (enemies: PlayerSchema[]) => {
         return Array.from(enemies, (enemy: PlayerSchema) => {
             const abilities = Array.from(enemy.abilities, (e) => e.id); 
             const { attack, defence, speed } = enemy.stats.combat;
-            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false);
+            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory);
             updatedEnemy.stats.combat.health.cur = enemy.stats.combat.health.cur;
             return updatedEnemy;
         });
@@ -405,6 +440,8 @@ export default (() => {
         getAbilityCosts,
         getStatus,
         getActionValue,
+        getLoot,
+        assignItem,
         assignMaxOrMinStat,
         assignBuffs,
         createPlayer,

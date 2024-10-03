@@ -92,11 +92,16 @@ export default (() => {
             partyId: string, 
             location?: { map: string, XY: number[] } ,
             isInCombat?: boolean,
+            players?: PlayerSchema[],
         },
     ) => {
-        const { partyId, location, isInCombat } = payload;
+        const { partyId, location, isInCombat, players } = payload;
 
         switch(type) {
+            case "players":
+                if(!players) return;
+                uploadPlayers(partyId, players);
+                break;
             case "location":
                 if(!location) break;
                 uploadLocation(partyId, location);
@@ -108,6 +113,11 @@ export default (() => {
         }
     }
 
+    const uploadPlayers = async (partyId: string, players: PlayerSchema[]) => {
+        const playersRef = ref(db, `/party/${partyId}/players`);
+        await set(playersRef, players);
+    }
+
     const uploadLocation = async (partyId: string, location: { map: string, XY: number[] }) => {
         const locationRef = ref(db, `/party/${partyId}/location`);
         await set(locationRef, location);
@@ -117,6 +127,17 @@ export default (() => {
         const reference = ref(db, `/party/${partyId}/inCombat`);
         await set(reference, isInCombat);
     }
+
+    const syncPartyMemberToAccount = async (player: PlayerSchema) => {
+        const userRef = ref(db, `/users/${player.pid}/characters/`);
+        await get(userRef).then(async(snapshot) => {
+            const data = snapshot.val();
+            if(!data) return console.error("No Characters under this user id");
+            for(let i = 0; i < data.length; i++) {
+                if(data[i].name === player.name) await set(child(userRef, `/${i}`), player);
+            }
+        });
+    }
     
     return {
         getParties,
@@ -124,5 +145,6 @@ export default (() => {
         joinParty,
         connectParty,
         uploadParty,
+        syncPartyMemberToAccount,
     }
 })();

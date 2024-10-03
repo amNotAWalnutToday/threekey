@@ -8,7 +8,7 @@ import partyFns from '../utils/partyFns';
 import UserContext from '../data/Context';
 import enemydata from '../data/enemies.json';
 
-const { connectParty, uploadParty } = partyFns;
+const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
 const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy } = dungeonFns;
 const { upload } = combatFns;
 
@@ -106,8 +106,11 @@ export default function Dungeon() {
         return '';
     }
 
-    const leaveFloor = () => {
+    const leaveFloor = async () => {
         if(floor.number <= 0) {
+            for(const member of party.players) {
+                await syncPartyMemberToAccount(member);
+            }
             navigate('/town');
         } else {
             nextFloor('down');
@@ -146,7 +149,6 @@ export default function Dungeon() {
         await connectParty(party.players[0].pid, setParty);
         let newFloor;
         newFloor = await getFloor(Number(party.location.map));
-        console.log(newFloor);
         if(!newFloor) { 
             newFloor = createFloor(party.location.XY, setFloor);
             newFloor.number = Number(party.location.map);

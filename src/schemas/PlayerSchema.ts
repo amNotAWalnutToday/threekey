@@ -19,7 +19,7 @@ interface PlayerSchema {
     isAttacking: number,
     location: { map: string, XY: number[] },
     abilities: AbilitySchema[],
-    inventory: string[], //IDS
+    inventory: { id: string, amount: number }[], //IDS
     status: StatusSchema[],
     stats: {
         combat: {
