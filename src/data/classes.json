@@ -1,6 +1,9 @@
 {
     "naturalist": {
         "stats": {
+            "level": 1,
+            "xp": 0,
+            "rank": "",
             "combat": {
                 "shield": {
                     "max": 100,

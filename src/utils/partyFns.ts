@@ -73,16 +73,24 @@ export default (() => {
     const connectParty = async (
         partyId: string,
         setParty: React.Dispatch<React.SetStateAction<PartySchema>>,
-    ) => {
+    ): Promise<PartySchema>=> {
         try {
             const partyRef = ref(db, `/party/${partyId}`);
+            let party = {} as PartySchema;
+            await get(partyRef).then(async (snapshot) => {
+                const data = await snapshot.val();
+                if(!data) return data;
+                party = data;
+            });
             await onValue(partyRef, async (snapshot) => {
                 const data = await snapshot.val();
-                if(!data) return;
+                if(!data) return data;
                 setParty(() => data);
             });
+            return party;
         } catch(e) {
             console.error(e);
+            return {} as PartySchema;
         }
     }
 

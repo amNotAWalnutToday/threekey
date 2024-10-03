@@ -77,6 +77,26 @@ export default (() => {
         return av > 0 && speed > 0 ? av : 1;
     }
 
+    const getRankValue = (rank: string) => {
+        const ranks = ['', 'E', 'D', 'C', 'B', 'A', 'S'];
+        return ranks.indexOf(rank);
+    }
+
+    const getXpReceived = (enemy: PlayerSchema, party: PartySchema) => {
+        const rankXp = getRankValue(enemy.stats.rank);
+        let floorXp = (Number(party.location.map) + 1);
+        floorXp = floorXp > 0 ? floorXp : 1; 
+        return rankXp * floorXp;
+    }
+
+    const getLevelUpReq = (level: number, rank: string) => {
+        const baseXp = 5;
+        let rankValue = getRankValue(rank);
+        if(rankValue < 1) rankValue = 1;
+        const increment = (level * baseXp) * rankValue;
+        return baseXp + increment;
+    }
+
     const getLoot = (enemies: PlayerSchema[]) => {
         const loot = [];
         for(const enemy of enemies) {
@@ -86,6 +106,33 @@ export default (() => {
             }
         }
         return loot;
+    }
+
+    const assignXp = (player: PlayerSchema, xp: number) => {
+        player.stats.xp += xp;
+        const levelReq = getLevelUpReq(player.stats.level, player.stats.rank);
+        const rankVal = getRankValue(player.stats.rank);
+        const currentMaxLevel = rankVal > 0 ? rankVal * 10 : 5;
+        if(player.stats.xp > levelReq && currentMaxLevel > player.stats.level) {
+            player.stats.level += 1;
+            player.stats.xp = 0;
+            player = assignStatUpsByRole(player);
+        }
+        return player;
+    }
+
+    const assignStatUpsByRole = (player: PlayerSchema) => {
+        const updatedPlayer = {...player};
+        switch(updatedPlayer.role) {
+            case "naturalist":
+                updatedPlayer.stats.combat.attack += 1;
+                updatedPlayer.stats.combat.defence += 1;
+                updatedPlayer.stats.combat.health.max += 3;
+                updatedPlayer.stats.combat.resources.mana.max += 1;
+                break;
+        }
+
+        return updatedPlayer;
     }
 
     const assignItem = (player: PlayerSchema, item: {id:string, amount:number}) => {
@@ -140,7 +187,11 @@ export default (() => {
 
         for(const ability of abiltyData.all) {
             for(const users of ability.users) {
-                if(users === playerClass) usableAbilities.push(ability);
+                const abilityRef = {
+                    id: ability.id,
+                    level: 0,
+                }
+                if(users === playerClass) usableAbilities.push(abilityRef);
             }
         }
 
@@ -151,12 +202,13 @@ export default (() => {
         name: string, pid: string, playerClass: string, 
         combatStats: typeof classData.naturalist.stats, 
         status: StatusSchema[], location: { map: string, XY: number[] },
-        inventory: { id: string, amount: number }[],
+        inventory: { id: string, amount: number }[]
     ) => {
         const stats = combatStats ? combatStats : classData.naturalist.stats;
         const abilities = assignAbilities(playerClass);
         const player: PlayerSchema = {
             name,
+            role: playerClass,
             pid,
             npc: false,
             dead: false,
@@ -174,7 +226,7 @@ export default (() => {
     const createEnemy = (
         name: string, pid: string, maxHealth: number, abilityIds: string[],
         attack: number, defence: number, speed: number, status: StatusSchema[],
-        dead: boolean, inventory: {id: string, amount: number}[],
+        dead: boolean, inventory: {id: string, amount: number}[], rank: string,
     ) => {
         const health = {
             max: maxHealth,
@@ -189,14 +241,18 @@ export default (() => {
             cur: 0,
         }
 
-        const abilities: AbilitySchema[] = [];
+        const abilities = [];
         for(const id of abilityIds) {
-            const ability = getAbility(id);
+            const ability = {
+                id,
+                level: 1
+            };
             if(ability) abilities.push(ability);
         }
 
         const enemy: PlayerSchema = {
             name,
+            role: '',
             pid,
             inventory: inventory ?? [],
             location: { map: '', XY: [] },
@@ -206,6 +262,9 @@ export default (() => {
             abilities,
             status: status ?? [],
             stats: {
+                level: 1,
+                xp: 0,
+                rank: rank ?? 'E',
                 combat: {
                     health,
                     shield,
@@ -278,8 +337,8 @@ export default (() => {
         for(let i = 0; i < enemyIds.length; i++) {
             for(const enemy of enemyList) {
                 if(enemy.id === enemyIds[i]) {
-                    const { attack, defence, speed, name, health, abilities, inventory } = enemy;
-                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory); 
+                    const { rank, attack, defence, speed, name, health, abilities, inventory } = enemy;
+                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory, rank); 
                     enemies.push(newEnemy);
                 }    
             }
@@ -310,7 +369,7 @@ export default (() => {
         return Array.from(enemies, (enemy: PlayerSchema) => {
             const abilities = Array.from(enemy.abilities, (e) => e.id); 
             const { attack, defence, speed } = enemy.stats.combat;
-            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory);
+            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory, enemy.stats.rank);
             updatedEnemy.stats.combat.health.cur = enemy.stats.combat.health.cur;
             return updatedEnemy;
         });
@@ -441,6 +500,8 @@ export default (() => {
         getStatus,
         getActionValue,
         getLoot,
+        getXpReceived,
+        assignXp,
         assignItem,
         assignMaxOrMinStat,
         assignBuffs,

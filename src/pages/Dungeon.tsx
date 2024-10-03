@@ -7,6 +7,7 @@ import combatFns from '../utils/combatFns';
 import partyFns from '../utils/partyFns';
 import UserContext from '../data/Context';
 import enemydata from '../data/enemies.json';
+import PartySchema from '../schemas/PartySchema';
 
 const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
 const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy } = dungeonFns;
@@ -125,7 +126,7 @@ export default function Dungeon() {
         newFloor.number = newMapLocation;
         setFloor(() => newFloor);
         upload('floor', { floor: newFloor, fieldId: '' });
-        const start = getTile(newFloor.tiles, { type: "upstairs" })?.state;
+        const start = getTile(newFloor.tiles, { type: dir === "up" ? "upstairs" : "downstairs" })?.state;
         if(!start) return newFloor;
         uploadParty('location', { partyId: party.players[0].pid, location: { map: `${newMapLocation}`, XY: start.XY } });
         return newFloor;
@@ -146,7 +147,8 @@ export default function Dungeon() {
     }
 
     const initializeDungeon = async () => {
-        await connectParty(party.players[0].pid, setParty);
+        const updatedParty: PartySchema = await connectParty(party.players[0].pid, setParty);
+        if(!updatedParty) return;
         let newFloor;
         newFloor = await getFloor(Number(party.location.map));
         if(!newFloor) { 
@@ -157,8 +159,8 @@ export default function Dungeon() {
         const start = getTile(newFloor.tiles, { type: 'upstairs' });
         if(!start) return;
         setFloor(() => newFloor);
-        if(!party.inCombat) await uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: start.state.XY } });
-        else if(party.inCombat && isHost) await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
+        if(!updatedParty.inCombat) await uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: start.state.XY } });
+        if(updatedParty.inCombat && isHost) await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
         assignMinimap(newFloor.tiles, start.state.XY, facing);
     }
 
@@ -175,7 +177,6 @@ export default function Dungeon() {
 
     useEffect(() => {
         setLocation(() => {
-            console.log(floor, party);
             if(`${floor.number}` !== party.location.map) {
                 changeFloor();
             }

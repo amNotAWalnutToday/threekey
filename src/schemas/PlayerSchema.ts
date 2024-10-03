@@ -13,15 +13,19 @@ type AbilityRefSchema = {
 
 interface PlayerSchema {
     name: string,
+    role: string,
     pid: string,
     npc?: boolean,
     dead?: boolean,
     isAttacking: number,
     location: { map: string, XY: number[] },
-    abilities: AbilitySchema[],
+    abilities: AbilityRefSchema[],
     inventory: { id: string, amount: number }[], //IDS
     status: StatusSchema[],
     stats: {
+        level: number,
+        xp: number,
+        rank: string,
         combat: {
             shield: Bar,
             health: Bar

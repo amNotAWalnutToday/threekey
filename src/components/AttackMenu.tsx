@@ -1,5 +1,10 @@
+import { useEffect, useState } from "react";
 import PlayerSchema from "../schemas/PlayerSchema";
 import AbilitySchema from "../schemas/AbilitySchema";
+import abilityData from '../data/abilities.json';
+import combatFns from "../utils/combatFns";
+
+const { getAbility } = combatFns;
 
 type Props = {
     selectedPlayer: { state: PlayerSchema, index: number } | null
@@ -16,6 +21,20 @@ export default function AttackMenu(
         selectTargetByAbility
     }: Props
 ) {
+    const [abilities, setAbilities] = useState<AbilitySchema[]>([]);
+
+    useEffect(() => {
+        if(!selectedPlayer) return;
+        if(!selectedPlayer.state) return;
+        const uiAbilities: AbilitySchema[] = [];
+        for(const abilityId of selectedPlayer.state.abilities) {
+            const ability = getAbility(abilityId.id);
+            if(!ability) continue;
+            uiAbilities.push(ability);
+        }
+        setAbilities(() => uiAbilities);
+        /*eslint-disable-next-line*/
+    }, [selectedPlayer]);
 
     const checkCanUseAbility = (ability: AbilitySchema, player: PlayerSchema) => {
         const { health, resources } = player.stats.combat;
@@ -40,8 +59,9 @@ export default function AttackMenu(
     }
 
     const mapAbilities = () => {
-        if(!selectedPlayer?.state) return;
-        return selectedPlayer?.state.abilities.map((ability, ind) => {
+        if(!abilities.length) return;
+        if(!selectedPlayer) return;
+        return abilities.map((ability, ind) => {
             return (
                 <button 
                     key={`ability-${ind}`}

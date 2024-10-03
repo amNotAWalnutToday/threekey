@@ -21,7 +21,8 @@ import { ref, set } from "firebase/database";
 const { 
     getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
-    initiateBattle, connectToBattle, upload, getLoot, assignItem,
+    initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
+    assignXp,
 } = combatFns;
 const { db } = accountFns;
 const { uploadParty } = partyFns;
@@ -548,8 +549,9 @@ export default function Combat() {
             let av = getActionValue(enemy);
             while(av > 0) {
                 const ran = Math.floor(Math.random() * enemy.abilities.length);
-                const ability = enemy.abilities[ran];
-                const targets = getTargets(ability.name, enemy.abilities[ran].type === 'ally' ? enemies : players, enemy.pid);
+                const ability = getAbility(enemy.abilities[ran].id);
+                if(!ability) continue;
+                const targets = getTargets(ability.name, ability.type === 'ally' ? enemies : players, enemy.pid);
                 const action = createAction(ability.name, enemy.pid, [...targets]); 
                 dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id }});
                 av -= ability.av;
@@ -598,6 +600,14 @@ export default function Combat() {
             const player = assignItem(field.players[ran], item);
             if(!player) return;
             await upload("player", { fieldId: field.id, player: { state: player, index: ran} });
+        }
+        for(let i = 0; i < field.players.length; i++) {
+            let updatedPlayer = {...field.players[i]};
+            for(const enemy of field.enemies) {
+                const xp = getXpReceived(enemy, party);
+                updatedPlayer = assignXp(updatedPlayer, xp);    
+            }
+            await upload("player", { fieldId: field.id, player: { state: updatedPlayer, index: i} });
         }
         await uploadParty("players", { partyId: field.id, players: field.players });
     }

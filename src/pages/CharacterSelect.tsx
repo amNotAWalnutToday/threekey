@@ -19,7 +19,7 @@ export default function CharacterSelect() {
 
     const createClass = () => {
         if(!user) return;
-        const player = createPlayer(playerName, user.uid, 'naturalist', classData.naturalist.stats, []);
+        const player = createPlayer(playerName, user.uid, 'naturalist', classData.naturalist.stats, [], { map: "-1", XY: [1, 1] }, []);
         setCharacter(player);
         const index = user.characters ? user.characters.length : 0;
         upload('character', { fieldId: '', user, player: { state: player, index } });
