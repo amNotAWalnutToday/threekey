@@ -5,7 +5,7 @@
             "name": "sproutling",
             "abilities": [
                 "I01",
-                "I03"
+                "P01"
             ],
             "shield": 0,
             "health": 30,

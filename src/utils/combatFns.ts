@@ -145,6 +145,7 @@ export default (() => {
     const createEnemy = (
         name: string, pid: string, maxHealth: number, abilityIds: string[],
         attack: number, defence: number, speed: number, status: StatusSchema[],
+        dead: boolean,
     ) => {
         const health = {
             max: maxHealth,
@@ -171,7 +172,7 @@ export default (() => {
             inventory: [],
             location: { map: '', XY: [] },
             npc: true,
-            dead: false,
+            dead,
             isAttacking: 0,
             abilities,
             status: status ?? [],
@@ -237,7 +238,6 @@ export default (() => {
             id: '',
         }
 
-        console.log(players, 'current');
         const partyRef = ref(db, `party/${players[0].pid}`);
         await get(partyRef).then( async (snapshot) => {
             const data: PartySchema = await snapshot.val();
@@ -250,7 +250,7 @@ export default (() => {
             for(const enemy of enemyList) {
                 if(enemy.id === enemyIds[i]) {
                     const { attack, defence, speed, name, health, abilities } = enemy;
-                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, []); 
+                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false); 
                     enemies.push(newEnemy);
                 }    
             }
@@ -275,7 +275,7 @@ export default (() => {
         return Array.from(enemies, (enemy: PlayerSchema) => {
             const abilities = Array.from(enemy.abilities, (e) => e.id); 
             const { attack, defence, speed } = enemy.stats.combat;
-            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status);
+            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false);
             updatedEnemy.stats.combat.health.cur = enemy.stats.combat.health.cur;
             return updatedEnemy;
         });

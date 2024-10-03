@@ -39,6 +39,7 @@ export default (() => {
                 players: [player],
                 location: player.location,
                 grouped: true,
+                inCombat: false,
                 host: 0,
             }
             await set(partyRef, party);
@@ -89,14 +90,20 @@ export default (() => {
         type: string, 
         payload: { 
             partyId: string, 
-            location: { map: string, XY: number[] } 
+            location?: { map: string, XY: number[] } ,
+            isInCombat?: boolean,
         },
     ) => {
-        const { partyId, location } = payload;
+        const { partyId, location, isInCombat } = payload;
 
         switch(type) {
             case "location":
+                if(!location) break;
                 uploadLocation(partyId, location);
+                break;
+            case "inCombat":
+                if(!isInCombat) break;
+                uploadInCombat(partyId, isInCombat);
                 break;
         }
     }
@@ -104,6 +111,11 @@ export default (() => {
     const uploadLocation = async (partyId: string, location: { map: string, XY: number[] }) => {
         const locationRef = ref(db, `/party/${partyId}/location`);
         await set(locationRef, location);
+    }
+
+    const uploadInCombat = async (partyId: string, isInCombat: boolean) => {
+        const reference = ref(db, `/party/${partyId}/inCombat`);
+        await set(reference, isInCombat);
     }
     
     return {

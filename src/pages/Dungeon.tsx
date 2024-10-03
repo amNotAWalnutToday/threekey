@@ -15,6 +15,7 @@ const { upload } = combatFns;
 export default function Dungeon() {
     const { character, enemies, setEnemies, setParty, party } = useContext(UserContext);
 
+    const [isHost, setIsHost] = useState(character.pid === party.players[0].pid); 
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
     const [minimap, setMinimap] = useState<TileSchema[]>([]);
     const [location, setLocation] = useState(character.location ?? {map: "1", XY: [1, 1]});
@@ -154,7 +155,8 @@ export default function Dungeon() {
         const start = getTile(newFloor.tiles, { type: 'upstairs' });
         if(!start) return;
         setFloor(() => newFloor);
-        uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: start.state.XY } });
+        if(!party.inCombat) await uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: start.state.XY } });
+        else if(party.inCombat && isHost) await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
         assignMinimap(newFloor.tiles, start.state.XY, facing);
     }
 
@@ -224,7 +226,10 @@ export default function Dungeon() {
             {
                 enemies.length &&
                 <button
-                    onClick={() => navigate('../combat')}
+                    onClick={async () => { 
+                        await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: true });
+                        navigate('../combat')
+                    }}
                 >
                     Enter Combat
                 </button>

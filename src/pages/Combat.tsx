@@ -1,4 +1,5 @@
 import { useState, useEffect, useReducer, useCallback, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import combatFns from '../utils/combatFns';
 import PlayerSchema from "../schemas/PlayerSchema";
 import FieldSchema from "../schemas/FieldSchema";
@@ -209,10 +210,12 @@ export default function Combat() {
     const { character, party } = useContext(UserContext);
     const enemyIds = useContext(UserContext).enemies;
     const setEnemyIds = useContext(UserContext).setEnemies;
+    const navigate = useNavigate();
 
     const [currentTime, setCurrentTime] = useState(0);
     const [loading, setLoading] = useState(true);
     const [inProgress, setInProgress] = useState(false);
+    const [isWon, setIsWon] = useState(false);
     const [actionValue, setActionValue] = useState(0);
 
     /**GAME DATA*/
@@ -342,6 +345,7 @@ export default function Combat() {
         for(const p of side2) if(p.dead) count[1]++;
         if(count[0] >= side1.length || count[1] >= side2.length) {
             setInProgress(() => false);
+            setIsWon(() => true);
         }        
     }, [players, enemies]);
 
@@ -556,7 +560,7 @@ export default function Combat() {
     }, [players, enemies, field.id]);
     
     useEffect(() => {
-        if(field.start) {
+        if(field.start && !isWon) {
             setInProgress(() => true);
         }
     }, [field.start]);
@@ -624,6 +628,19 @@ export default function Combat() {
                     <div style={{width: getTime()}} className="fill">{actionValue}AV</div>
                 </div>
             </div>
+            {
+                isWon 
+                &&
+                <div style={{transform: "translateY(100px)"}} >
+                    <button 
+                        onClick={() => {
+                            navigate('../dungeon');
+                        }}
+                    >
+                        Return to Dungeon
+                    </button>
+                </div>
+            }
             {/* <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button> */}
             <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log({players, enemies})}>enemies</button>
             {/* <button style={{position: "absolute", zIndex: 5, transform: "translateY(100px)"}} onClick={() => spawnEnemy()}>spawn enemies</button> */}
