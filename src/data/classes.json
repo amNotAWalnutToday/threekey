@@ -39,6 +39,9 @@
     },
     "spiritualist": {
         "stats": {
+            "level": 1,
+            "xp": 0,
+            "rank": "",
             "combat": {
                 "shield": {
                     "max": 100,
@@ -49,16 +52,34 @@
                     "cur": 100
                 },
                 "resources": {
-                    "mana": 100
+                    "mana": {
+                        "max": 10,
+                        "cur": 10
+                    },
+                    "msp": {
+                        "max": 0,
+                        "cur": 0
+                    },
+                    "psp": {
+                        "max": 0,
+                        "cur": 0
+                    },
+                    "soul": {
+                        "max": 0,
+                        "cur": 0
+                    }
                 },
                 "attack": 5,
-                "defence": 0,
-                "speed": 10
+                "defence": 1,
+                "speed": 30
             }
         }
     },
     "technologist": {
         "stats": {
+            "level": 1,
+            "xp": 0,
+            "rank": "",
             "combat": {
                 "shield": {
                     "max": 100,
@@ -69,11 +90,26 @@
                     "cur": 100
                 },
                 "resources": {
-                    "mana": 100
+                    "mana": {
+                        "max": 10,
+                        "cur": 10
+                    },
+                    "msp": {
+                        "max": 0,
+                        "cur": 0
+                    },
+                    "psp": {
+                        "max": 0,
+                        "cur": 0
+                    },
+                    "soul": {
+                        "max": 0,
+                        "cur": 0
+                    }
                 },
                 "attack": 5,
-                "defence": 0,
-                "speed": 10
+                "defence": 1,
+                "speed": 30
             }
         }
     }

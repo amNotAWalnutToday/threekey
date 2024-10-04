@@ -21,6 +21,68 @@
     box-shadow: 0px 12px 32px var(--black);
 }
 
+.character_select {
+    margin: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.character_create {
+    display :flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.character_menu {
+    display: flex;
+    flex-direction: column;
+    min-width: 320px;
+    max-width: 320px;
+    margin-left: 2.5rem;
+    gap: 1rem;
+}
+
+.character_btn {
+    background-color: var(--black);
+    padding: 1.5rem 2.5rem;
+    border: var(--border_white_outset);
+    outline: var(--outline_white_inset);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+.menu_btn {
+    font-size: 20px;
+    text-shadow: 2.5px 2px 1px black;
+    padding: 0.5rem 1rem;
+    color: white;
+    border: var(--border_white_outset);
+    background-color: var(--silver);
+    border-radius: 3px;
+    text-align: center; 
+}
+
+.menu_btn.selected {
+    background-color: goldenrod;
+}
+
+.menu_input {
+    padding: 0.25rem;
+    background-color: var(--silver);
+    border: var(--border_white_outset);
+    border-radius: 3px;
+    outline-offset: 1px;
+    outline: var(--border_white_outset);
+    color: white;
+}
+
+.menu_title {
+    width: 100%;
+    text-align: center;
+    font-size: 32px;
+    text-shadow: 2.5px 2px 1px black;
+}
+
 .menu_link {
     padding: 0.5rem 1rem;
     color: white;
