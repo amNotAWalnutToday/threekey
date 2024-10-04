@@ -1,4 +1,4 @@
-import { ref, set, get, child, onValue } from "firebase/database";
+import { ref, set, get, child, onValue, remove } from "firebase/database";
 import accountFns from "./accountFns";
 import PlayerSchema from "../schemas/PlayerSchema";
 import PartySchema from "../schemas/PartySchema";
@@ -19,7 +19,9 @@ export default (() => {
                 for(const p in data) parties.push(data[p]);
                 for(const party of parties) {
                     for(const player of party.players) {
-                        if(player.pid === pid) setParty(party);
+                        if(player.pid === pid) { 
+                            await connectParty(party.players[0].pid, setParty);
+                        }
                     }
                 }
                 setParties(parties);
@@ -43,7 +45,7 @@ export default (() => {
                 host: 0,
             }
             await set(partyRef, party);
-            setParty(() => party);
+            await connectParty(party.players[0].pid, setParty);
         } catch(e) {
             console.error(e);
         }
@@ -91,6 +93,41 @@ export default (() => {
         } catch(e) {
             console.error(e);
             return {} as PartySchema;
+        }
+    }
+
+    const removePlayer = (players: PlayerSchema[], playerIndex: number) => {
+        const firstHalf = players.slice(0, playerIndex);
+        const lastHalf = players.slice(playerIndex + 1);
+        return firstHalf.concat(lastHalf);
+    }
+
+    const leaveParty = async (
+        partyId: string,
+        player: PlayerSchema,
+        setParty: React.Dispatch<React.SetStateAction<PartySchema>>,
+    ) => {
+        const partyRef = ref(db, `/party/${partyId}`);
+        await get(partyRef).then( async (snapshot) => {
+            const data = await snapshot.val();
+            const players = [...data.players];
+            const playerIndex = players.findIndex((e) => e.pid === player.pid);
+            const updatedPlayers = removePlayer(players, playerIndex);
+            await set(child(partyRef, `/players`), updatedPlayers);
+            setParty(() => ({} as PartySchema));
+        });
+    }
+
+    const destroyRoom = async (
+        partyId: string,
+        setParty: React.Dispatch<React.SetStateAction<PartySchema>>,
+    ) => {
+        try {
+            const partyRef = ref(db, `/party/${partyId}`);
+            await remove(partyRef);
+            setParty(() => ({} as PartySchema));
+        } catch(e) {
+            return console.error(e);
         }
     }
 
@@ -150,6 +187,8 @@ export default (() => {
     return {
         getParties,
         createParty,
+        destroyRoom,
+        leaveParty,
         joinParty,
         connectParty,
         uploadParty,

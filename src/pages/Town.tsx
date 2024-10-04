@@ -4,8 +4,9 @@ import UserContext from "../data/Context";
 import partyFns from "../utils/partyFns"
 import PlayerSchema from "../schemas/PlayerSchema";
 import PartySchema from "../schemas/PartySchema";
+import PartyMenu from "../components/PartyMenu";
 
-const { getParties, createParty, joinParty } = partyFns;
+const { getParties, createParty, joinParty, leaveParty, destroyRoom } = partyFns;
 
 export default function Town() {
     const { character, party, setParty } = useContext(UserContext);
@@ -40,22 +41,39 @@ export default function Town() {
     
     return (
         <div>
-            <button
-                onClick={() => createParty(character, setParty)}
-            >
-                Create Party
-            </button>
+            {party.players
+            &&
+            <PartyMenu
+            
+            />
+            }
             {!party.players ? 
+            <div>
+                <button
+                    className="menu_btn"
+                    onClick={() => createParty(character, setParty)}
+                >
+                    Create Party
+                </button>
+                <button
+                    className="menu_btn"
+                    onClick={() => {
+                            if(!isPartyMenuOpen) getParties(character.pid, setParties, setParty);
+                            setIsPartyMenuOpen(() => !isPartyMenuOpen)
+                        }}
+                >
+                    Join Party
+                </button>
+            </div>
+            :
             <button
-                onClick={() => {
-                    if(!isPartyMenuOpen) getParties(character.pid, setParties, setParty);
-                    setIsPartyMenuOpen(() => !isPartyMenuOpen)
+                className="menu_btn"
+                onClick={() => { 
+                    const isHost = party.players[0].pid === character.pid
+                    if(isHost) return destroyRoom(party.players[0].pid, setParty);
+                    else return leaveParty(party.players[0].pid, character, setParty);
                 }}
             >
-                Join Party
-            </button>
-            :
-            <button>
                 Leave Party
             </button>
             }
