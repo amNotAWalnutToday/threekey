@@ -66,6 +66,11 @@
     background-color: goldenrod;
 }
 
+.menu_btn:disabled {
+    filter: brightness(50%);
+    cursor: not-allowed;
+}
+
 .menu_input {
     padding: 0.25rem;
     background-color: var(--silver);
@@ -113,6 +118,28 @@
 
 .party_menu_player {
 
+}
+
+.inventory {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    z-index: 5;
+}
+
+.inventory_items {
+    display: grid;
+    grid-template-columns: repeat(5, 64px);
+    grid-template-rows: repeat(auto-fit, 64px);
+    gap: 1rem;
+}
+
+.inventory_item {
+    border: var(--border_white_outset);
+}
+
+.inventory_item.selected {
+    border: var(--border_gold_outset);
 }
 
 button:hover {

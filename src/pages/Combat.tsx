@@ -210,7 +210,7 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
 }
 
 export default function Combat() {
-    const { character, party } = useContext(UserContext);
+    const { character, party, setCharacter } = useContext(UserContext);
     const enemyIds = useContext(UserContext).enemies;
     const setEnemyIds = useContext(UserContext).setEnemies;
     const navigate = useNavigate();
@@ -238,6 +238,7 @@ export default function Combat() {
     const [selectedPlayer, setSelectedPlayer] = useState<{state: PlayerSchema, index: number} | null>({ state: players[0], index: 0 });
     const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
     const [isHost, setIsHost] = useState(party.players[0].pid === character.pid);
+    const characterIndex = getPlayer(party.players, character.pid).index;
 
     const initialize = (
         players: PlayerSchema[], 
@@ -257,6 +258,7 @@ export default function Combat() {
 
     useEffect(() => {
         setField((prev) => Object.assign({}, prev, { players }));
+        setCharacter((prev) => Object.assign({}, prev, players[characterIndex]));
     }, [players]);
 
     useEffect(() => {

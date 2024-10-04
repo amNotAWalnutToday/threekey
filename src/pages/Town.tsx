@@ -1,17 +1,20 @@
 import { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import UserContext from "../data/Context";
 import partyFns from "../utils/partyFns"
 import PlayerSchema from "../schemas/PlayerSchema";
 import PartySchema from "../schemas/PartySchema";
 import PartyMenu from "../components/PartyMenu";
+import Inventory from "../components/inventory";
 
 const { getParties, createParty, joinParty, leaveParty, destroyRoom } = partyFns;
 
 export default function Town() {
     const { character, party, setParty } = useContext(UserContext);
+    const navigate = useNavigate();
 
     const [isPartyMenuOpen, setIsPartyMenuOpen] = useState(false);
+    const [isInventoryOpen, setIsInventoryOpen] = useState(false);
     const [parties, setParties] = useState<PartySchema[]>([]);
 
     const mapParties = () => {
@@ -80,7 +83,16 @@ export default function Town() {
             <div>
                 { isPartyMenuOpen ? mapParties() : null }
             </div>
-            <Link to={'../dungeon'}>Dungeon</Link>
+            <div>
+                <button 
+                    className="menu_btn"
+                    onClick={() => setIsInventoryOpen((prev) => !prev)}
+                >
+                    Inventory
+                </button>
+                <button className="menu_btn" onClick={() => navigate('../dungeon')} >Dungeon</button>
+            </div> 
+            { isInventoryOpen && <Inventory inventory={character.inventory} /> }
         </div>
     )
 }

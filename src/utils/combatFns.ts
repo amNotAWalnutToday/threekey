@@ -135,6 +135,45 @@ export default (() => {
         return updatedPlayer;
     }
 
+    const removeItem = (player: PlayerSchema, item: {id: string, amount: number}) => {
+        const updatedPlayer = {...player};
+        let shouldRemoveFullStack = false;
+        let itemIndex = -1;
+        for(let i = 0; i < updatedPlayer.inventory.length; i++) {
+            if(updatedPlayer.inventory[i].id === item.id) {
+                if(item.amount >= updatedPlayer.inventory[i].amount) { 
+                    shouldRemoveFullStack = true;
+                    itemIndex = i;
+                }
+                else updatedPlayer.inventory[i].amount -= item.amount;
+            }
+        }
+        if(shouldRemoveFullStack) {
+            updatedPlayer.inventory.splice(itemIndex, 1);
+        }
+        return player;
+    }
+
+    const applyItem = (
+        item: { id: string, amount: number }, 
+        payload: { 
+            player: PlayerSchema
+        },
+    ) => {
+        const { player } = payload;
+        let updatedPlayer = {...player};
+        switch(item.id) {
+            case "001":
+                if(!updatedPlayer) return updatedPlayer;
+                updatedPlayer.stats.combat.health.cur += 50;
+                updatedPlayer = assignMaxOrMinStat(updatedPlayer, [player], 0)[0];
+                break;
+        }
+
+        updatedPlayer = removeItem(updatedPlayer, item);
+        return updatedPlayer;
+    }
+
     const assignItem = (player: PlayerSchema, item: {id:string, amount:number}) => {
         const fullItem = populateItem(item);
         let inInventory = false;
@@ -501,6 +540,8 @@ export default (() => {
         getActionValue,
         getLoot,
         getXpReceived,
+        removeItem,
+        applyItem,
         assignXp,
         assignItem,
         assignMaxOrMinStat,
@@ -509,6 +550,7 @@ export default (() => {
         createEnemy,
         createAction,
         createStatus,
+        populateItem,
         initiateBattle,
         connectToBattle,
         upload,
