@@ -10,6 +10,7 @@ import PartyMenu from "../components/PartyMenu";
 import Inventory from "../components/Inventory";
 import TownSchema from "../schemas/TownSchema";
 import Inn from "./Inn";
+import CharacterProfile from "../components/CharacterProfile";
 
 const { 
     getParties, createParty, joinParty, leaveParty, destroyRoom, uploadParty,
@@ -23,16 +24,20 @@ export default function Town() {
     const navigate = useNavigate();
 
     const [town, setTown] = useState<TownSchema>({} as TownSchema);
+    const [otherCharacterBusy, setOtherCharacterBusy] = useState(false);
+    const [parties, setParties] = useState<PartySchema[]>([]);
+
+    // menu state
     const [isPartyMenuOpen, setIsPartyMenuOpen] = useState(false);
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
     const [isInnOpen, setIsInnOpen] = useState(false);
-    const [otherCharacterBusy, setOtherCharacterBusy] = useState(false);
-    const [parties, setParties] = useState<PartySchema[]>([]);
+    const [inspectCharacter, setInspectCharacter] = useState({} as PlayerSchema);
 
     const toggleOffMenus = (exception: string) => {
         if(exception !== "partyMenu") setIsPartyMenuOpen(() => false);
         if(exception !== "inventoryMenu") setIsInventoryOpen(() => false);
         if(exception !== "innMenu") setIsInnOpen(() => false);
+        if(exception !== "characterProfileMenu") setInspectCharacter(() => ({} as PlayerSchema));
     }
 
     const mapParties = () => {
@@ -144,6 +149,15 @@ export default function Town() {
                 </button>
                 <button 
                     className="menu_btn" 
+                    onClick={() => { 
+                        setInspectCharacter((prev) => prev.pid ? {} as PlayerSchema : {...character});
+                        toggleOffMenus("characterProfileMenu");
+                    }}
+                >
+                    Profile
+                </button>
+                <button 
+                    className="menu_btn" 
                     onClick={() => navigate('../dungeon')}
                     disabled={!party.players}
                 >
@@ -165,6 +179,12 @@ export default function Town() {
                 position="center"
                 buttons={["use", "destroy"]}
             /> 
+            }
+            { inspectCharacter.pid
+            &&
+            <CharacterProfile
+                character={inspectCharacter}
+            />
             }
         </div>
     )

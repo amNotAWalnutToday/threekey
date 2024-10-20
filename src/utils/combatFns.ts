@@ -563,6 +563,7 @@ export default (() => {
         getActionValue,
         getLoot,
         getXpReceived,
+        getLevelUpReq,
         getItem,
         removeItem,
         applyItem,

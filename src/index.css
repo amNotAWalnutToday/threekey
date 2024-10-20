@@ -112,6 +112,12 @@
   transition: width 0.5s ease-in-out;
 }
 
+.xp_fill {
+  background-color: rgba(0, 174, 255, 0.754);
+  height: 100%;
+  transition: width 0.5s ease-in-out;
+}
+
 .fill {
   background-color: rgba(0, 174, 255, 0.754);
   height: 100%;

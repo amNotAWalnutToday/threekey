@@ -112,6 +112,7 @@
     gap: 1rem;
 }
 
+.character_profile .emptyBar,
 .party_menu_bars .emptyBar {
     transform: translateY(0) !important
 }
@@ -157,6 +158,40 @@
     background-color: red;
 }
 
+.profile_status {
+    border: 1px solid white;
+    padding: 0.25rem 0.5rem;
+    min-height: 160px;
+    max-height: 160px;
+    overflow-y: scroll;
+}
+
+.profile_menu_bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.profile_w_bar {
+    display: inline-flex;
+    gap: 1rem;
+    padding: 0.25rem 1rem 0.25rem 0;
+    justify-content: flex-end;
+    align-items: baseline;
+}
+
+.border_red {
+    border: 1px solid red;
+}
+
+.border_aqua {
+    border: 1px solid aqua;
+}
+
+.border_blue {
+    border: 1px solid blue;
+}
+
 .bottom_abs {
     position: absolute;
     bottom: 50px;
@@ -175,6 +210,10 @@
 .right_abs_hor {
     transform: translateX(-75%);
     left: 75%;
+}
+
+.small_title_font {
+    font-size: 16px;
 }
 
 button:hover {
