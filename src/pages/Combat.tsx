@@ -210,7 +210,7 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
 }
 
 export default function Combat() {
-    const { character, party, setCharacter } = useContext(UserContext);
+    const { character, party, setCharacter, user } = useContext(UserContext);
     const enemyIds = useContext(UserContext).enemies;
     const setEnemyIds = useContext(UserContext).setEnemies;
     const navigate = useNavigate();
@@ -572,6 +572,7 @@ export default function Combat() {
     }, [field.start]);
 
     const functionForBelowMe = async () => {
+        if(!user?.uid) return navigate('/');
         if(isHost && loading) {
             const newField = await initiateBattle([...players, character], enemyIds);
             setField((field) => Object.assign({}, field, { ...newField }));

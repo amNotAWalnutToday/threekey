@@ -34,7 +34,7 @@ export default function CharacterCreateMenu() {
     }
 
     const createClass = () => {
-        if(!user || selectedClass.length) return;
+        if(!user || !selectedClass.length) return;
         const role = getClass(selectedClass);
         if(!role) return;
         const player = createPlayer(playerName, user.uid, selectedClass, role.stats, [], { map: "-1", XY: [1, 1] }, []);

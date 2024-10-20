@@ -8,8 +8,10 @@ const { db } = accountFns;
 export default (() => {
     const getParties = async (
         pid: string,
+        name: string,
         setParties: React.Dispatch<React.SetStateAction<PartySchema[]>>,
         setParty: React.Dispatch<React.SetStateAction<PartySchema>>,
+        setOtherCharacterBusy: React.Dispatch<React.SetStateAction<boolean>>,
     ) => {
         try {
             const partyRef = ref(db, `/party/`);
@@ -19,8 +21,10 @@ export default (() => {
                 for(const p in data) parties.push(data[p]);
                 for(const party of parties) {
                     for(const player of party.players) {
-                        if(player.pid === pid) { 
+                        if(player.pid === pid && player.name === name) { 
                             await connectParty(party.players[0].pid, setParty);
+                        } else if(player.pid === pid && player.name !== name) {
+                            setOtherCharacterBusy(() => true);
                         }
                     }
                 }

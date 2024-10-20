@@ -14,7 +14,7 @@ const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy } = dun
 const { upload } = combatFns;
 
 export default function Dungeon() {
-    const { character, enemies, setEnemies, setParty, party } = useContext(UserContext);
+    const { character, enemies, setEnemies, setParty, party, user } = useContext(UserContext);
 
     const [isHost, setIsHost] = useState(character.pid === party.players[0].pid); 
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
@@ -165,6 +165,7 @@ export default function Dungeon() {
     }
 
     useEffect(() => {
+        if(!user?.uid) return navigate('/');
         initializeDungeon();
     }, []);
 

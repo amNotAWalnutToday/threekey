@@ -122,9 +122,11 @@
 
 .inventory {
     position: absolute;
-    top: 50px;
-    left: 50px;
+    top: 30%;
+    transform: translateY(-30%);
     z-index: 5;
+    min-height: 400px;
+    max-height: 400px;
 }
 
 .inventory_items {
@@ -140,6 +142,39 @@
 
 .inventory_item.selected {
     border: var(--border_gold_outset);
+}
+
+.inventory_btn_bar {
+    display: flex;
+    width: 80%;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.inn {
+    display: flex;
+    background-color: red;
+}
+
+.bottom_abs {
+    position: absolute;
+    bottom: 50px;
+}
+
+.center_abs_hor {
+    transform: translateX(-50%);
+    left: 50%;
+}
+
+.left_abs_hor {
+    transform: translateX(-25%);
+    left: 25%;
+}
+
+.right_abs_hor {
+    transform: translateX(-75%);
+    left: 75%;
 }
 
 button:hover {

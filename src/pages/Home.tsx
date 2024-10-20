@@ -1,9 +1,11 @@
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useContext, useState } from "react"
 import UserContext from "../data/Context"
 import testdata from '../data/testdata.json';
 import accountFns from "../utils/accountFns";
+import townFns from "../utils/townFns";
 
+const { createTown } = townFns;
 const { createAccountAnon } = accountFns;
 
 export default function Home() {
@@ -54,6 +56,9 @@ export default function Home() {
                     }}
                 >
                     Select Werly
+                </button>
+                <button className="menu_btn" onClick={() => createTown()}>
+                    create town
                 </button>
             </div>
         </div>

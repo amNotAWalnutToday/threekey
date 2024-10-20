@@ -108,6 +108,16 @@ export default (() => {
         return loot;
     }
 
+    const getItem = (inventory: {id: string, amount: number}[], item: {id: string, amount: number}) => {
+        for(let i = 0; i < inventory.length; i++) {
+            if(item.id === inventory[i].id) return {state: inventory[i], index: i};
+        }
+        for(let i = 0; i < itemData.length; i++) {
+            if(item.id === itemData[i].id) return {state: { id: itemData[i].id, amount: 0 }, index: -1};
+        }
+        return {state: inventory[0], index: -1};
+    }
+
     const assignXp = (player: PlayerSchema, xp: number) => {
         player.stats.xp += xp;
         const levelReq = getLevelUpReq(player.stats.level, player.stats.rank);
@@ -165,7 +175,7 @@ export default (() => {
         switch(item.id) {
             case "001":
                 if(!updatedPlayer) return updatedPlayer;
-                updatedPlayer.stats.combat.health.cur += 50;
+                updatedPlayer.stats.combat.health.cur += 50 * item.amount;
                 updatedPlayer = assignMaxOrMinStat(updatedPlayer, [player], 0)[0];
                 break;
         }
@@ -174,11 +184,24 @@ export default (() => {
         return updatedPlayer;
     }
 
+    const assignHeal = (player: PlayerSchema, amount: number, isHeal: boolean) => {
+        const updatedPlayer = {...player};
+        const updatedHealth = isHeal ? amount : amount * -1
+        updatedPlayer.stats.combat.health.cur += updatedHealth;
+        return assignMaxOrMinStat(player, [player], 0)[0];
+    }
+
+    const assignResource = (player: PlayerSchema, amount: number) => {
+        const updatedPlayer = {...player};
+        updatedPlayer.stats.combat.resources.mana.cur += amount;
+        return assignMaxOrMinStat(player, [player], 0)[0];
+    }
+
     const assignItem = (player: PlayerSchema, item: {id:string, amount:number}) => {
         const fullItem = populateItem(item);
         let inInventory = false;
         for(let i = 0; i < player.inventory.length; i++) {
-            if(!fullItem) return;
+            if(!fullItem) return player;
             if(player.inventory[i].id === item.id) {
                 const stackedAmount = player.inventory[i].amount + item.amount;
                 if(stackedAmount >= fullItem.stack) player.inventory[i].amount = fullItem.stack;
@@ -540,8 +563,11 @@ export default (() => {
         getActionValue,
         getLoot,
         getXpReceived,
+        getItem,
         removeItem,
         applyItem,
+        assignHeal,
+        assignResource,
         assignXp,
         assignItem,
         assignMaxOrMinStat,
