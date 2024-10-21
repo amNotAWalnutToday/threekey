@@ -152,7 +152,7 @@ export default function Tree({town, uploadCharacter}: Props) {
                     }
                     <div
                         className={`box ${building.name === selectedSkill.name ? 'selected' : ''}`}
-                        onClick={() => setSelectedSkill({name: building.name, level: building.level, requirements: building.requirements, id: building.id ?? ''})}
+                        onClick={() => setSelectedSkill({name: building.name, level: building.level, requirements: building.requirements, id: building.id ?? '', pre: building.pre})}
                     >
                         <p>{building.name}</p>
                         <p>{building.level}</p>
@@ -210,6 +210,9 @@ export default function Tree({town, uploadCharacter}: Props) {
     const levelUpAbility = () => {
         if(checkRequirements()) return;
         const ability = getAbilityRef(character, selectedSkill?.id ?? '');
+        const preAbility = getAbilityRef(character, selectedSkill?.pre ?? '');
+        if(preAbility.index >= 0 && preAbility.state.level <= ability.state.level) return;
+        console.log('a');
         ability.state.level++;
         if(ability.index < 0) return;
         let updatedCharacter = {...character};
