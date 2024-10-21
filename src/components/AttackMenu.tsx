@@ -4,7 +4,7 @@ import AbilitySchema from "../schemas/AbilitySchema";
 import abilityData from '../data/abilities.json';
 import combatFns from "../utils/combatFns";
 
-const { getAbility } = combatFns;
+const { getAbility, getAbilityRef } = combatFns;
 
 type Props = {
     selectedPlayer: { state: PlayerSchema, index: number } | null
@@ -62,6 +62,8 @@ export default function AttackMenu(
         if(!abilities.length) return;
         if(!selectedPlayer) return;
         return abilities.map((ability, ind) => {
+            const abilityRef = getAbilityRef(selectedPlayer.state, ability.id);
+            if(!abilityRef.state.level) return;
             return (
                 <button 
                     key={`ability-${ind}`}

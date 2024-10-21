@@ -5,12 +5,22 @@
             "name": "seed shot",
             "type": "single",
             "damageType": "damage",
-            "damage": 5,
+            "damage": 40,
             "cost": {
                 "health": 5
             },
             "av": 1,
-            "users": ["naturalist"]
+            "users": ["naturalist"],
+            "unlocks": {
+                "max": 5,
+                "req": [
+                    {"id": "001", "amount": 1}, 
+                    {"id": "002", "amount": 1}, 
+                    {"id": "003", "amount": 1}, 
+                    {"id": "004", "amount": 1}, 
+                    {"id": "005", "amount": 1}
+                ]
+            }
         },
         {
             "id": "P02",
@@ -22,7 +32,12 @@
                 "health": 10
             },
             "av": 1,
-            "users": ["naturalist"]
+            "users": ["naturalist"],
+            "unlocks": {
+                "max": 5,
+                "req": [{"id": "001", "amount": 5}],
+                "pre": "P01"
+            }
         },
         {
             "id": "P03",
@@ -34,7 +49,11 @@
                 "mana": 5
             },
             "av": 1,
-            "users": ["naturalist"]
+            "users": ["naturalist"],
+            "unlocks": {
+                "max": 5,
+                "req": [{"id": "001", "amount": 1}]
+            }
         },
         {
             "id": "P04",
@@ -46,7 +65,12 @@
                 "health": 25
             },
             "av": 1,
-            "users": ["naturalist"]
+            "users": ["naturalist"],
+            "unlocks": {
+                "max": 5,
+                "req": [{"id": "001", "amount": 5}],
+                "pre": "P03"
+            }
         },
         {
             "id": "P05",
@@ -58,7 +82,11 @@
                 "mana": 2
             },
             "av": 1,
-            "users": ["naturalist"]
+            "users": ["naturalist"],
+            "unlocks": {
+                "max": 5,
+                "req": [{"id": "001", "amount": 1}]
+            }
         },
         {
             "id": "I01",
@@ -70,7 +98,11 @@
                 "mana": 2
             },
             "av": 1,
-            "users": ["naturalist"]
+            "users": ["naturalist"],
+            "unlocks": {
+                "max": 5,
+                "req": [{"id": "001", "amount": 5}]
+            }
         },
         {
             "id": "I02",
@@ -82,7 +114,12 @@
                 "mana": 2
             },
             "av": 1,
-            "users": ["naturalist"]
+            "users": ["naturalist"],
+            "unlocks": {
+                "max": 5,
+                "req": [{"id": "001", "amount": 5}],
+                "pre": "I01"
+            }
         },
         {
             "id": "I03",
@@ -94,7 +131,11 @@
                 "mana": 5
             },
             "av": 1,
-            "users": ["naturalist"]
+            "users": ["naturalist"],
+            "unlocks": {
+                "max": 5,
+                "req": [{"id": "001", "amount": 5}]
+            }
         }
     ]
 }

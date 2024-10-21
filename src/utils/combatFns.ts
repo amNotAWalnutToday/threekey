@@ -47,6 +47,17 @@ export default (() => {
             if(id === ability.id || id === ability.name) return ability;
         }
     }
+
+    const getAbilityRef = (character: PlayerSchema, id: string) => {
+        const ability = { state: {level: 0, id: ""}, index: -1 };
+        for(let i = 0; i < character.abilities.length; i++) {
+            if(character.abilities[i].id === id) {
+                ability.state = character.abilities[i]
+                ability.index = i;
+            }
+        }
+        return ability;
+    }
     
     const getAbilityCosts = (abilityId: string) => {
         const ability = getAbility(abilityId);
@@ -55,6 +66,12 @@ export default (() => {
         const usedResources = [];
         for(const cost in ability.cost) usedResources.push(cost);
         return usedResources;
+    }
+
+    const getAbilityLevelEffect = (ability: AbilitySchema, abilityLevel: number) => {
+        const updatedAbility = {...ability};
+        updatedAbility.damage += (abilityLevel * 3);
+        return updatedAbility;
     }
 
     const getStatus = (statuses: StatusSchema[], name: string) => {
@@ -264,10 +281,10 @@ export default (() => {
         name: string, pid: string, playerClass: string, 
         combatStats: typeof classData.naturalist.stats, 
         status: StatusSchema[], location: { map: string, XY: number[] },
-        inventory: { id: string, amount: number }[]
+        inventory: { id: string, amount: number }[], abilityRefs: {id: string, level: number}[],
     ) => {
         const stats = combatStats ? combatStats : classData.naturalist.stats;
-        const abilities = assignAbilities(playerClass);
+        const abilities = abilityRefs ?? assignAbilities(playerClass);
         const player: PlayerSchema = {
             name,
             role: playerClass,
@@ -417,7 +434,7 @@ export default (() => {
 
     const populatePlayers = (players: PlayerSchema[]) => {
         return Array.from(players, (player: PlayerSchema) => {
-            return createPlayer(player.name, player.pid, 'naturalist', player.stats, player.status, player.location, player.inventory);
+            return createPlayer(player.name, player.pid, 'naturalist', player.stats, player.status, player.location, player.inventory, player.abilities);
         });
     }
 
@@ -558,7 +575,9 @@ export default (() => {
         getPlayer,
         getTargets,
         getAbility,
+        getAbilityRef,
         getAbilityCosts,
+        getAbilityLevelEffect,
         getStatus,
         getActionValue,
         getLoot,

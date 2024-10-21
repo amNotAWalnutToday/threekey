@@ -1,12 +1,13 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import UserContext from "../data/Context";
 import TownSchema from "../schemas/TownSchema";
 import townFns from "../utils/townFns";
 import combatFns from "../utils/combatFns";
 import Item from "./Item";
 import PlayerSchema from "../schemas/PlayerSchema";
+import AbilitySchema from "../schemas/AbilitySchema";
 
-const { populateItem, removeItem, getItem } = combatFns;
+const { populateItem, removeItem, getItem, getAbility, getAbilityRef } = combatFns;
 const { assignBuildingLevel } = townFns
 
 type Props = {
@@ -19,6 +20,7 @@ interface Category {
     level: number,
     requirements: {id: string, amount: number}[],
     pre?: string,
+    id?: string,
 }
 
 export default function Tree({town, uploadCharacter}: Props) {
@@ -26,6 +28,11 @@ export default function Tree({town, uploadCharacter}: Props) {
     const [categories, setCategories] = useState<Category[][]>([]);
     const [selectedSkill, setSelectedSkill] = useState({} as Category);
     const [selectedTab, setSelectedTab] = useState("");
+
+    const selectTab = (tab: string) => {
+        setSelectedTab(() => tab);
+        setSelectedSkill(() => ({} as Category));
+    }
 
     const sortItems = (items: Category[]): Category[] => {
         const sorted: Category[] = [];
@@ -35,7 +42,12 @@ export default function Tree({town, uploadCharacter}: Props) {
             if (!visited[item.name]) {
                 visited[item.name] = true;
                 if (item.pre) {
-                    const dependency = items.find(i => i.name === item.pre);
+                    const dependency = items.find(i => { 
+                        let isHere = false;
+                        if(i.name === item.pre) isHere = true;
+                        if(i?.id === item.pre) isHere = true;
+                        return isHere;
+                    });
                     if (dependency) {
                         visit(dependency);
                     }
@@ -47,19 +59,20 @@ export default function Tree({town, uploadCharacter}: Props) {
         return sorted;
     }
 
-    const groupItems = (sortedItems: Category[]): Category[][] => {
+    const groupItems = (sortedItems: Category[], byId?: boolean): Category[][] => {
         const categories: Category[][] = [];
         const itemToCategory: { [key: string]: number } = {};
         
         sortedItems.forEach(item => {
+            const itemToCategoryIndex = !byId ? item.name : item?.id ?? ""; 
             if (item.pre && itemToCategory[item.pre] !== undefined) {
                 const categoryIndex = itemToCategory[item.pre];
                 categories[categoryIndex].push(item);
-                itemToCategory[item.name] = categoryIndex;
+                itemToCategory[itemToCategoryIndex] = categoryIndex;
             } else {
                 const newCategoryIndex = categories.length;
                 categories.push([item]);
-                itemToCategory[item.name] = newCategoryIndex;
+                itemToCategory[itemToCategoryIndex] = newCategoryIndex;
             }
         });
         
@@ -72,8 +85,8 @@ export default function Tree({town, uploadCharacter}: Props) {
         Object.entries(town).forEach(([key, value]) => {
             const pre = key === "storage" ? "inn" : undefined;
             const itemIds = ["002", "003", "004", "005", "006"];
-            const id = itemIds[value.level];
-            const requirements = [{id, amount: 5}];
+            const id = itemIds[value.level] ?? "";
+            const requirements = id.length ? [{id, amount: 5}] : [];
             const building = { level: value.level, name: key, pre, requirements };
             levelsArray.push(building);
         });
@@ -86,7 +99,27 @@ export default function Tree({town, uploadCharacter}: Props) {
     }
 
     const assignAbilityCategories = () => {
-        setCategories(() => []);
+        const abilities = Array.from(character.abilities, (ref) => {
+            const ability = getAbility(ref.id) ?? {} as AbilitySchema;
+            const itemIds = ability.unlocks?.req;
+            const idIndex = Math.floor(ref.level / 10);
+            const safeIndex = Math.min(idIndex, itemIds.length - 1);
+            const id = itemIds[safeIndex].id;
+            const requirements = [{id, amount: Math.max(ref.level % 10, 1)}];
+            if(requirements[0].amount < 0) requirements[0].amount = 1; 
+            const category: Category = { 
+                level: ref.level,
+                name: ability?.name ?? "",
+                requirements: requirements ?? [],
+                pre: ability?.unlocks.pre,
+                id: ability?.id,
+            };
+            return category;
+        });
+        const sortedItems = sortItems(abilities);
+        const grouped = groupItems(sortedItems, true);
+
+        setCategories(() => grouped);
     }
 
     const assignExplorationCategories = () => {
@@ -119,7 +152,7 @@ export default function Tree({town, uploadCharacter}: Props) {
                     }
                     <div
                         className={`box ${building.name === selectedSkill.name ? 'selected' : ''}`}
-                        onClick={() => setSelectedSkill({name: building.name, level: building.level, requirements: building.requirements})}
+                        onClick={() => setSelectedSkill({name: building.name, level: building.level, requirements: building.requirements, id: building.id ?? ''})}
                     >
                         <p>{building.name}</p>
                         <p>{building.level}</p>
@@ -135,7 +168,7 @@ export default function Tree({town, uploadCharacter}: Props) {
             const fullItem = populateItem(req);
             const fromInventory = getItem(character.inventory, req).state;
             if(!fullItem) return;
-            return (
+            return req.id.length ? (
                 <Item 
                     key={`req-${index}`}
                     item={fullItem}
@@ -143,6 +176,12 @@ export default function Tree({town, uploadCharacter}: Props) {
                     requiredAmount={req.amount}
                     selected={false}
                 />
+            ) : (
+                <p
+                    key={`req-${index}`}
+                >
+                    MAX!
+                </p>
             )
         });
     }
@@ -156,36 +195,75 @@ export default function Tree({town, uploadCharacter}: Props) {
         }
         return error;
     }
+
+    const levelUpBuilding = () => {
+        if(checkRequirements()) return;
+        const updatedBuilding = assignBuildingLevel(selectedSkill);
+        setSelectedSkill(updatedBuilding);
+        let updatedPlayer = {...character};
+        for(const req of selectedSkill.requirements) {
+            updatedPlayer = removeItem(updatedPlayer, req);
+        }
+        uploadCharacter(updatedPlayer);
+    }
+
+    const levelUpAbility = () => {
+        if(checkRequirements()) return;
+        const ability = getAbilityRef(character, selectedSkill?.id ?? '');
+        ability.state.level++;
+        if(ability.index < 0) return;
+        let updatedCharacter = {...character};
+        updatedCharacter.abilities[ability.index] = ability.state;
+        for(const req of selectedSkill.requirements) {
+            updatedCharacter = removeItem(updatedCharacter, req);
+        }
+        uploadCharacter(updatedCharacter);
+    }
+
+    useEffect(() => {
+        if(selectedTab === "town") assignTownCategories();
+        /*eslint-disable-next-line*/
+    }, [town]);
+
+    useEffect(() => {
+        if(selectedTab === "ability") assignAbilityCategories();
+        /*eslint-disable-next-line*/
+    }, [character]);
     
     return (
         <div className="menu inventory tree_menu center_abs_hor" >
-            { mapTownTree() }
-            <hr />
+            <div className="skill_tree" >
+                { mapTownTree() }
+            </div>
             <div className="cen-flex" >
                 { mapRequirements() }
             </div>
+            {selectedSkill?.requirements?.length 
+            ?
             <button 
                     className="menu_btn" 
                     onClick={() => { 
-                        if(checkRequirements()) return;
-                        const updatedBuilding = assignBuildingLevel(selectedSkill);
-                        setSelectedSkill(updatedBuilding);
-                        let updatedPlayer = {...character};
-                        for(const req of selectedSkill.requirements) {
-                            updatedPlayer = removeItem(updatedPlayer, req);
+                        switch(selectedTab) {
+                            case "town":
+                                levelUpBuilding()
+                                break;
+                            case "ability":
+                                levelUpAbility()
+                                break;
                         }
-                        uploadCharacter(updatedPlayer);
                     }}
+                    disabled={checkRequirements()}
             >
                 Level Up
             </button>
+            : <p>MAX!</p>}
             <div className="tree_btn_bar" >
                 <button 
                     className="menu_btn" 
                     onClick={() => { 
                         //TBA
                         assignTownCategories();
-                        setSelectedTab(() => "town")
+                        selectTab("town")
                     }}
                     disabled={selectedTab === "town"}
                 >
@@ -196,7 +274,7 @@ export default function Tree({town, uploadCharacter}: Props) {
                     onClick={() => { 
                         //TBA
                         assignAbilityCategories();
-                        setSelectedTab(() => "ability")
+                        selectTab("ability")
                     }}
                     disabled={selectedTab === "ability"}
                 >
@@ -207,7 +285,7 @@ export default function Tree({town, uploadCharacter}: Props) {
                     onClick={() => { 
                         //TBA
                         assignExplorationCategories();
-                        setSelectedTab(() => "exploration")
+                        selectTab("exploration")
                     }}
                     disabled={selectedTab === "exploration"}
                 >

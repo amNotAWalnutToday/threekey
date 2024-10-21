@@ -22,7 +22,7 @@ const {
     getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
-    assignXp,
+    assignXp, getAbilityRef, getAbilityLevelEffect
 } = combatFns;
 const { db } = accountFns;
 const { uploadParty } = partyFns;
@@ -370,6 +370,9 @@ export default function Combat() {
         if(damageType === "status") {
             const { name, type, duration, amount, affects, refs } = getStatus([...statusData.all] as StatusSchema[], abilityId).state
             const status: StatusSchema = createStatus(name, type, amount, duration, affects, refs);
+            const user = getPlayer(players, userId);
+            const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
+            status.amount += abilityLevel
             dispatchEnemies({
                 type: PLAYERS_REDUCER_ACTIONS.add_status,
                 payload: { pid: targets[i], amount, damageType, status: { ...status }, fieldId: field.id }
@@ -389,6 +392,9 @@ export default function Combat() {
         if(damageType === "status") {
             const { name, type, duration, amount, affects, refs } = getStatus([...statusData.all] as StatusSchema[], abilityId).state
             const status: StatusSchema = createStatus(name, type, amount, duration, affects, refs);
+            const user = getPlayer(players, userId);
+            const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
+            status.amount += abilityLevel
             dispatchPlayers({
                 type: PLAYERS_REDUCER_ACTIONS.add_status,
                 payload: { pid: targets[i], amount, damageType, status, fieldId: field.id }
@@ -412,6 +418,9 @@ export default function Combat() {
         if(damageType === "status") {
             const { name, type, duration, amount, affects, refs } = getStatus([...statusData.all] as StatusSchema[], abilityId).state
             const status: StatusSchema = createStatus(name, type, amount, duration, affects, refs);
+            const user = getPlayer(enemies, userId);
+            const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
+            status.amount += abilityLevel
             dispatchPlayers({
                 type: PLAYERS_REDUCER_ACTIONS.add_status,
                 payload: { pid: targets[i], amount, damageType, status, fieldId: field.id }
@@ -431,6 +440,9 @@ export default function Combat() {
         if(damageType === "status") {
             const { name, type, duration, amount, affects, refs } = getStatus([...statusData.all] as StatusSchema[], abilityId).state
             const status: StatusSchema = createStatus(name, type, amount, duration, affects, refs);
+            const user = getPlayer(enemies, userId);
+            const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
+            status.amount += abilityLevel
             dispatchEnemies({
                 type: PLAYERS_REDUCER_ACTIONS.add_status,
                 payload: { pid: targets[i], amount, damageType, status: { ...status }, fieldId: field.id }
@@ -438,27 +450,29 @@ export default function Combat() {
         }
     }
 
-    const getDamageFormula = (user: PlayerSchema, target: PlayerSchema, abilityDamage: number) => {
+    const getDamageFormula = (user: PlayerSchema, target: PlayerSchema, abilityDamage: number, abilityLevel: number) => {
         let attack = user.stats.combat.attack;
         let defence = target.stats.combat.defence;
 
         attack = assignBuffs(user.status, 'attack', attack);
         defence = assignBuffs(target.status, 'defence', defence);
 
-        const damage = Math.floor(((attack / 4) * abilityDamage)) - defence;
+        const damage = Math.floor(((attack / 4) * (abilityDamage + (abilityLevel * 2)))) - defence;
         return damage > 0 ? damage : 1;
     }
 
     const attack = useCallback((userId: string, targets: string[], ability: AbilitySchema) => {
         const user = getPlayer([...players, ...enemies], userId).state;
+        const abilityRef = getAbilityRef(user, ability.id).state;
         const { damageType } = ability;
+
 
         targets.forEach((targetRef: string, i: number) => {
             const target = getPlayer([...players, ...enemies], targetRef);
             let amount = (
                 damageType === "heal"
-                    ? ability.damage
-                    : getDamageFormula(user, target.state, ability.damage)
+                    ? ability.damage + abilityRef.level
+                    : getDamageFormula(user, target.state, ability.damage, abilityRef.level)
             );
             if(damageType === "status" && ability.damage < 1) amount = 0;
 
@@ -636,7 +650,7 @@ export default function Combat() {
         <div>
             <AttackMenu 
                 {...props}
-                selectedPlayer={selectedPlayer}
+                selectedPlayer={{state: character, index: -1}}
                 target={target}
             />
             <PlayersContainer

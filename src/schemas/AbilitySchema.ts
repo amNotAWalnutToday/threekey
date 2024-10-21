@@ -1,3 +1,9 @@
+interface Requirements {
+    max: number,
+    req: {id: string, amount: number}[],
+    pre?: string,
+}
+
 interface AbilitySchema {
     id: string,
     type: string,
@@ -10,6 +16,7 @@ interface AbilitySchema {
     },
     av: number,
     users: string[],
+    unlocks: Requirements
 }
 
 export default AbilitySchema;

@@ -18,6 +18,7 @@ export default function Inn({town, applyRest}: Props) {
                 position="left"
                 buttons={town?.storage.level > 0 ? ["deposit"] : []}
                 storage={town.storage.inventory}
+                limit={10}
             />
             {town?.storage?.level > 0
             &&
@@ -25,6 +26,7 @@ export default function Inn({town, applyRest}: Props) {
                 inventory={town.storage.inventory}
                 position="right"
                 buttons={["withdraw"]}
+                limit={town.storage.level * 5}
             />
             }
             <button 

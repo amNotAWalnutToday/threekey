@@ -196,6 +196,7 @@ export default function Town() {
                 inventory={character.inventory} 
                 position="center"
                 buttons={["use", "destroy"]}
+                limit={10}
             /> 
             }
             { inspectCharacter.pid

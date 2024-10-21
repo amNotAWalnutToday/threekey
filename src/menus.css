@@ -126,6 +126,28 @@
     justify-content: space-between;
 }
 
+.skill_tree {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 270px;
+    min-height: 270px;
+    padding-top: 0.75rem;
+    padding-bottom: 1rem;
+    padding-left: 1rem;
+    overflow: scroll;
+}
+
+.skill_tree::-webkit-scrollbar {
+    background-color: #242424;
+    width: 0.25rem;
+    height: 0.25rem;
+}
+
+.skill_tree::-webkit-scrollbar-thumb {
+    background-color: goldenrod;
+}
+
 .inventory {
     position: absolute;
     top: 20%;
