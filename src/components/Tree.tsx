@@ -6,7 +6,7 @@ import combatFns from "../utils/combatFns";
 import Item from "./Item";
 import PlayerSchema from "../schemas/PlayerSchema";
 
-const { populateItem, removeItem } = combatFns;
+const { populateItem, removeItem, getItem } = combatFns;
 const { assignBuildingLevel } = townFns
 
 type Props = {
@@ -25,7 +25,7 @@ export default function Tree({town, uploadCharacter}: Props) {
     const { character } = useContext(UserContext);
     const [categories, setCategories] = useState<Category[][]>([]);
     const [selectedSkill, setSelectedSkill] = useState({} as Category);
-
+    const [selectedTab, setSelectedTab] = useState("");
 
     const sortItems = (items: Category[]): Category[] => {
         const sorted: Category[] = [];
@@ -66,21 +66,36 @@ export default function Tree({town, uploadCharacter}: Props) {
         return categories;
     }
 
-    const mapTownTree = () => {
-        if(!town) return;
+    const assignTownCategories = () => {
         const levelsArray: Category[] = [];
         
         Object.entries(town).forEach(([key, value]) => {
             const pre = key === "storage" ? "inn" : undefined;
-            const requirements = [{id: "002", amount: 5}];
+            const itemIds = ["002", "003", "004", "005", "006"];
+            const id = itemIds[value.level];
+            const requirements = [{id, amount: 5}];
             const building = { level: value.level, name: key, pre, requirements };
             levelsArray.push(building);
         });
         
         const sortedItems = sortItems(levelsArray);
         const grouped = groupItems(sortedItems);
+        
+        setCategories(() => grouped);
+        return grouped;
+    }
 
-        return grouped.map((category, gIndex) => {
+    const assignAbilityCategories = () => {
+        setCategories(() => []);
+    }
+
+    const assignExplorationCategories = () => {
+        setCategories(() => []);
+    }
+
+    const mapTownTree = () => {
+        if(!town) return;
+        return categories.map((category, gIndex) => {
             return (
                 <div
                     key={`group-${gIndex}`}
@@ -118,12 +133,14 @@ export default function Tree({town, uploadCharacter}: Props) {
         if(!selectedSkill.name) return;
         return selectedSkill.requirements.map((req, index) => {
             const fullItem = populateItem(req);
+            const fromInventory = getItem(character.inventory, req).state;
             if(!fullItem) return;
             return (
                 <Item 
                     key={`req-${index}`}
                     item={fullItem}
-                    amount={req.amount}
+                    amount={fromInventory?.amount ?? 0}
+                    requiredAmount={req.amount}
                     selected={false}
                 />
             )
@@ -143,7 +160,10 @@ export default function Tree({town, uploadCharacter}: Props) {
     return (
         <div className="menu inventory tree_menu center_abs_hor" >
             { mapTownTree() }
-            { mapRequirements() }
+            <hr />
+            <div className="cen-flex" >
+                { mapRequirements() }
+            </div>
             <button 
                     className="menu_btn" 
                     onClick={() => { 
@@ -159,6 +179,41 @@ export default function Tree({town, uploadCharacter}: Props) {
             >
                 Level Up
             </button>
+            <div className="tree_btn_bar" >
+                <button 
+                    className="menu_btn" 
+                    onClick={() => { 
+                        //TBA
+                        assignTownCategories();
+                        setSelectedTab(() => "town")
+                    }}
+                    disabled={selectedTab === "town"}
+                >
+                    Town
+                </button>
+                <button 
+                    className="menu_btn" 
+                    onClick={() => { 
+                        //TBA
+                        assignAbilityCategories();
+                        setSelectedTab(() => "ability")
+                    }}
+                    disabled={selectedTab === "ability"}
+                >
+                    Abilities
+                </button>
+                <button 
+                    className="menu_btn" 
+                    onClick={() => { 
+                        //TBA
+                        assignExplorationCategories();
+                        setSelectedTab(() => "exploration")
+                    }}
+                    disabled={selectedTab === "exploration"}
+                >
+                    Exploration
+                </button>
+            </div>
         </div>
     )
 }

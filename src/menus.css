@@ -123,6 +123,7 @@
 
 .tree_menu {
     width: 1000px;
+    justify-content: space-between;
 }
 
 .inventory {
@@ -190,6 +191,14 @@
     gap: 2rem;
 }
 
+.tree_btn_bar {
+    display: flex;
+}
+
+.tree_btn_bar button {
+    width: 100%;
+}
+
 .category_title {
     border-bottom: 1px solid white;
     transform: translateY(-20px);
@@ -201,16 +210,36 @@
     height: 64px;
 }
 
+.common {
+    background: var(--white-r-gradient);
+}
+
+.uncommon {
+    background: var(--green-r-gradient);
+}
+
+.rare {
+    background: var(--blue-r-gradient);
+}
+
+.epic {
+    background: var(--purple-r-gradient);
+}
+
+.legendary {
+    background: var(--orange-r-gradient);
+}
+
 .border_red {
-    border: 1px solid red;
+    border: 2px outset red;
 }
 
 .border_aqua {
-    border: 1px solid aqua;
+    border: 2px outset aqua;
 }
 
 .border_blue {
-    border: 1px solid blue;
+    border: 2px outset blue;
 }
 
 .bottom_abs {

@@ -19,5 +19,33 @@
         "rarity": "common",
         "price": 1000,
         "stack": 5
+    },
+    {
+        "id": "003",
+        "name": "Town Skill Scroll",
+        "rarity": "uncommon",
+        "price": 1000,
+        "stack": 5
+    },
+    {
+        "id": "004",
+        "name": "Town Skill Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 5
+    },
+    {
+        "id": "005",
+        "name": "Town Skill Scroll",
+        "rarity": "epic",
+        "price": 1000,
+        "stack": 5
+    },
+    {
+        "id": "006",
+        "name": "Town Skill Scroll",
+        "rarity": "legendary",
+        "price": 1000,
+        "stack": 5
     }
 ]

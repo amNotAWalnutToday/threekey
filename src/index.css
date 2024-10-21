@@ -18,6 +18,12 @@
   --golden_highlight: rgba(184, 142, 35, 0.9);
   --golden_fade: var(--orange);
   --brown: rgba(114, 87, 18, 0.9);
+
+  --white-r-gradient: radial-gradient(rgb(193, 193, 193), rgb(79, 79, 79));
+  --green-r-gradient: radial-gradient(lime, darkgreen);
+  --blue-r-gradient: radial-gradient(rgb(0, 114, 213), rgb(23, 23, 209));
+  --purple-r-gradient: radial-gradient(violet, purple);
+  --orange-r-gradient: radial-gradient(orange, rgb(168, 92, 0));
   
   --outline_gold_inset: 2px inset var(--golden);
   --border_gold_outset: 2px outset var(--gold);
@@ -45,6 +51,10 @@
   box-sizing: border-box;
   border: none;
   user-select: none;
+}
+
+hr {
+  border: 1px double white;
 }
 
 .sidemenu {
