@@ -16,14 +16,17 @@ export default function Inn({town, applyRest}: Props) {
             <Inventory  
                 inventory={character.inventory}
                 position="left"
-                buttons={["deposit"]}
+                buttons={town?.storage.level > 0 ? ["deposit"] : []}
                 storage={town.storage.inventory}
             />
+            {town?.storage?.level > 0
+            &&
             <Inventory  
                 inventory={town.storage.inventory}
                 position="right"
                 buttons={["withdraw"]}
             />
+            }
             <button 
                 className="menu_btn center_abs_hor" 
                 style={{bottom: "50px", position: "absolute"}}

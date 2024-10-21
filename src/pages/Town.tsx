@@ -10,6 +10,7 @@ import PartyMenu from "../components/PartyMenu";
 import Inventory from "../components/Inventory";
 import TownSchema from "../schemas/TownSchema";
 import Inn from "./Inn";
+import Tree from "../components/Tree";
 import CharacterProfile from "../components/CharacterProfile";
 
 const { 
@@ -31,13 +32,16 @@ export default function Town() {
     const [isPartyMenuOpen, setIsPartyMenuOpen] = useState(false);
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
     const [isInnOpen, setIsInnOpen] = useState(false);
+    const [isTreeOpen, setIsTreeOpen] = useState(false);
     const [inspectCharacter, setInspectCharacter] = useState({} as PlayerSchema);
+
 
     const toggleOffMenus = (exception: string) => {
         if(exception !== "partyMenu") setIsPartyMenuOpen(() => false);
         if(exception !== "inventoryMenu") setIsInventoryOpen(() => false);
         if(exception !== "innMenu") setIsInnOpen(() => false);
         if(exception !== "characterProfileMenu") setInspectCharacter(() => ({} as PlayerSchema));
+        if(exception !== "treeMenu") setIsTreeOpen(() => false);
     }
 
     const mapParties = () => {
@@ -55,10 +59,7 @@ export default function Town() {
         });
     }
 
-    const applyRest = () => {
-        let updatedCharacter = assignHeal(character, character.stats.combat.health.max, true);
-        updatedCharacter = assignResource(updatedCharacter, character.stats.combat.resources.mana.max);
-        updatedCharacter.status = [];
+    const uploadCharacterTown = (updatedCharacter: PlayerSchema) => {
         if(party.players) {
             const playerIndex = getPlayer(party.players, character.pid).index;
             const updatedParty = [...party.players];
@@ -67,6 +68,13 @@ export default function Town() {
         } 
         syncPartyMemberToAccount(updatedCharacter);
         setCharacter(() => updatedCharacter);
+    }
+
+    const applyRest = () => {
+        let updatedCharacter = assignHeal(character, character.stats.combat.health.max, true);
+        if(town.inn.level >= 2) updatedCharacter = assignResource(updatedCharacter, character.stats.combat.resources.mana.max);
+        if(town.inn.level >= 3) updatedCharacter.status = [];
+        uploadCharacterTown(updatedCharacter);
     }
 
     useEffect(() => {
@@ -144,6 +152,7 @@ export default function Town() {
                         setIsInnOpen((prev) => !prev);
                         toggleOffMenus("innMenu");
                     }}
+                    disabled={town?.inn?.level < 1}
                 >
                     Inn
                 </button>
@@ -155,6 +164,15 @@ export default function Town() {
                     }}
                 >
                     Profile
+                </button>
+                <button 
+                    className="menu_btn" 
+                    onClick={() => { 
+                        setIsTreeOpen((prev) => !prev);
+                        toggleOffMenus("treeMenu");
+                    }}
+                >
+                    Skills
                 </button>
                 <button 
                     className="menu_btn" 
@@ -186,6 +204,20 @@ export default function Town() {
                 character={inspectCharacter}
             />
             }
+            { isTreeOpen
+            &&
+            <Tree 
+                town={town}
+                uploadCharacter={uploadCharacterTown}
+            />
+            }
+            <button
+                onClick={() => {
+                    const updatedCharacter = {...character};
+                    updatedCharacter.stats.combat.resources.mana.cur = 100;
+                    uploadCharacterTown(updatedCharacter);
+                }}
+            >manad down</button>
         </div>
     )
 }

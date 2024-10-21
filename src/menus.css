@@ -121,13 +121,17 @@
 
 }
 
+.tree_menu {
+    width: 1000px;
+}
+
 .inventory {
     position: absolute;
-    top: 30%;
-    transform: translateY(-30%);
+    top: 20%;
+    transform: translateY(-20%);
     z-index: 5;
-    min-height: 400px;
-    max-height: 400px;
+    min-height: 500px;
+    max-height: 500px;
 }
 
 .inventory_items {
@@ -141,6 +145,7 @@
     border: var(--border_white_outset);
 }
 
+.box.selected,
 .inventory_item.selected {
     border: var(--border_gold_outset);
 }
@@ -178,6 +183,22 @@
     padding: 0.25rem 1rem 0.25rem 0;
     justify-content: flex-end;
     align-items: baseline;
+}
+
+.tree_group {
+    display : flex;
+    gap: 2rem;
+}
+
+.category_title {
+    border-bottom: 1px solid white;
+    transform: translateY(-20px);
+}
+
+.box {
+    border: 1px solid white;
+    width: 64px;
+    height: 64px;
 }
 
 .border_red {

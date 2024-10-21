@@ -4,6 +4,7 @@ import partyFns from "../utils/partyFns";
 import itemData from '../data/items.json';
 import UserContext from "../data/Context";
 import townFns from "../utils/townFns";
+import Item from "./Item";
 
 const { populateItem, applyItem, removeItem, getPlayer, assignItem, getItem } = combatFns;
 const { uploadParty, syncPartyMemberToAccount } = partyFns;
@@ -27,18 +28,19 @@ export default function Inventory({inventory, position, buttons, storage}: Props
         return inventory.map((item, index) => {
             const fullItem = populateItem(item);
             if(!fullItem) return;
+            function selectItem() {
+                if(!fullItem) return;
+                setSelectedAmount(() => 1);
+                setSelectedItem(() => ({state: fullItem, index}));
+            }
             return (
-                <div
-                    className={`inventory_item ${selectedItem?.state?.id === item.id && 'selected'}`}
-                    onClick={() => {
-                        setSelectedAmount(() => 1);
-                        setSelectedItem(() => ({state: fullItem, index}));
-                    }}
+                <Item 
                     key={`item-${index}`}
-                >
-                    <p>{fullItem?.name}</p>
-                    <p>{item.amount}</p>
-                </div>
+                    item={fullItem}
+                    amount={item.amount}
+                    selected={selectedItem?.state?.id === item.id}
+                    click={selectItem}
+                />
             )
         });
     }

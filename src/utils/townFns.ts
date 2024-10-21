@@ -5,6 +5,11 @@ import itemData from '../data/items.json';
 
 const { db } = accountFns;
 const template = {} as TownSchema;
+interface Building {
+    name: string,
+    level: number,
+    requirements: {id: string, amount: number}[],
+}
 
 export default (() => {
     const createTown = (
@@ -85,17 +90,29 @@ export default (() => {
         return inventory;
     }
 
+    const assignBuildingLevel = (building: Building, amount?: number) => {
+        const updatedBuilding = {...building};
+        updatedBuilding.level += amount ?? 1;
+        uploadTown("level", {building: updatedBuilding});
+        return updatedBuilding;
+    }
+
     const uploadTown = async (
         type: string, 
         payload: {
             storageInventory?: typeof template.storage.inventory,
+            building?: Building,
         }
     ) => {
-        const { storageInventory } = payload;
+        const { storageInventory, building } = payload;
         switch(type) {
             case "inventory":
                 if(!storageInventory) return console.error("No Storage Inventory");
                 uploadStorageInventory(storageInventory);
+                break;
+            case "level":
+                if(!building) return console.error("No building");
+                uploadLevels(building);
                 break;
         }
     }
@@ -104,12 +121,18 @@ export default (() => {
         const storageInventoryRef = ref(db, `/town/storage/inventory`);
         await set(storageInventoryRef, storageInventory ?? []);
     }
+
+    const uploadLevels = async (building: Building) => {
+        const buildingRef = ref(db, `/town/${building.name}/level`);
+        await set(buildingRef, building.level);
+    }
     
     return {
         createTown,
         connectTown,
         removeStoredItem,
         assignItemToStorage,
+        assignBuildingLevel,
         uploadTown,
     }
 })();
