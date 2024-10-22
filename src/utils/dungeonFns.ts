@@ -179,7 +179,7 @@ export default (() => {
             if(!tile) continue;
             if(tile.state.type.length) continue;
             const ran = Math.floor(Math.random() * 100);
-            const chosenBiome = ran > 1 ? getRandomBiome(floorNum + 10) : biome;
+            const chosenBiome = ran > 79 ? getRandomBiome(floorNum + 10) : biome;
             tiles[tile.index].type = chosenBiome;
         }
         return tiles;
@@ -234,7 +234,7 @@ export default (() => {
         return {
             tiles, 
             number: 0,
-            biome: ''
+            biome: chosenBiome,
         };
     }
 

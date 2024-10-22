@@ -8,6 +8,13 @@ import partyFns from '../utils/partyFns';
 import UserContext from '../data/Context';
 import enemydata from '../data/enemies.json';
 import PartySchema from '../schemas/PartySchema';
+import PlayerSchema from '../schemas/PlayerSchema';
+import Log from '../components/Log';
+import UIButtonBar from '../components/UIBtnBar';
+import PartyMenu from '../components/PartyMenu';
+import Inventory from '../components/Inventory';
+import CharacterProfile from '../components/CharacterProfile';
+import Tree from '../components/Tree';
 
 const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
 const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy } = dungeonFns;
@@ -15,6 +22,7 @@ const { upload } = combatFns;
 
 export default function Dungeon() {
     const { character, enemies, setEnemies, setParty, party, user } = useContext(UserContext);
+    const navigate = useNavigate();
 
     const [isHost, setIsHost] = useState(character.pid === party.players[0].pid); 
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
@@ -22,7 +30,25 @@ export default function Dungeon() {
     const [location, setLocation] = useState(character.location ?? {map: "1", XY: [1, 1]});
     const [facing, setFacing] = useState('north');
 
-    const navigate = useNavigate();
+    const [gameLog, setGameLog] = useState<string[]>([]);
+
+    const logMessage = (message: string) => {
+        const updatedGamelog = [...gameLog];
+        updatedGamelog.push(message);
+        if(updatedGamelog.length > 101) updatedGamelog.shift();
+        setGameLog(() => updatedGamelog);
+    }
+
+    /**MENU STATE*/
+    const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+    const [isTreeOpen, setIsTreeOpen] = useState(false);
+    const [inspectCharacter, setInspectCharacter] = useState({} as PlayerSchema);
+
+    const toggleOffMenus = (exception: string) => {
+        if(exception !== "inventoryMenu") setIsInventoryOpen(() => false);
+        if(exception !== "characterProfileMenu") setInspectCharacter(() => ({} as PlayerSchema));
+        if(exception !== "treeMenu") setIsTreeOpen(() => false);
+    }
     
     const mapFloor = () => {
         return floor?.tiles?.map((tile, index) => {
@@ -188,31 +214,69 @@ export default function Dungeon() {
 
     return (
         <div>
-            <div className="grid">{ mapFloor() }</div>
-            <p>Location: [{location.XY[0]},{location.XY[1]}]</p>
-            <p>Facing: {facing}</p>
-            <button
-                onClick={() => turn('left')}
-            >
-                turn left
-            </button>
-            <button
-                onClick={() => move(getDirection())}
-            >
-                move forward
-            </button>
-            <button
-                onClick={() => turn('right')}
-            >
-                turn right
-            </button>
-            <div className="minimap">{ mapMinimap() }</div>
+            {/* <div className="grid">{ mapFloor() }</div> */}
+            <div className="dungeon_info" >
+                <p>Floor: {floor.number}</p>
+                <p>Biome: {floor.biome}</p>
+                <p>Location: [ {location.XY[0]} , {location.XY[1]} ]</p>
+                <p>Facing: {facing}</p>
+                <p>Size: {floor.tiles.length / 10}x{floor.tiles.length / 10}</p>
+            </div>
+            <div className="minimap_group">
+                <div className='btn_group'>
+                    <button
+                        className='menu_btn'
+                        onClick={() => console.log()}
+                    >
+                        inspect
+                    </button>
+                    <button
+                        className='menu_btn'
+                        onClick={() => console.log()}
+                    >
+                        use
+                    </button>
+                    <button
+                        className='menu_btn'
+                        onClick={() => console.log()}
+                    >
+                        disarm
+                    </button>
+                    <button
+                        className='menu_btn'
+                        onClick={() => console.log()}
+                    >
+                        event
+                    </button>
+                </div>
+                <div className="minimap">{ mapMinimap() }</div>
+                <div className="btn_group">
+                    <button
+                        className='menu_btn'
+                        onClick={() => turn('left')}
+                    >
+                        turn left
+                    </button>
+                    <button
+                        className='menu_btn'
+                        onClick={() => move(getDirection())}
+                    >
+                        move forward
+                    </button>
+                    <button
+                        className='menu_btn'
+                        onClick={() => turn('right')}
+                    >
+                        turn right
+                    </button>
+                </div>
+            </div>
             {
                 floor.tiles &&
                 getTile(floor.tiles, { XY: location.XY })?.state.type === 'upstairs'
                 &&
                 <button
-                onClick={leaveFloor}
+                    onClick={leaveFloor}
                 >
                     Go Up
                 </button>
@@ -237,13 +301,41 @@ export default function Dungeon() {
                 >
                     Enter Combat
                 </button>
-            }   
-            
-            <button
-                    onClick={() => console.log(enemies)}
-                >
-                    check enemies
-                </button>
+            }
+            <Log 
+                messages={[]}
+            />
+            <UIButtonBar 
+                showInventory={() => {
+                    setIsInventoryOpen((prev) => !prev);
+                    toggleOffMenus("inventoryMenu");
+                }}
+                showProfile={() => {
+                    setInspectCharacter((prev) => prev.pid ? {} as PlayerSchema : {...character});
+                    toggleOffMenus("characterProfileMenu");
+                }}
+                showTree={() => {
+                    setIsTreeOpen((prev) => !prev);
+                    toggleOffMenus("treeMenu");
+                }}
+            />
+            { isInventoryOpen 
+            && 
+            <Inventory 
+                inventory={character.inventory} 
+                position="center"
+                buttons={["use", "destroy"]}
+                limit={10}
+                logMessage={logMessage}
+            /> 
+            }
+            { inspectCharacter.pid
+            &&
+            <CharacterProfile
+                character={inspectCharacter}
+            />
+            }
+            <PartyMenu />
         </div>
     )
 }

@@ -13,6 +13,7 @@ import Inn from "./Inn";
 import Tree from "../components/Tree";
 import CharacterProfile from "../components/CharacterProfile";
 import Log from "../components/Log";
+import UIButtonBar from "../components/UIBtnBar";
 
 const { 
     getParties, createParty, joinParty, leaveParty, destroyRoom, uploadParty,
@@ -37,7 +38,7 @@ export default function Town() {
         setGameLog(() => updatedGamelog);
     }
 
-    // menu state
+    /**MENU STATE*/
     const [isPartyMenuOpen, setIsPartyMenuOpen] = useState(false);
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
     const [isInnOpen, setIsInnOpen] = useState(false);
@@ -146,15 +147,6 @@ export default function Town() {
             </div>
             <div>
                 <button 
-                    className="menu_btn"
-                    onClick={() => { 
-                        setIsInventoryOpen((prev) => !prev);
-                        toggleOffMenus("inventoryMenu");
-                    }}
-                >
-                    Inventory
-                </button>
-                <button 
                     className="menu_btn" 
                     onClick={() => { 
                         setIsInnOpen((prev) => !prev);
@@ -166,30 +158,26 @@ export default function Town() {
                 </button>
                 <button 
                     className="menu_btn" 
-                    onClick={() => { 
-                        setInspectCharacter((prev) => prev.pid ? {} as PlayerSchema : {...character});
-                        toggleOffMenus("characterProfileMenu");
-                    }}
-                >
-                    Profile
-                </button>
-                <button 
-                    className="menu_btn" 
-                    onClick={() => { 
-                        setIsTreeOpen((prev) => !prev);
-                        toggleOffMenus("treeMenu");
-                    }}
-                >
-                    Skills
-                </button>
-                <button 
-                    className="menu_btn" 
                     onClick={() => navigate('../dungeon')}
                     disabled={!party.players}
                 >
                     Dungeon
                 </button>
             </div>
+            <UIButtonBar 
+                showInventory={() => {
+                    setIsInventoryOpen((prev) => !prev);
+                    toggleOffMenus("inventoryMenu");
+                }}
+                showProfile={() => {
+                    setInspectCharacter((prev) => prev.pid ? {} as PlayerSchema : {...character});
+                    toggleOffMenus("characterProfileMenu");
+                }}
+                showTree={() => {
+                    setIsTreeOpen((prev) => !prev);
+                    toggleOffMenus("treeMenu");
+                }}
+            />
             <Log 
                 messages={gameLog}
             />
