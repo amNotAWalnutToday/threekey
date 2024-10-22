@@ -13,6 +13,7 @@ const { assignBuildingLevel } = townFns
 type Props = {
     town: TownSchema;
     uploadCharacter: (character: PlayerSchema) => void;
+    logMessage: (message: string) => void;
 }
 
 interface Category {
@@ -23,7 +24,7 @@ interface Category {
     id?: string,
 }
 
-export default function Tree({town, uploadCharacter}: Props) {
+export default function Tree({town, uploadCharacter, logMessage}: Props) {
     const { character } = useContext(UserContext);
     const [categories, setCategories] = useState<Category[][]>([]);
     const [selectedSkill, setSelectedSkill] = useState({} as Category);
@@ -205,6 +206,7 @@ export default function Tree({town, uploadCharacter}: Props) {
             updatedPlayer = removeItem(updatedPlayer, req);
         }
         uploadCharacter(updatedPlayer);
+        logMessage(`${character.name} has leveled up the town skill ${selectedSkill.name}`);
     }
 
     const levelUpAbility = () => {
@@ -212,7 +214,6 @@ export default function Tree({town, uploadCharacter}: Props) {
         const ability = getAbilityRef(character, selectedSkill?.id ?? '');
         const preAbility = getAbilityRef(character, selectedSkill?.pre ?? '');
         if(preAbility.index >= 0 && preAbility.state.level <= ability.state.level) return;
-        console.log('a');
         ability.state.level++;
         if(ability.index < 0) return;
         let updatedCharacter = {...character};
@@ -221,6 +222,7 @@ export default function Tree({town, uploadCharacter}: Props) {
             updatedCharacter = removeItem(updatedCharacter, req);
         }
         uploadCharacter(updatedCharacter);
+        logMessage(`${character.name} has leveled up the skill ${selectedSkill.name}`);
     }
 
     useEffect(() => {

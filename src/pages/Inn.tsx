@@ -6,9 +6,10 @@ import Inventory from "../components/Inventory"
 type Props = {
     town: TownSchema
     applyRest: () => void;
+    logMessage: (message: string) => void;
 }
 
-export default function Inn({town, applyRest}: Props) {
+export default function Inn({town, applyRest, logMessage}: Props) {
     const { character } = useContext(UserContext);
     
     return (
@@ -19,6 +20,7 @@ export default function Inn({town, applyRest}: Props) {
                 buttons={town?.storage.level > 0 ? ["deposit"] : []}
                 storage={town.storage.inventory}
                 limit={10}
+                logMessage={logMessage}
             />
             {town?.storage?.level > 0
             &&
@@ -27,12 +29,16 @@ export default function Inn({town, applyRest}: Props) {
                 position="right"
                 buttons={["withdraw"]}
                 limit={town.storage.level * 5}
+                logMessage={logMessage}
             />
             }
             <button 
                 className="menu_btn center_abs_hor" 
                 style={{bottom: "50px", position: "absolute"}}
-                onClick={applyRest}
+                onClick={() => {
+                    applyRest();
+                    logMessage(`${character.name} has rested and has recovered.`);
+                }}
             >
                 Rest
             </button>

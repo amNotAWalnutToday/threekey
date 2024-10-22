@@ -16,9 +16,10 @@ type Props = {
     buttons: string[],
     storage?: {id: string, amount: number}[],
     limit: number,
+    logMessage: (message: string) => void,
 }
 
-export default function Inventory({inventory, position, buttons, storage, limit}: Props) {
+export default function Inventory({inventory, position, buttons, storage, limit, logMessage}: Props) {
     const { character, party, setCharacter } = useContext(UserContext);
     const [selectedItem, setSelectedItem] = useState<{state: typeof itemData[0] | null, index: number}>({state: null, index: -1});
     const [selectedAmount, setSelectedAmount] = useState(0);
@@ -84,6 +85,7 @@ export default function Inventory({inventory, position, buttons, storage, limit}
                             await syncPartyMemberToAccount(updatedPlayer);
                             setSelectedItem(() => ({state: null, index: 0}));
                             setCharacter(updatedPlayer);
+                            logMessage(`${character.name} has used a ${selectedItem.state?.name}.`);
                         }}
                         className="menu_btn"
                     >

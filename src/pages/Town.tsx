@@ -12,6 +12,7 @@ import TownSchema from "../schemas/TownSchema";
 import Inn from "./Inn";
 import Tree from "../components/Tree";
 import CharacterProfile from "../components/CharacterProfile";
+import Log from "../components/Log";
 
 const { 
     getParties, createParty, joinParty, leaveParty, destroyRoom, uploadParty,
@@ -27,6 +28,14 @@ export default function Town() {
     const [town, setTown] = useState<TownSchema>({} as TownSchema);
     const [otherCharacterBusy, setOtherCharacterBusy] = useState(false);
     const [parties, setParties] = useState<PartySchema[]>([]);
+    const [gameLog, setGameLog] = useState<string[]>([]);
+
+    const logMessage = (message: string) => {
+        const updatedGamelog = [...gameLog];
+        updatedGamelog.push(message);
+        if(updatedGamelog.length > 101) updatedGamelog.shift();
+        setGameLog(() => updatedGamelog);
+    }
 
     // menu state
     const [isPartyMenuOpen, setIsPartyMenuOpen] = useState(false);
@@ -34,7 +43,6 @@ export default function Town() {
     const [isInnOpen, setIsInnOpen] = useState(false);
     const [isTreeOpen, setIsTreeOpen] = useState(false);
     const [inspectCharacter, setInspectCharacter] = useState({} as PlayerSchema);
-
 
     const toggleOffMenus = (exception: string) => {
         if(exception !== "partyMenu") setIsPartyMenuOpen(() => false);
@@ -182,12 +190,16 @@ export default function Town() {
                     Dungeon
                 </button>
             </div>
+            <Log 
+                messages={gameLog}
+            />
             {
                 isInnOpen 
                 && 
                 <Inn 
                     town={town} 
                     applyRest={applyRest}
+                    logMessage={logMessage}
                 />
             }
             { isInventoryOpen 
@@ -197,6 +209,7 @@ export default function Town() {
                 position="center"
                 buttons={["use", "destroy"]}
                 limit={10}
+                logMessage={logMessage}
             /> 
             }
             { inspectCharacter.pid
@@ -210,6 +223,7 @@ export default function Town() {
             <Tree 
                 town={town}
                 uploadCharacter={uploadCharacterTown}
+                logMessage={logMessage}
             />
             }
             <button

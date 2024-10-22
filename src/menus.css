@@ -138,13 +138,13 @@
     overflow: scroll;
 }
 
-.skill_tree::-webkit-scrollbar {
+*::-webkit-scrollbar {
     background-color: #242424;
     width: 0.25rem;
     height: 0.25rem;
 }
 
-.skill_tree::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
     background-color: goldenrod;
 }
 
@@ -184,6 +184,29 @@
 .inn {
     display: flex;
     background-color: red;
+}
+
+.gamelog {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    min-height: 200px;
+    max-height: 200px;
+    min-width: 600px;
+    max-width: 600px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.gamelog_message_group {
+    overflow-y: scroll;
+    padding-top: 1rem;
+}
+
+.message {
+    text-shadow: 2.5px 2px 1px black;
+    font-size: 16px;
 }
 
 .profile_status {
