@@ -34,6 +34,23 @@ export default (() => {
         return floor;
     }
 
+    const getBiomes = (floorNum: number) => {
+        let defaultBiomes = ['forest', 'scrapyard', 'crypt']
+        const medBiomes = ['hive', 'factory', 'abyss'] 
+        const highBiomes = ['cataclysmic desert', 'simulation', 'realm of divinity'];
+        if(floorNum > 24) defaultBiomes = defaultBiomes.concat(medBiomes);
+        if(floorNum > 49) defaultBiomes = defaultBiomes.concat(highBiomes);
+        console.log(defaultBiomes);
+        return defaultBiomes;        
+    }
+
+    const getRandomBiome = (floorNum: number) => {
+        const biomes = getBiomes(floorNum);
+        const biomeRan = Math.floor(Math.random() * biomes.length);
+        const chosenBiome = biomes[biomeRan];
+        return chosenBiome;
+    }
+
     const rotate = (neighbours: number[][], middle: number[], facing: string) => {
         if(facing === 'north') return neighbours;
         return neighbours.map((XY) => {
@@ -91,7 +108,10 @@ export default (() => {
 
     const getKey = (XY: number[]) => `${XY[0]}x${XY[1]}`;
     
-    const assignPaths = (tiles: TileSchema[], start: number[], target: number[]) => {
+    const assignPaths = (
+        tiles: TileSchema[], start: number[], target: number[],
+        biome: string, floorNum: number,
+    ) => {
         if(!start || !target) return;
         console.log(start, target);
         const queue: Coords[] = [];
@@ -158,17 +178,22 @@ export default (() => {
             const tile = getTile(tiles, { XY: [point.x, point.y] });
             if(!tile) continue;
             if(tile.state.type.length) continue;
-            tiles[tile.index].type = 'path';
+            const ran = Math.floor(Math.random() * 100);
+            const chosenBiome = ran > 1 ? getRandomBiome(floorNum + 10) : biome;
+            tiles[tile.index].type = chosenBiome;
         }
         return tiles;
     }
 
     const createFloor = (
         characterLocation: number[],
+        floorNum: number,
         setFloor: React.Dispatch<React.SetStateAction<FloorSchema>>,
     ) => {
         const tiles: TileSchema[] = [];
         const totalRooms: number[][] = [];
+
+        const chosenBiome = getRandomBiome(floorNum);
 
         for(let i = 10; i > 0; i--) {
             for(let j = 10; j > 0; j--) {
@@ -185,9 +210,9 @@ export default (() => {
         tiles[upstairsRan].type = 'upstairs',
         tiles[downStairsRan].type = 'downstairs',
         
-        assignPaths([...tiles], tiles[upstairsRan].XY, tiles[downStairsRan].XY);
+        assignPaths([...tiles], tiles[upstairsRan].XY, tiles[downStairsRan].XY, chosenBiome, floorNum);
         for(const coords of totalRooms) {
-            assignPaths([...tiles], tiles[upstairsRan].XY, coords);
+            assignPaths([...tiles], tiles[upstairsRan].XY, coords, chosenBiome, floorNum);
             const neighbours = [
                 [coords[0], coords[1] - 1],
                 [coords[0] - 1, coords[1]],
@@ -202,7 +227,7 @@ export default (() => {
                 const tile = getTile(tiles, { XY: neighbour });
                 if(!tile) continue;
                 if(tile.state.type !== '') continue; 
-                tiles[tile.index].type = 'room';
+                tiles[tile.index].type = chosenBiome;
             }
         } 
 

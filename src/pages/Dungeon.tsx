@@ -29,7 +29,7 @@ export default function Dungeon() {
             return (
                 <div  
                     key={`tile-${index}`}
-                    className={`${tile.type !== "" ? 'dirt' : 'wall'}`}
+                    className={`${tile.type !== "" ? tile.type : 'wall'}`}
                 >
                     <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p>
                     <p>{tile.type}</p>
@@ -43,7 +43,7 @@ export default function Dungeon() {
             return  tile.type !== 'wall' ? (
                 <div  
                     key={`tile-${index}`}
-                    className={`${tile.type !== "" ? 'dirt' : 'wall'}`}
+                    className={`${tile.type !== "" ? tile.type : 'wall'}`}
                 >
                     <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p>
                     <p>{tile.type}</p>
@@ -122,7 +122,7 @@ export default function Dungeon() {
         const newMapLocation = dir === 'up' ? Number(party.location.map) + 1 : Number(party.location.map) - 1;
         let newFloor;
         newFloor = await getFloor(newMapLocation) 
-        if(!newFloor) newFloor = createFloor(party.location.XY, setFloor);
+        if(!newFloor) newFloor = createFloor(party.location.XY, newMapLocation, setFloor);
         newFloor.number = newMapLocation;
         setFloor(() => newFloor);
         upload('floor', { floor: newFloor, fieldId: '' });
@@ -152,7 +152,7 @@ export default function Dungeon() {
         let newFloor;
         newFloor = await getFloor(Number(party.location.map));
         if(!newFloor) { 
-            newFloor = createFloor(party.location.XY, setFloor);
+            newFloor = createFloor(party.location.XY, Number(party.location.map), setFloor);
             newFloor.number = Number(party.location.map);
             upload('floor', { floor: newFloor, fieldId: '' });
         }

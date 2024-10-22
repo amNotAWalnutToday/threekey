@@ -168,12 +168,46 @@ hr {
   background-color: #06A;
 }
 
+.forest,
 .grass {
   background-color: #0A6;
 }
 
+.room,
 .dirt {
   background-color: #a86c3b;
+}
+
+.scrapyard {
+  background-color: rgb(43, 38, 18);
+}
+
+.crypt {
+  background-color: #122;
+}
+
+.hive {
+  background: radial-gradient(yellow, orange);
+}
+
+.factory {
+  background: radial-gradient(rgb(36, 49, 36), rgb(68, 64, 45) );
+}
+
+.abyss {
+  background: radial-gradient(royalblue, darkblue);
+}
+
+.desert {
+  background: radial-gradient(yellow, red);
+}
+
+.simulation {
+  background: radial-gradient(rgb(6, 57, 6), black );
+}
+
+.divinity {
+  background: radial-gradient(white, grey);
 }
 
 .wall {
