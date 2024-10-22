@@ -1,0 +1,9 @@
+[
+    {
+        "type": "pitfall",
+        "biomes": ["forest", "scrapyard"],
+        "disarmType": "random",
+        "disarmSkill": "",
+        "minFloor": -1
+    }
+]

@@ -508,10 +508,9 @@ export default (() => {
             actionQueue?: ActionSchema[],
             user?: UserSchema,
             player?: { state: PlayerSchema, index: number },
-            floor?: FloorSchema,
         }
     ) => {
-        const { fieldId, field, actionQueue, player, floor, user } = payload;
+        const { fieldId, field, actionQueue, player, user } = payload;
 
         switch(type) {
             case "field":
@@ -527,10 +526,6 @@ export default (() => {
             case "enemy":
                 if(!player) return console.error("No Enemy");
                 uploadEnemy(player.state, player.index, fieldId);
-                break;
-            case "floor":
-                if(!floor) return console.error("No Floor");
-                uploadFloor(floor);
                 break;
             case "character":
                 if(!player || !user) return; 
@@ -559,11 +554,6 @@ export default (() => {
     const uploadEnemy = async (enemy: PlayerSchema, index: number, fieldId: string) => {
         const enemyRef = ref(db, `/fields/${fieldId}/enemies/${index}`);
         await set(enemyRef, assignMaxOrMinStat(enemy, [enemy], 0)[0]);
-    }
-
-    const uploadFloor = async (floor: FloorSchema) => {
-        const floorRef = ref(db, `/dungeon/${floor.number}`);
-        await set(floorRef, floor);
     }
 
     const uploadCharacter = async (user: UserSchema, player: PlayerSchema, index: number) => {

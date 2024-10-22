@@ -17,14 +17,16 @@ import CharacterProfile from '../components/CharacterProfile';
 import Tree from '../components/Tree';
 
 const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
-const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy } = dungeonFns;
-const { upload } = combatFns;
+const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy,
+    connectFloor, uploadDungeon, getTrap, disarmTrap,
+} = dungeonFns;
+// const { upload } = combatFns;
 
 export default function Dungeon() {
     const { character, enemies, setEnemies, setParty, party, user } = useContext(UserContext);
     const navigate = useNavigate();
 
-    const [isHost, setIsHost] = useState(character.pid === party.players[0].pid); 
+    const [isHost, setIsHost] = useState(false); 
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
     const [minimap, setMinimap] = useState<TileSchema[]>([]);
     const [location, setLocation] = useState(character.location ?? {map: "1", XY: [1, 1]});
@@ -98,11 +100,7 @@ export default function Dungeon() {
         if(!targetTile) return;
         if(targetTile.state.type === '') return;
         uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: [x, y] } });
-        // setLocation((prev) => { 
-        //     const newLocation = Object.assign({}, prev, {XY: [x, y]});
-        //     assignMinimap(floor.tiles, getTile(floor.tiles, { XY: newLocation.XY })?.state.XY ?? [0,0], facing);
-        //     return newLocation;
-        // });
+        if(targetTile.state.trap) encounterTrap(targetTile.state.trap);
         getEncounters();
     }
 
@@ -133,6 +131,37 @@ export default function Dungeon() {
         return '';
     }
 
+    const applyUseTile = (tile: TileSchema, useType: string) => {
+        const type = useType === "type" ? tile.type : useType === "trap" ? tile.trap : tile.event;
+        switch(type) {
+            case "upstairs":
+                leaveFloor();
+                break;
+            case "downstairs":
+                nextFloor('up', 1);
+                break;
+            case "pitfall":
+                nextFloor('down', 2);
+                break;
+        }
+    }
+
+    const applyDisarmTile = (tile: TileSchema) => {
+        const trap = getTrap(tile.trap ?? "");
+        if(!trap) return;
+        if(trap.disarmType === "random") {
+            const ran = Math.floor(Math.random() * 100);
+            if(ran > 49) {
+                logMessage(`${trap.type} has been disarmed.`)
+                disarmTrap(tile, floor);
+                return;
+            } else { 
+                logMessage(`you failed to disarm the trap and fell for it instead`);
+                applyUseTile(tile, 'trap');
+            }
+        }
+    }
+
     const leaveFloor = async () => {
         if(floor.number <= 0) {
             for(const member of party.players) {
@@ -140,18 +169,18 @@ export default function Dungeon() {
             }
             navigate('/town');
         } else {
-            nextFloor('down');
+            nextFloor('down', 1);
         }
     }
 
-    const nextFloor = async (dir: string) => {
-        const newMapLocation = dir === 'up' ? Number(party.location.map) + 1 : Number(party.location.map) - 1;
+    const nextFloor = async (dir: string, floorsMoved: number) => {
+        const newMapLocation = dir === 'up' ? Number(party.location.map) + floorsMoved : Number(party.location.map) - floorsMoved;
         let newFloor;
         newFloor = await getFloor(newMapLocation) 
         if(!newFloor) newFloor = createFloor(party.location.XY, newMapLocation, setFloor);
         newFloor.number = newMapLocation;
         setFloor(() => newFloor);
-        upload('floor', { floor: newFloor, fieldId: '' });
+        uploadDungeon('floor', { floor: newFloor });
         const start = getTile(newFloor.tiles, { type: dir === "up" ? "upstairs" : "downstairs" })?.state;
         if(!start) return newFloor;
         uploadParty('location', { partyId: party.players[0].pid, location: { map: `${newMapLocation}`, XY: start.XY } });
@@ -172,6 +201,10 @@ export default function Dungeon() {
         }
     }
 
+    const encounterTrap = (trap: string) => {
+        logMessage(`You have encountered a ${trap} trap!`);
+    }
+
     const initializeDungeon = async () => {
         const updatedParty: PartySchema = await connectParty(party.players[0].pid, setParty);
         if(!updatedParty) return;
@@ -180,7 +213,7 @@ export default function Dungeon() {
         if(!newFloor) { 
             newFloor = createFloor(party.location.XY, Number(party.location.map), setFloor);
             newFloor.number = Number(party.location.map);
-            upload('floor', { floor: newFloor, fieldId: '' });
+            uploadDungeon('floor', { floor: newFloor });
         }
         const start = getTile(newFloor.tiles, { type: 'upstairs' });
         if(!start) return;
@@ -188,10 +221,13 @@ export default function Dungeon() {
         if(!updatedParty.inCombat) await uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: start.state.XY } });
         if(updatedParty.inCombat && isHost) await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
         assignMinimap(newFloor.tiles, start.state.XY, facing);
+
+        await connectFloor(Number(party.location.map), setFloor);
     }
 
     useEffect(() => {
         if(!user?.uid) return navigate('/');
+        if(character.pid === party.players[0].pid) setIsHost(() => true);
         initializeDungeon();
     }, []);
 
@@ -212,6 +248,13 @@ export default function Dungeon() {
         });
     }, [party.location]);
 
+    const checkCanMove = () => {
+        if(!floor.tiles) return;
+        const currentTile = getTile(floor.tiles, {XY: party.location.XY})?.state;
+        if(currentTile?.trap) return false;
+        return true;
+    }
+
     return (
         <div>
             {/* <div className="grid">{ mapFloor() }</div> */}
@@ -220,7 +263,7 @@ export default function Dungeon() {
                 <p>Biome: {floor.biome}</p>
                 <p>Location: [ {location.XY[0]} , {location.XY[1]} ]</p>
                 <p>Facing: {facing}</p>
-                <p>Size: {floor.tiles.length / 10}x{floor.tiles.length / 10}</p>
+                {/* <p>Size: {floor.tiles.length / 10}x{floor.tiles.length / 10}</p> */}
             </div>
             <div className="minimap_group">
                 <div className='btn_group'>
@@ -232,13 +275,21 @@ export default function Dungeon() {
                     </button>
                     <button
                         className='menu_btn'
-                        onClick={() => console.log()}
+                        onClick={() => {
+                            const thisTile = getTile(floor.tiles, { XY: party.location.XY })?.state ?? {} as TileSchema;
+                            let type = 'type';
+                            if(thisTile.trap) type = 'trap';
+                            applyUseTile(thisTile, type);
+                        }}
                     >
                         use
                     </button>
                     <button
                         className='menu_btn'
-                        onClick={() => console.log()}
+                        onClick={() => {
+                            const thisTile = getTile(floor.tiles, { XY: party.location.XY })?.state ?? {} as TileSchema;
+                            applyDisarmTile(thisTile);
+                        }}
                     >
                         disarm
                     </button>
@@ -254,43 +305,26 @@ export default function Dungeon() {
                     <button
                         className='menu_btn'
                         onClick={() => turn('left')}
+                        disabled={!checkCanMove()}
                     >
                         turn left
                     </button>
                     <button
                         className='menu_btn'
                         onClick={() => move(getDirection())}
+                        disabled={!checkCanMove()}
                     >
                         move forward
                     </button>
                     <button
                         className='menu_btn'
                         onClick={() => turn('right')}
+                        disabled={!checkCanMove()}
                     >
                         turn right
                     </button>
                 </div>
             </div>
-            {
-                floor.tiles &&
-                getTile(floor.tiles, { XY: location.XY })?.state.type === 'upstairs'
-                &&
-                <button
-                    onClick={leaveFloor}
-                >
-                    Go Up
-                </button>
-            }
-            {
-                floor.tiles &&
-                getTile(floor.tiles, { XY: location.XY })?.state.type === 'downstairs'
-                &&
-                <button
-                    onClick={() => nextFloor('up')}
-                >
-                    Go Down
-                </button>
-            }
             {
                 enemies.length &&
                 <button
@@ -303,7 +337,7 @@ export default function Dungeon() {
                 </button>
             }
             <Log 
-                messages={[]}
+                messages={gameLog}
             />
             <UIButtonBar 
                 showInventory={() => {
@@ -335,7 +369,7 @@ export default function Dungeon() {
                 character={inspectCharacter}
             />
             }
-            <PartyMenu />
+            {party.players && <PartyMenu />}
         </div>
     )
 }

@@ -1,7 +1,8 @@
-import { get, ref } from "firebase/database";
+import { get, ref, onValue, set } from "firebase/database";
 import accountFns from "./accountFns";
 import TileSchema from "../schemas/TileSchema";
 import FloorSchema from "../schemas/FloorSchema";
+import trapData from '../data/traps.json';
 
 const { db } = accountFns;
 
@@ -32,6 +33,23 @@ export default (() => {
         });
 
         return floor;
+    }
+
+    const getTrap = (trapType: string) => {
+        for(const trap of trapData) {
+            if(trap.type === trapType) return trap;
+        }
+    }
+
+    const getPossibleTraps = (biome: string, floorNum: number) => {
+        const possibleTraps = [];
+        for(const trap of trapData) {
+            for(const trapBiome of trap.biomes) {
+                if(biome === trapBiome && trap.minFloor <= floorNum) possibleTraps.push(trap);
+            }
+        }
+
+        return possibleTraps;
     }
 
     const getBiomes = (floorNum: number) => {
@@ -106,6 +124,26 @@ export default (() => {
         return populatedTiles;
     }
 
+    const disarmTrap = (tile: TileSchema, floor: FloorSchema) => {
+        const updatedTile = {...tile};
+        updatedTile.trap = "";
+        uploadDungeon("tile", { tile: updatedTile, floor });
+    }
+
+    const assignRandomTileAttributes = (tile: TileSchema, floorNum: number, biome: string) => {
+        const biomeRan = Math.floor(Math.random() * 100);
+        const chosenBiome = biomeRan > 79 ? getRandomBiome(floorNum + 10) : biome;
+        tile.type = chosenBiome;
+        // choose trap
+        const possibleTraps = getPossibleTraps(chosenBiome, floorNum);
+        const shouldTrap = Math.floor(Math.random() * 100);
+        const possibleTrapRan = Math.floor(Math.random() * possibleTraps.length);
+        if(shouldTrap >= 70) {
+            tile.trap = possibleTraps[possibleTrapRan].type;
+        }
+        return tile;
+    }
+
     const getKey = (XY: number[]) => `${XY[0]}x${XY[1]}`;
     
     const assignPaths = (
@@ -178,9 +216,7 @@ export default (() => {
             const tile = getTile(tiles, { XY: [point.x, point.y] });
             if(!tile) continue;
             if(tile.state.type.length) continue;
-            const ran = Math.floor(Math.random() * 100);
-            const chosenBiome = ran > 79 ? getRandomBiome(floorNum + 10) : biome;
-            tiles[tile.index].type = chosenBiome;
+            tiles[tile.index] = assignRandomTileAttributes(tile.state, floorNum, biome);
         }
         return tiles;
     }
@@ -227,15 +263,64 @@ export default (() => {
                 const tile = getTile(tiles, { XY: neighbour });
                 if(!tile) continue;
                 if(tile.state.type !== '') continue; 
-                tiles[tile.index].type = chosenBiome;
+                tiles[tile.index] = assignRandomTileAttributes(tile.state, floorNum, chosenBiome);
             }
-        } 
+        }
 
         return {
             tiles, 
-            number: 0,
+            number: floorNum,
             biome: chosenBiome,
         };
+    }
+
+    const connectFloor = async(
+        floorNum: number,
+        setFloor: React.Dispatch<React.SetStateAction<FloorSchema>>,
+    ) => {
+        try {
+            const floorRef = ref(db, `/dungeon/${floorNum}`);
+            await onValue(floorRef, async(snapshot) => {
+                const data: FloorSchema = await snapshot.val();
+                if(!data) return data;
+                if(floorNum === data.number) setFloor(() => data);
+                console.log(getPossibleTraps(data.biome, floorNum));
+            });
+        } catch(e) {
+            return console.error(e);
+        }
+    }
+
+    const uploadDungeon = async (
+        type: string, 
+        payload: { 
+            floor?: FloorSchema,
+            tile?: TileSchema,
+        },
+    ) => {
+        const { floor, tile } = payload;
+
+        switch(type) {
+            case "floor":
+                if(!floor) return;
+                uploadFloor(floor);
+                break;
+            case "tile": 
+                if(!tile || !floor) return;
+                uploadTile(floor, tile);
+                break;
+        }
+    }
+
+    const uploadFloor = async (floor: FloorSchema) => {
+        const floorRef = ref(db, `/dungeon/${floor.number}`);
+        await set(floorRef, floor);
+    }
+
+    const uploadTile = async (floor: FloorSchema, tile: TileSchema) => {
+        const tileIndex = getTile(floor.tiles, { XY: tile.XY })?.index ?? -1;
+        const tileRef = ref(db, `/dungeon/${floor.number}/tiles/${tileIndex}`);
+        await set(tileRef, tile);
     }
 
     const createUIEnemy = (id: string) => {
@@ -245,8 +330,12 @@ export default (() => {
     return {
         getTile,
         getFloor,
+        getTrap,
         getTileNeighbours,
+        disarmTrap,
         createFloor,
         createUIEnemy,
+        connectFloor,
+        uploadDungeon,
     }
 })();

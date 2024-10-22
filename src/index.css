@@ -160,8 +160,8 @@ hr {
 
 .minimap {
   display : grid;
-  grid-template-columns: repeat(3, 64px);
-  grid-template-rows: repeat(3, 64px);
+  grid-template-columns: repeat(3, 96px);
+  grid-template-rows: repeat(3, 96px);
   box-shadow: 6px 6px 12px black;
   border: 1px solid white;
 }
