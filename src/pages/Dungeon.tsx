@@ -18,7 +18,7 @@ import Tree from '../components/Tree';
 
 const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
 const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy,
-    connectFloor, uploadDungeon, getTrap, disarmTrap,
+    connectFloor, uploadDungeon, getTrap, disarmTrap, getEnemies,
 } = dungeonFns;
 // const { upload } = combatFns;
 
@@ -154,11 +154,25 @@ export default function Dungeon() {
             if(ran > 49) {
                 logMessage(`${trap.type} has been disarmed.`)
                 disarmTrap(tile, floor);
-                return;
             } else { 
                 logMessage(`you failed to disarm the trap and fell for it instead`);
                 applyUseTile(tile, 'trap');
             }
+        }
+    }
+
+    const enterFight = async () => {
+        await uploadParty('wasInCombat', { partyId: party.players[0].pid, isInCombat: true });
+        await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: true });
+    }
+
+    const avoidFight = () => {
+        const ran = Math.floor(Math.random() * 100);
+        if(ran > 49) {
+            logMessage('You successfully avoided the enemies.');
+            uploadParty("enemies", { partyId: party.players[0].pid, enemyIds: [] });
+        } else { 
+            enterFight();
         }
     }
 
@@ -167,7 +181,8 @@ export default function Dungeon() {
             for(const member of party.players) {
                 await syncPartyMemberToAccount(member);
             }
-            navigate('/town');
+            uploadParty("location", { partyId: party.players[0].pid, location: {...party.location, map: "-1"} });
+            // navigate('/town');
         } else {
             nextFloor('down', 1);
         }
@@ -190,12 +205,9 @@ export default function Dungeon() {
     const getEncounters = () => {
         const encountered = Math.floor(Math.random() * 3);
         if(encountered === 1) {
-            setEnemies(() => {
-                const ran = Math.floor(Math.random() * 4);
-                const enemies = [];
-                for(let i = 0; i < ran; i++) enemies.push(createUIEnemy(enemydata.all[0].id));
-                return enemies;
-            });
+            const amount = Math.floor(Math.random() * 4);
+            const enemies = getEnemies(floor.number, floor.biome, amount);
+            uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: enemies });
         } else {
             setEnemies(() => []);
         }
@@ -218,9 +230,13 @@ export default function Dungeon() {
         const start = getTile(newFloor.tiles, { type: 'upstairs' });
         if(!start) return;
         setFloor(() => newFloor);
-        if(!updatedParty.inCombat) await uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: start.state.XY } });
-        if(updatedParty.inCombat && isHost) await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
-        assignMinimap(newFloor.tiles, start.state.XY, facing);
+        if(!updatedParty.wasInCombat) { 
+            await uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: start.state.XY } });
+            assignMinimap(newFloor.tiles, start.state.XY, facing);
+        } else {
+            await uploadParty('wasInCombat', { partyId: party.players[0].pid, isInCombat: false });
+            assignMinimap(newFloor.tiles, party.location.XY, 'north');
+        }
 
         await connectFloor(Number(party.location.map), setFloor);
     }
@@ -239,6 +255,8 @@ export default function Dungeon() {
     }
 
     useEffect(() => {
+        if(!user?.uid) return navigate('/');
+        if(Number(party.location.map) < 0) return navigate('/town');
         setLocation(() => {
             if(`${floor.number}` !== party.location.map) {
                 changeFloor();
@@ -248,10 +266,15 @@ export default function Dungeon() {
         });
     }, [party.location]);
 
+    useEffect(() => {
+        if(party?.inCombat) return navigate('/combat');
+    }, [party.inCombat]);
+
     const checkCanMove = () => {
         if(!floor.tiles) return;
         const currentTile = getTile(floor.tiles, {XY: party.location.XY})?.state;
         if(currentTile?.trap) return false;
+        if(party?.enemies) return false;
         return true;
     }
 
@@ -266,6 +289,23 @@ export default function Dungeon() {
                 {/* <p>Size: {floor.tiles.length / 10}x{floor.tiles.length / 10}</p> */}
             </div>
             <div className="minimap_group">
+                {party?.enemies?.length
+                &&
+                <div className='btn_group' >
+                    <button
+                        className='menu_btn'
+                        onClick={enterFight}
+                    >
+                        Fight
+                    </button> 
+                    <button
+                        className='menu_btn'
+                        onClick={avoidFight}
+                    >
+                        Avoid
+                    </button> 
+                </div>
+                }
                 <div className='btn_group'>
                     <button
                         className='menu_btn'
@@ -295,7 +335,7 @@ export default function Dungeon() {
                     </button>
                     <button
                         className='menu_btn'
-                        onClick={() => console.log()}
+                        onClick={() => console.log(getEnemies(1, 'forest', 5))}
                     >
                         event
                     </button>

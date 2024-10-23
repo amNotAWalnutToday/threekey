@@ -265,6 +265,11 @@ export default function Combat() {
         setField((prev) => Object.assign({}, prev, { enemies }));
     }, [enemies]);
 
+    useEffect(() => {
+        if(!party?.inCombat) return navigate('/dungeon');
+        /*eslint-disable-next-line*/
+    }, [party.inCombat]);
+
     const selectPlayer = (player: { state: PlayerSchema, index: number } | null) => {
         setSelectedPlayer((prev) => {
             if(prev === null || player === null) return player;
@@ -588,7 +593,7 @@ export default function Combat() {
     const functionForBelowMe = async () => {
         if(!user?.uid) return navigate('/');
         if(isHost && loading) {
-            const newField = await initiateBattle([...players, character], enemyIds);
+            const newField = await initiateBattle([...players, character]);
             setField((field) => Object.assign({}, field, { ...newField }));
             setLoading(() => false);
         }
@@ -596,6 +601,7 @@ export default function Combat() {
     }
 
     useEffect(() => {
+        if(!user?.uid) return navigate('/');
         functionForBelowMe();
         /*eslint-disable-next-line*/
     }, []);
@@ -673,8 +679,9 @@ export default function Combat() {
                 &&
                 <div style={{transform: "translateY(100px)"}} >
                     <button 
-                        onClick={() => {
-                            navigate('../dungeon');
+                        onClick={async () => {
+                            await uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: [] });
+                            await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
                         }}
                     >
                         Return to Dungeon

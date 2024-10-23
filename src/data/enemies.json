@@ -17,7 +17,9 @@
             "inventory": [
                 {"id": "001", "amount": 1}, 
                 {"id": "002", "amount": 1}
-            ]
+            ],
+            "biomes": ["forest", "scrapyard", "crypt"],
+            "minFloor": 0
         }
     ]
 }

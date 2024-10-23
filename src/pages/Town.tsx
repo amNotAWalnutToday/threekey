@@ -96,6 +96,12 @@ export default function Town() {
     }, [party]);
 
     useEffect(() => {
+        if(!party?.players) return;
+        if(Number(party.location.map) > -1) navigate('../dungeon');
+        /*eslint-disable-next-line*/
+    }, [party.location]);
+
+    useEffect(() => {
         if(!user?.uid) return navigate('/');
         connectTown(setTown);
         /*eslint-disable-next-line*/
@@ -158,7 +164,7 @@ export default function Town() {
                 </button>
                 <button 
                     className="menu_btn" 
-                    onClick={() => navigate('../dungeon')}
+                    onClick={() => uploadParty("location", { partyId: party.players[0].pid, location: {...party.location, map: "0"}})}
                     disabled={!party.players}
                 >
                     Dungeon

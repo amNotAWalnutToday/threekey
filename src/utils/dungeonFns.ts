@@ -3,6 +3,7 @@ import accountFns from "./accountFns";
 import TileSchema from "../schemas/TileSchema";
 import FloorSchema from "../schemas/FloorSchema";
 import trapData from '../data/traps.json';
+import enemyData from '../data/enemies.json';
 
 const { db } = accountFns;
 
@@ -67,6 +68,23 @@ export default (() => {
         const biomeRan = Math.floor(Math.random() * biomes.length);
         const chosenBiome = biomes[biomeRan];
         return chosenBiome;
+    }
+
+    const getEnemies = (floorNum: number, biome: string, amount: number) => {
+        const possibleEnemies = [];
+        for(const enemy of enemyData.all) {
+            for(const enemyBiome of enemy.biomes) {
+                if(enemyBiome === biome && floorNum >= enemy.minFloor) possibleEnemies.push(enemy);
+            }
+        }
+
+        const enemies = [];
+        for(let i = 0; i < amount; i++) {
+            const ran = Math.floor(Math.random() * possibleEnemies.length);
+            enemies.push(possibleEnemies[ran]);
+        }
+        
+        return Array.from(enemies, enemy => enemy.id);
     }
 
     const rotate = (neighbours: number[][], middle: number[], facing: string) => {
@@ -332,6 +350,7 @@ export default (() => {
         getFloor,
         getTrap,
         getTileNeighbours,
+        getEnemies,
         disarmTrap,
         createFloor,
         createUIEnemy,

@@ -142,22 +142,29 @@ export default (() => {
             location?: { map: string, XY: number[] } ,
             isInCombat?: boolean,
             players?: PlayerSchema[],
+            enemyIds?: string[],
         },
     ) => {
-        const { partyId, location, isInCombat, players } = payload;
+        const { partyId, location, isInCombat, players, enemyIds } = payload;
 
         switch(type) {
             case "players":
                 if(!players) return;
                 uploadPlayers(partyId, players);
                 break;
+            case "enemies":
+                if(!enemyIds) return;
+                uploadEnemies(partyId, enemyIds);
+                break;
             case "location":
                 if(!location) break;
                 uploadLocation(partyId, location);
                 break;
             case "inCombat":
-                if(!isInCombat) break;
-                uploadInCombat(partyId, isInCombat);
+                uploadInCombat(partyId, isInCombat ?? false);
+                break;
+            case "wasInCombat":
+                uploadWasInCombat(partyId, isInCombat ?? false);
                 break;
         }
     }
@@ -167,6 +174,11 @@ export default (() => {
         await set(playersRef, players);
     }
 
+    const uploadEnemies = async (partyId: string, enemyIds: string[]) => {
+        const enemiesRef = ref(db, `/party/${partyId}/enemies`);
+        await set(enemiesRef, enemyIds);
+    }
+
     const uploadLocation = async (partyId: string, location: { map: string, XY: number[] }) => {
         const locationRef = ref(db, `/party/${partyId}/location`);
         await set(locationRef, location);
@@ -174,6 +186,11 @@ export default (() => {
 
     const uploadInCombat = async (partyId: string, isInCombat: boolean) => {
         const reference = ref(db, `/party/${partyId}/inCombat`);
+        await set(reference, isInCombat);
+    }
+
+    const uploadWasInCombat = async (partyId: string, isInCombat: boolean) => {
+        const reference = ref(db, `/party/${partyId}/wasInCombat`);
         await set(reference, isInCombat);
     }
 

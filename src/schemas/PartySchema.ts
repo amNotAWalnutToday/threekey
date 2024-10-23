@@ -4,7 +4,9 @@ interface PartySchema {
     host: number,
     grouped: boolean,
     inCombat: boolean,
-    location: { map: string, XY: number[] }
+    wasInCombat: boolean,
+    location: { map: string, XY: number[] },
+    enemies: string[],
     players: PlayerSchema[]
 }
 

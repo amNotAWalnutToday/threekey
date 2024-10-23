@@ -395,7 +395,7 @@ export default (() => {
         return status;
     }
 
-    const initiateBattle = async (players: PlayerSchema[], enemyIds: string[]) => {
+    const initiateBattle = async (players: PlayerSchema[]) => {
         const field: FieldSchema = {
             players: [],
             enemies: [],
@@ -405,10 +405,13 @@ export default (() => {
             id: '',
         }
 
+        const enemyIds: string[] = [];
+
         const partyRef = ref(db, `party/${players[0].pid}`);
         await get(partyRef).then( async (snapshot) => {
             const data: PartySchema = await snapshot.val();
             for(const p in data.players) field.players.push(data.players[p]);
+            for(const e of data.enemies) enemyIds.push(e);
         });
 
         const enemyList = enemyData.all;
