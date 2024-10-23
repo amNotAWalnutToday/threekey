@@ -17,9 +17,10 @@ type Props = {
     storage?: {id: string, amount: number}[],
     limit: number,
     logMessage: (message: string) => void,
+    toggleOff?: () => void;
 }
 
-export default function Inventory({inventory, position, buttons, storage, limit, logMessage}: Props) {
+export default function Inventory({inventory, position, buttons, storage, limit, logMessage, toggleOff}: Props) {
     const { character, party, setCharacter } = useContext(UserContext);
     const [selectedItem, setSelectedItem] = useState<{state: typeof itemData[0] | null, index: number}>({state: null, index: -1});
     const [selectedAmount, setSelectedAmount] = useState(0);
@@ -157,6 +158,15 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                         disabled={!selectedItem.state || getMaxRange() < 1}
                     >
                         Withdraw
+                    </button>
+                    }
+                    {toggleOff
+                    &&
+                    <button
+                        className="menu_btn"
+                        onClick={toggleOff}
+                    >
+                        Close
                     </button>
                     }
                 </div>

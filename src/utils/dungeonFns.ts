@@ -5,6 +5,7 @@ import FloorSchema from "../schemas/FloorSchema";
 import trapData from '../data/traps.json';
 import enemyData from '../data/enemies.json';
 import itemData from '../data/items.json';
+import eventData from '../data/events.json';
 
 const { db } = accountFns;
 
@@ -14,7 +15,7 @@ type Coords = {
 }
 
 export default (() => {
-    const getTile = (tiles: TileSchema[], search: { XY?: number[], type?: string}) => {
+    const getTile = (tiles: TileSchema[], search: { XY?: number[], type?: string, event?: string}) => {
         for(let i = 0; i < tiles.length; i++) {
             if(search.XY) {
                 if(tiles[i].XY[0] === search.XY[0] && tiles[i].XY[1] === search.XY[1]) return { state: tiles[i], index: i};
@@ -22,7 +23,19 @@ export default (() => {
             if(search.type) {
                 if(tiles[i].type === search.type) return { state: tiles[i], index: i};
             }
+            if(!tiles[i].event) continue;
+            if(search.event) {
+                if(tiles[i].event === search.event) return { state: tiles[i], index: i};
+            }
         }
+    }
+
+    const getAvailableTiles = (tiles: TileSchema[]) => {
+        const availableTiles = [];
+        for(let i = 0; i < tiles.length; i++) {
+            if(tiles[i].type === "") availableTiles.push({ state: tiles[i], index: i});
+        }
+        return availableTiles;
     }
 
     const getFloor = async (floorNum: number) => {
@@ -54,16 +67,31 @@ export default (() => {
         return possibleTraps;
     }
 
-    const getPossibleItems = (biome: string, floorNum: number) => {
+    const getPossibleItems = (biome: string, floorNum: number, isChest?: boolean) => {
         const possibleItems = [];
 
         for(const item of itemData) {
             for(const itemBiome of item.biomes) {
-                if(biome === itemBiome && item.minFloor <= floorNum) possibleItems.push(item);
+                if(biome === itemBiome && item.minFloor <= floorNum) {
+                    if(item.chestOnly && !isChest) continue;
+                    possibleItems.push(item);
+                }
             }
         }
 
         return possibleItems;
+    }
+
+    const getPossibleEvents = (biome: string, floorNum: number) => {
+        const possibleEvents = [];
+
+        for(const event of eventData) {
+            for(const eventBiome of event.biomes) {
+                if(biome === eventBiome && event.minFloor <= floorNum) possibleEvents.push(event);
+            }
+        }
+
+        return possibleEvents;
     }
 
     const getBiomes = (floorNum: number) => {
@@ -81,6 +109,27 @@ export default (() => {
         const biomeRan = Math.floor(Math.random() * biomes.length);
         const chosenBiome = biomes[biomeRan];
         return chosenBiome;
+    }
+
+    const getChestLoot = (biome: string, floorNum: number) => {
+        const possibleItems = getPossibleItems(biome, floorNum, true);
+        const loot = [];
+        const variety = Math.floor(Math.random() * 3) + 1;
+        for(let i = 0; i < variety; i++) {
+            const chosenItemIndex = Math.floor(Math.random() * possibleItems.length);
+            const chosenItem = possibleItems[chosenItemIndex];
+            const amount = chosenItem.id === "000" ? 20 * floorNum + 1 : Math.floor(Math.random() * 2) + 1;
+            const convertedItem = { id: chosenItem.id, amount }
+            
+            let lootIndex = -1;
+            for(let i = 0; i < loot.length; i++) {
+                if(loot[i].id === chosenItem.id) lootIndex = i;
+            }
+
+            if(lootIndex > -1) loot[lootIndex].amount += amount; 
+            else loot.push(convertedItem);
+        }
+        return loot;
     }
 
     const getEnemies = (floorNum: number, biome: string, amount: number) => {
@@ -159,6 +208,21 @@ export default (() => {
         const updatedTile = {...tile};
         updatedTile.trap = "";
         uploadDungeon("tile", { tile: updatedTile, floor });
+    }
+
+    const removeLock = async (floor: FloorSchema, currentTile: TileSchema) => {
+        const stairsTile = getTile(floor.tiles, { type: 'downstairs' });
+        if(!stairsTile?.state) return;
+        const updatedTile = {...stairsTile.state};
+        updatedTile.event = "";
+        await uploadDungeon("tile", { floor, tile: updatedTile  });
+        await removeEvent(floor, currentTile);     
+    }
+
+    const removeEvent = async (floor: FloorSchema, currentTile: TileSchema) => {
+        const updatedTile = {...currentTile};
+        updatedTile.event = "";
+        await uploadDungeon("tile", { floor, tile: updatedTile });
     }
 
     const assignRandomTileAttributes = (tile: TileSchema, floorNum: number, biome: string) => {
@@ -267,19 +331,46 @@ export default (() => {
                 const roomRan = Math.floor(Math.random() * 40); 
                 const check = roomRan === 1 && totalRooms.length <= 3;
                 if(check) totalRooms.push([j, i]);
-                const tile = { XY: [j, i], type: check ? 'room' : '' };
+                const tile: TileSchema = { XY: [j, i], type: check ? 'room' : '' };
+                if(check) {
+                    const chance = Math.floor(Math.random() * 3);
+                    const possibleEvents = getPossibleEvents(chosenBiome, floorNum);
+                    const possibleEventIndex = Math.floor(Math.random() * possibleEvents.length);
+                    if(chance === 1) {
+                        tile.event = possibleEvents[possibleEventIndex].type;
+                        tile.type = chosenBiome;
+                    } else tile.type = "";
+                }
                 tiles.push(tile);
             }
         }
-        const downStairsRan = Math.floor(Math.random() * tiles.length);
+        const downStairsLocationIndex = Math.floor(Math.random() * tiles.length);
+        const downStairsEventChance = Math.floor(Math.random() * 3);
         const upstairsTile = getTile(tiles, { XY: characterLocation });
-        const upstairsRan = upstairsTile?.index ?? Math.floor(Math.random() * tiles.length);
-        tiles[upstairsRan].type = 'upstairs',
-        tiles[downStairsRan].type = 'downstairs',
+        const upstairsLocationIndex = upstairsTile?.index ?? Math.floor(Math.random() * tiles.length);
+        tiles[upstairsLocationIndex].type = 'upstairs';
+        tiles[downStairsLocationIndex].type = 'downstairs';
+        const possibleEvents = getPossibleEvents('downstairs', floorNum);
+        if(downStairsEventChance > 1 && possibleEvents.length) {
+            const chosenEvent = Math.floor(Math.random() * possibleEvents.length);
+            tiles[downStairsLocationIndex].event = possibleEvents[chosenEvent].type;
         
-        assignPaths([...tiles], tiles[upstairsRan].XY, tiles[downStairsRan].XY, chosenBiome, floorNum);
+            if(possibleEvents[chosenEvent].type === "locked_door" ) {
+                const availableTiles = getAvailableTiles([...tiles]);
+                const chosenTileIndex = Math.floor(Math.random() * availableTiles.length);
+                const chosenTile = availableTiles[chosenTileIndex];
+                const updatedTile = {...chosenTile.state}
+                updatedTile.type = getRandomBiome(floorNum);
+                const chosenOpenMethod = Math.floor(Math.random() * 2);
+                updatedTile.event = chosenOpenMethod === 0 ? "key" : "floor_guardian";
+                tiles[chosenTile.index] = updatedTile;
+                totalRooms.push([...updatedTile.XY]);
+            }
+        }
+        
+        assignPaths([...tiles], tiles[upstairsLocationIndex].XY, tiles[downStairsLocationIndex].XY, chosenBiome, floorNum);
         for(const coords of totalRooms) {
-            assignPaths([...tiles], tiles[upstairsRan].XY, coords, chosenBiome, floorNum);
+            assignPaths([...tiles], tiles[upstairsLocationIndex].XY, coords, chosenBiome, floorNum);
             const neighbours = [
                 [coords[0], coords[1] - 1],
                 [coords[0] - 1, coords[1]],
@@ -372,8 +463,11 @@ export default (() => {
         getTrap,
         getPossibleItems,
         getTileNeighbours,
+        getChestLoot,
         getEnemies,
         disarmTrap,
+        removeLock,
+        removeEvent,
         createFloor,
         createUIEnemy,
         connectFloor,

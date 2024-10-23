@@ -246,6 +246,18 @@ hr {
   animation: sendAttackPlayer 0.33s 1 linear;
 }
 
+.naturalist.back {
+  background: url('/src/assets/elf_back.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.naturalist.front {
+  background: url('/src/assets/elf_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 @keyframes sendAttackEnemy {
   0% {
     transform : translateY(0px);

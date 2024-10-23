@@ -1,0 +1,12 @@
+[
+    {
+        "type": "locked_door",
+        "biomes": ["downstairs"],
+        "minFloor": 5
+    },
+    {
+        "type": "chest",
+        "biomes": ["forest", "scrapyard", "crypt"],
+        "minFloor": 0
+    }
+]

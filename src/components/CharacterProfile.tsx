@@ -64,6 +64,7 @@ export default function CharacterProfile({character}: Props) {
                     <p>Attack: {character.stats.combat.attack}</p>
                     <p>Defence: {character.stats.combat.defence}</p>
                     <p>Speed: {character.stats.combat.speed}</p>
+                    <div className={`${character.role} front player`} />
                 </div>
                 <div className="profile_status">
                     <h3>Status</h3>

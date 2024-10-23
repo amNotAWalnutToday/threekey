@@ -19,7 +19,7 @@ import Tree from '../components/Tree';
 const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
 const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy,
     connectFloor, uploadDungeon, getTrap, disarmTrap, getEnemies,
-    getPossibleItems, disconnectFloor,
+    getPossibleItems, disconnectFloor, removeLock, getChestLoot, removeEvent,
 } = dungeonFns;
 const { assignItem, getPlayer } = combatFns;
 
@@ -31,6 +31,7 @@ export default function Dungeon() {
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
     const [minimap, setMinimap] = useState<TileSchema[]>([]);
     const [location, setLocation] = useState(character.location ?? {map: "1", XY: [1, 1]});
+    const [currentTile, setCurrentTile] = useState<TileSchema>({} as TileSchema);
     const [facing, setFacing] = useState('north');
 
     const [gameLog, setGameLog] = useState<string[]>([]);
@@ -46,11 +47,14 @@ export default function Dungeon() {
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
     const [isTreeOpen, setIsTreeOpen] = useState(false);
     const [inspectCharacter, setInspectCharacter] = useState({} as PlayerSchema);
+    const [loot, setLoot] = useState<{id: string, amount: number}[]>([]);
+    const [trap, setTrap] = useState("");
 
     const toggleOffMenus = (exception: string) => {
         if(exception !== "inventoryMenu") setIsInventoryOpen(() => false);
         if(exception !== "characterProfileMenu") setInspectCharacter(() => ({} as PlayerSchema));
         if(exception !== "treeMenu") setIsTreeOpen(() => false);
+        if(exception !== "lootMenu") setLoot(() => []);
     }
     
     const mapFloor = () => {
@@ -88,6 +92,14 @@ export default function Dungeon() {
         });
     }
 
+    const uploadCharacterDungeon =  async (updatedPlayer: PlayerSchema) => {
+        const { index } = getPlayer(party.players, character.pid);
+        const updatedParty = {...party.players};
+        updatedParty[index] = updatedPlayer;
+        await uploadParty("players", { partyId: party.players[0].pid, players: updatedParty });
+        setCharacter(() => updatedPlayer);
+    }
+
     const move = (dir: string) => {
         const tile = getTile(floor.tiles, { XY: location.XY })?.state;
         if(!tile) return;
@@ -101,6 +113,7 @@ export default function Dungeon() {
         if(!targetTile) return;
         if(targetTile.state.type === '') return;
         uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: [x, y] } });
+        setCurrentTile(() => targetTile.state);
         if(targetTile.state.trap) encounterTrap(targetTile.state.trap);
         getEncounters();
     }
@@ -132,17 +145,38 @@ export default function Dungeon() {
         return '';
     }
 
-    const applyUseTile = (tile: TileSchema, useType: string) => {
+    const openChest = async () => {
+        const loot = getChestLoot(floor.biome, floor.number);
+        let updatedCharacter = {...character};
+        for(let i = 0; i < loot.length; i++) {
+            updatedCharacter = assignItem(updatedCharacter, loot[i]);
+        }
+        await uploadCharacterDungeon(updatedCharacter);
+        setLoot(() => loot ?? []);
+    }
+
+    const applyUseTile = async (tile: TileSchema, useType: string) => {
         const type = useType === "type" ? tile.type : useType === "trap" ? tile.trap : tile.event;
         switch(type) {
             case "upstairs":
                 leaveFloor();
                 break;
             case "downstairs":
+                if(tile.event && tile?.event === "locked_door") return logMessage(`At the top of the stairs you find a locked door.`)
                 nextFloor('up', 1);
                 break;
             case "pitfall":
                 nextFloor('down', 2);
+                break;
+            case "key":
+                await removeLock(floor, tile);
+                break;
+            case "floor_guardian":
+                getEncounters(true);
+                break;
+            case "chest":
+                await openChest();
+                await removeEvent(floor, tile);
                 break;
         }
     }
@@ -160,6 +194,7 @@ export default function Dungeon() {
                 applyUseTile(tile, 'trap');
             }
         }
+        setTrap(() => "");
     }
 
     const enterFight = async () => {
@@ -181,6 +216,7 @@ export default function Dungeon() {
         const thisTile = getTile(floor.tiles, { XY: party.location.XY })?.state;
         if(!thisTile) return;
         if(thisTile.checked) return;
+        if(thisTile.event) return logMessage(`After looking around you notice a ${thisTile.event}.`);
         
         const chance = Math.floor(Math.random() * 100);
         if(chance > 79) {
@@ -193,12 +229,9 @@ export default function Dungeon() {
                 amount: chosenItem.id === "000" ? (3 * floor.number + 1) : 1,
             }
 
-            const { state, index } = getPlayer(party.players, character.pid);
+            const { state } = getPlayer(party.players, character.pid);
             const updatedPlayer = assignItem(state, convertedItem);
-            const updatedParty = {...party.players};
-            updatedParty[index] = updatedPlayer;
-            await uploadParty("players", { partyId: party.players[0].pid, players: updatedParty });
-            setCharacter(() => updatedPlayer);
+            uploadCharacterDungeon(updatedPlayer);
 
             logMessage(`${character.name} inspected their surroundings and found ${chosenItem.name} x${convertedItem.amount}`);
         } else if(chance > 49) {
@@ -253,6 +286,7 @@ export default function Dungeon() {
 
     const encounterTrap = (trap: string) => {
         logMessage(`You have encountered a ${trap} trap!`);
+        setTrap(() => trap);
     }
 
     const initializeDungeon = async () => {
@@ -274,6 +308,8 @@ export default function Dungeon() {
         } else {
             await uploadParty('wasInCombat', { partyId: party.players[0].pid, isInCombat: false });
             assignMinimap(newFloor.tiles, party.location.XY, 'north');
+            const currentTile = getTile(newFloor.tiles, { XY: party.location.XY });
+            if(currentTile?.state.event === "floor_guardian") await removeLock(newFloor, currentTile.state);
         }
 
         await connectFloor(Number(party.location.map), setFloor);
@@ -335,6 +371,11 @@ export default function Dungeon() {
                 {/* <p>Size: {floor.tiles.length / 10}x{floor.tiles.length / 10}</p> */}
             </div>
             <div className="minimap_group">
+                {trap
+                &&
+                <div>
+                    <h2>{trap}</h2>
+                </div>}
                 {party?.enemies?.length
                 &&
                 <div className='btn_group' >
@@ -365,6 +406,7 @@ export default function Dungeon() {
                         onClick={() => {
                             const thisTile = getTile(floor.tiles, { XY: party.location.XY })?.state ?? {} as TileSchema;
                             let type = 'type';
+                            if(thisTile.event && thisTile?.event !== "locked_door") type = 'event';
                             if(thisTile.trap) type = 'trap';
                             applyUseTile(thisTile, type);
                         }}
@@ -377,12 +419,16 @@ export default function Dungeon() {
                             const thisTile = getTile(floor.tiles, { XY: party.location.XY })?.state ?? {} as TileSchema;
                             applyDisarmTile(thisTile);
                         }}
+                        disabled={!trap}
                     >
                         disarm
                     </button>
                     <button
                         className='menu_btn'
-                        onClick={() => console.log(createFloor([1, 1], 1, 'a'))}
+                        onClick={() => {
+                            console.log(getTile(floor.tiles, { event: 'chest' }))
+                            // console.log(getChestLoot(floor.biome, floor.number));
+                        }}
                     >
                         event
                     </button>
@@ -449,6 +495,20 @@ export default function Dungeon() {
                 limit={10}
                 logMessage={logMessage}
             /> 
+            }
+            { loot.length
+            &&
+            <Inventory 
+                inventory={loot}
+                position="center"
+                buttons={[]}
+                limit={100}
+                logMessage={logMessage}
+                toggleOff={() => {
+                    setLoot(() => []);
+                    toggleOffMenus("lootMenu");
+                }}
+            />
             }
             { inspectCharacter.pid
             &&
