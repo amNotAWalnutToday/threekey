@@ -4,48 +4,62 @@
         "name": "Coins",
         "rarity": "common",
         "price": 1,
-        "stack": 2000000
+        "stack": 2000000,
+        "biomes": ["forest", "scrapyard", "crypt"],
+        "minFloor": 0
     },
     {
         "id": "001",
         "name": "Health Potion",
         "rarity": "common",
         "price": 100,
-        "stack": 3
+        "stack": 3,
+        "biomes": ["forest", "scrapyard", "crypt"],
+        "minFloor": 0
     },
     {
         "id": "002",
         "name": "Town Skill Scroll",
         "rarity": "common",
         "price": 1000,
-        "stack": 5
+        "stack": 5,
+        "biomes": [],
+        "minFloor": 0
     },
     {
         "id": "003",
         "name": "Town Skill Scroll",
         "rarity": "uncommon",
         "price": 1000,
-        "stack": 5
+        "stack": 5,
+        "biomes": [],
+        "minFloor": 0
     },
     {
         "id": "004",
         "name": "Town Skill Scroll",
         "rarity": "rare",
         "price": 1000,
-        "stack": 5
+        "stack": 5,
+        "biomes": [],
+        "minFloor": 0
     },
     {
         "id": "005",
         "name": "Town Skill Scroll",
         "rarity": "epic",
         "price": 1000,
-        "stack": 5
+        "stack": 5,
+        "biomes": [],
+        "minFloor": 0
     },
     {
         "id": "006",
         "name": "Town Skill Scroll",
         "rarity": "legendary",
         "price": 1000,
-        "stack": 5
+        "stack": 5,
+        "biomes": [],
+        "minFloor": 0
     }
 ]

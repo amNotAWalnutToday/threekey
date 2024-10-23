@@ -217,16 +217,18 @@ export default (() => {
     const assignItem = (player: PlayerSchema, item: {id:string, amount:number}) => {
         const fullItem = populateItem(item);
         let inInventory = false;
-        for(let i = 0; i < player.inventory.length; i++) {
+        const playerInventory = player.inventory ?? [];
+        for(let i = 0; i < playerInventory.length; i++) {
             if(!fullItem) return player;
-            if(player.inventory[i].id === item.id) {
-                const stackedAmount = player.inventory[i].amount + item.amount;
-                if(stackedAmount >= fullItem.stack) player.inventory[i].amount = fullItem.stack;
-                else player.inventory[i].amount += item.amount;
+            if(playerInventory[i].id === item.id) {
+                const stackedAmount = playerInventory[i].amount + item.amount;
+                if(stackedAmount >= fullItem.stack) playerInventory[i].amount = fullItem.stack;
+                else playerInventory[i].amount += item.amount;
                 inInventory = true;
             }
         }
-        if(!inInventory) player.inventory.push(item);
+        if(!inInventory) playerInventory.push(item);
+        player.inventory = playerInventory;
         return player;
     }
 

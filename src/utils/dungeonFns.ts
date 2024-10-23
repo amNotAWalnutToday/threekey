@@ -4,6 +4,7 @@ import TileSchema from "../schemas/TileSchema";
 import FloorSchema from "../schemas/FloorSchema";
 import trapData from '../data/traps.json';
 import enemyData from '../data/enemies.json';
+import itemData from '../data/items.json';
 
 const { db } = accountFns;
 
@@ -51,6 +52,18 @@ export default (() => {
         }
 
         return possibleTraps;
+    }
+
+    const getPossibleItems = (biome: string, floorNum: number) => {
+        const possibleItems = [];
+
+        for(const item of itemData) {
+            for(const itemBiome of item.biomes) {
+                if(biome === itemBiome && item.minFloor <= floorNum) possibleItems.push(item);
+            }
+        }
+
+        return possibleItems;
     }
 
     const getBiomes = (floorNum: number) => {
@@ -157,7 +170,7 @@ export default (() => {
         const shouldTrap = Math.floor(Math.random() * 100);
         const possibleTrapRan = Math.floor(Math.random() * possibleTraps.length);
         if(shouldTrap >= 70) {
-            tile.trap = possibleTraps[possibleTrapRan].type;
+            tile.trap = possibleTraps[possibleTrapRan].type ?? "";
         }
         return tile;
     }
@@ -302,7 +315,6 @@ export default (() => {
                 const data: FloorSchema = await snapshot.val();
                 if(!data) return data;
                 if(floorNum === data.number) setFloor(() => data);
-                console.log(getPossibleTraps(data.biome, floorNum));
             });
         } catch(e) {
             return console.error(e);
@@ -349,6 +361,7 @@ export default (() => {
         getTile,
         getFloor,
         getTrap,
+        getPossibleItems,
         getTileNeighbours,
         getEnemies,
         disarmTrap,

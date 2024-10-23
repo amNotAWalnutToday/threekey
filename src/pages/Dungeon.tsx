@@ -19,11 +19,12 @@ import Tree from '../components/Tree';
 const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
 const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy,
     connectFloor, uploadDungeon, getTrap, disarmTrap, getEnemies,
+    getPossibleItems,
 } = dungeonFns;
-// const { upload } = combatFns;
+const { assignItem, getPlayer } = combatFns;
 
 export default function Dungeon() {
-    const { character, enemies, setEnemies, setParty, party, user } = useContext(UserContext);
+    const { character, enemies, setEnemies, setParty, party, user, setCharacter } = useContext(UserContext);
     const navigate = useNavigate();
 
     const [isHost, setIsHost] = useState(false); 
@@ -151,7 +152,7 @@ export default function Dungeon() {
         if(!trap) return;
         if(trap.disarmType === "random") {
             const ran = Math.floor(Math.random() * 100);
-            if(ran > 49) {
+            if(ran > 2) {
                 logMessage(`${trap.type} has been disarmed.`)
                 disarmTrap(tile, floor);
             } else { 
@@ -168,12 +169,46 @@ export default function Dungeon() {
 
     const avoidFight = () => {
         const ran = Math.floor(Math.random() * 100);
-        if(ran > 49) {
+        if(ran > 1) {
             logMessage('You successfully avoided the enemies.');
             uploadParty("enemies", { partyId: party.players[0].pid, enemyIds: [] });
         } else { 
             enterFight();
         }
+    }
+
+    const inspectTile = async () => {
+        const thisTile = getTile(floor.tiles, { XY: party.location.XY })?.state;
+        if(!thisTile) return;
+        if(thisTile.checked) return;
+        
+        const chance = Math.floor(Math.random() * 100);
+        if(chance > 79) {
+            const possibleItems = getPossibleItems(thisTile.type, floor.number);
+            const ran = Math.floor(Math.random() * possibleItems.length);
+            const chosenItem = possibleItems[ran];
+
+            const convertedItem = {
+                id: chosenItem.id,
+                amount: chosenItem.id === "000" ? (3 * floor.number + 1) : 1,
+            }
+
+            const { state, index } = getPlayer(party.players, character.pid);
+            const updatedPlayer = assignItem(state, convertedItem);
+            const updatedParty = {...party.players};
+            updatedParty[index] = updatedPlayer;
+            await uploadParty("players", { partyId: party.players[0].pid, players: updatedParty });
+            setCharacter(() => updatedPlayer);
+
+            logMessage(`${character.name} inspected their surroundings and found ${chosenItem.name} x${convertedItem.amount}`);
+        } else if(chance > 49) {
+            getEncounters(true);
+        } else {
+            logMessage(`You see nothing around other than the ${thisTile.type} scenery`);
+        }
+
+        thisTile.checked = true;
+        await uploadDungeon("tile", { floor, tile: thisTile })
     }
 
     const leaveFloor = async () => {
@@ -199,15 +234,17 @@ export default function Dungeon() {
         const start = getTile(newFloor.tiles, { type: dir === "up" ? "upstairs" : "downstairs" })?.state;
         if(!start) return newFloor;
         uploadParty('location', { partyId: party.players[0].pid, location: { map: `${newMapLocation}`, XY: start.XY } });
+        await connectFloor(newMapLocation, setFloor);
         return newFloor;
     }
 
-    const getEncounters = () => {
-        const encountered = Math.floor(Math.random() * 3);
+    const getEncounters = (guarantee?: boolean) => {
+        const encountered = guarantee ? 1 : Math.floor(Math.random() * 10);
         if(encountered === 1) {
             const amount = Math.floor(Math.random() * 4);
             const enemies = getEnemies(floor.number, floor.biome, amount);
             uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: enemies });
+            logMessage(`${character.name} ran into ${amount} enemies.`);
         } else {
             setEnemies(() => []);
         }
@@ -248,10 +285,11 @@ export default function Dungeon() {
     }, []);
 
     const changeFloor = async () => {
-        const nextFloor = await getFloor(Number(party.location.map));
+        const nextFloor = await getFloor(Number(party.location.map)) ?? {} as FloorSchema;
         console.log(nextFloor);
-        if(!nextFloor) return;
+        if(!nextFloor.biome) return;
         setFloor(() => nextFloor);
+        await connectFloor(nextFloor.number, setFloor);
     }
 
     useEffect(() => {
@@ -275,6 +313,13 @@ export default function Dungeon() {
         const currentTile = getTile(floor.tiles, {XY: party.location.XY})?.state;
         if(currentTile?.trap) return false;
         if(party?.enemies) return false;
+        return true;
+    }
+
+    const checkCanInspect = () => {
+        if(!floor.tiles) return;
+        const currentTile = getTile(floor.tiles, {XY: party.location.XY})?.state;
+        if(currentTile?.checked) return false;
         return true;
     }
 
@@ -309,7 +354,8 @@ export default function Dungeon() {
                 <div className='btn_group'>
                     <button
                         className='menu_btn'
-                        onClick={() => console.log()}
+                        onClick={() => inspectTile()}
+                        disabled={!checkCanInspect()}
                     >
                         inspect
                     </button>
@@ -335,7 +381,7 @@ export default function Dungeon() {
                     </button>
                     <button
                         className='menu_btn'
-                        onClick={() => console.log(getEnemies(1, 'forest', 5))}
+                        onClick={() => console.log(createFloor([1, 1], 1, 'a'))}
                     >
                         event
                     </button>
@@ -396,7 +442,7 @@ export default function Dungeon() {
             { isInventoryOpen 
             && 
             <Inventory 
-                inventory={character.inventory} 
+                inventory={character.inventory ?? []} 
                 position="center"
                 buttons={["use", "destroy"]}
                 limit={10}
