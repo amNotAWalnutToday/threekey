@@ -1,4 +1,4 @@
-import { get, ref, onValue, set } from "firebase/database";
+import { get, ref, onValue, set, off } from "firebase/database";
 import accountFns from "./accountFns";
 import TileSchema from "../schemas/TileSchema";
 import FloorSchema from "../schemas/FloorSchema";
@@ -321,6 +321,15 @@ export default (() => {
         }
     }
 
+    const disconnectFloor = async (floorNum: number) => {
+        try {
+            const floorRef = ref(db, `/dungeon/${floorNum}`);
+            off(floorRef);
+        } catch(e) {
+            return console.error(e);
+        }
+    }
+
     const uploadDungeon = async (
         type: string, 
         payload: { 
@@ -368,6 +377,7 @@ export default (() => {
         createFloor,
         createUIEnemy,
         connectFloor,
+        disconnectFloor,
         uploadDungeon,
     }
 })();

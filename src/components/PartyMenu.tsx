@@ -1,8 +1,13 @@
 import { useContext } from "react"
 import UserContext from "../data/Context"
 import ResourceBar from "./ResourceBar";
+import PlayerSchema from "../schemas/PlayerSchema";
 
-export default function PartyMenu() {
+type Props = {
+    toggleCharacterProfile: (player: PlayerSchema) => void;
+}
+
+export default function PartyMenu({toggleCharacterProfile}: Props) {
     const { party } = useContext(UserContext);
 
     const mapParty = () => {
@@ -11,6 +16,7 @@ export default function PartyMenu() {
                 <div
                     key={`party-player-${index}`}
                     className="party_menu_player character_btn"
+                    onClick={() => toggleCharacterProfile(player)}
                 >
                     <p>{player.name} Lvl.{player.stats.level} {player.stats.rank}</p>
                     <div className="party_menu_bars">

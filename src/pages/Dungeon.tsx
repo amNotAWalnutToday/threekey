@@ -19,7 +19,7 @@ import Tree from '../components/Tree';
 const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
 const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy,
     connectFloor, uploadDungeon, getTrap, disarmTrap, getEnemies,
-    getPossibleItems,
+    getPossibleItems, disconnectFloor,
 } = dungeonFns;
 const { assignItem, getPlayer } = combatFns;
 
@@ -234,6 +234,7 @@ export default function Dungeon() {
         const start = getTile(newFloor.tiles, { type: dir === "up" ? "upstairs" : "downstairs" })?.state;
         if(!start) return newFloor;
         uploadParty('location', { partyId: party.players[0].pid, location: { map: `${newMapLocation}`, XY: start.XY } });
+        await disconnectFloor(floor.number);
         await connectFloor(newMapLocation, setFloor);
         return newFloor;
     }
@@ -455,7 +456,12 @@ export default function Dungeon() {
                 character={inspectCharacter}
             />
             }
-            {party.players && <PartyMenu />}
+            {party.players && <PartyMenu 
+                toggleCharacterProfile={(player: PlayerSchema) => {
+                    setInspectCharacter((prev) => prev.pid ? {} as PlayerSchema : {...player});
+                    toggleOffMenus("characterProfileMenu");
+                }}
+            />}
         </div>
     )
 }

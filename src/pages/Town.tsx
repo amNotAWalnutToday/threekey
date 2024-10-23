@@ -112,7 +112,10 @@ export default function Town() {
             {party.players
             &&
             <PartyMenu
-            
+                toggleCharacterProfile={(player: PlayerSchema) => {
+                    setInspectCharacter((prev) => prev.pid ? {} as PlayerSchema : {...player});
+                    toggleOffMenus("characterProfileMenu");
+                }}
             />
             }
             {!party.players ? 
@@ -220,13 +223,6 @@ export default function Town() {
                 logMessage={logMessage}
             />
             }
-            <button
-                onClick={() => {
-                    const updatedCharacter = {...character};
-                    updatedCharacter.stats.combat.resources.mana.cur = 100;
-                    uploadCharacterTown(updatedCharacter);
-                }}
-            >manad down</button>
         </div>
     )
 }

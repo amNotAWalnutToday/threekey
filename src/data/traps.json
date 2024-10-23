@@ -1,7 +1,7 @@
 [
     {
         "type": "pitfall",
-        "biomes": ["forest", "scrapyard"],
+        "biomes": ["forest", "scrapyard", "crypt"],
         "disarmType": "random",
         "disarmSkill": "",
         "minFloor": -1
