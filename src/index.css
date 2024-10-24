@@ -19,6 +19,7 @@
   --golden_fade: var(--orange);
   --brown: rgba(114, 87, 18, 0.9);
 
+  --black-l-gradient: linear-gradient(#24242487, #1111117a);
   --white-r-gradient: radial-gradient(rgb(193, 193, 193), rgb(79, 79, 79));
   --green-r-gradient: radial-gradient(lime, darkgreen);
   --blue-r-gradient: radial-gradient(rgb(0, 114, 213), rgb(23, 23, 209));
@@ -177,7 +178,7 @@ hr {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background: linear-gradient(#24242487, #1111117a);
+  background: var(--black-l-gradient);
   box-shadow: 4px 4px 16px black;
 }
 

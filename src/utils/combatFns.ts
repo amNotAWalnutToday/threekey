@@ -94,9 +94,14 @@ export default (() => {
         return av > 0 && speed > 0 ? av : 1;
     }
 
+    const getRank = (value: number) => {
+        const ranks = ['', 'F', 'E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS'];
+        return ranks[Math.min(value, ranks.length - 1)];
+    }
+
     const getRankValue = (rank: string) => {
-        const ranks = ['', 'E', 'D', 'C', 'B', 'A', 'S'];
-        return ranks.indexOf(rank);
+        const ranks = ['', 'F', 'E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS'];
+        return Math.min(ranks.indexOf(rank), ranks.length - 1);
     }
 
     const getXpReceived = (enemy: PlayerSchema, party: PartySchema) => {
@@ -108,10 +113,19 @@ export default (() => {
 
     const getLevelUpReq = (level: number, rank: string) => {
         const baseXp = 5;
-        let rankValue = getRankValue(rank);
-        if(rankValue < 1) rankValue = 1;
+        const rankValue = 1 + getRankValue(rank);
         const increment = (level * baseXp) * rankValue;
         return baseXp + increment;
+    }
+
+    const getCanLevelUp = (player: PlayerSchema) => {
+        const levelReq = getLevelUpReq(player.stats.level, player.stats.rank);
+        const rankVal = getRankValue(player.stats.rank);
+        const currentMaxLevel = rankVal > 0 ? rankVal * 10 : 5;
+        if(player.stats.xp > levelReq && currentMaxLevel > player.stats.level) {
+            return true;
+        }
+        return false;
     }
 
     const getLoot = (enemies: PlayerSchema[]) => {
@@ -137,10 +151,7 @@ export default (() => {
 
     const assignXp = (player: PlayerSchema, xp: number) => {
         player.stats.xp += xp;
-        const levelReq = getLevelUpReq(player.stats.level, player.stats.rank);
-        const rankVal = getRankValue(player.stats.rank);
-        const currentMaxLevel = rankVal > 0 ? rankVal * 10 : 5;
-        if(player.stats.xp > levelReq && currentMaxLevel > player.stats.level) {
+        if(getCanLevelUp(player)) {
             player.stats.level += 1;
             player.stats.xp = 0;
             player = assignStatUpsByRole(player);
@@ -155,7 +166,19 @@ export default (() => {
                 updatedPlayer.stats.combat.attack += 1;
                 updatedPlayer.stats.combat.defence += 1;
                 updatedPlayer.stats.combat.health.max += 3;
-                updatedPlayer.stats.combat.resources.mana.max += 1;
+                break;
+        }
+
+        return updatedPlayer;
+    }
+
+    const assignRankStatUpsByRole = (player: PlayerSchema) => {
+        const updatedPlayer = {...player};
+        switch(updatedPlayer.role) {
+            case "naturalist":
+                updatedPlayer.stats.combat.speed += 5;
+                updatedPlayer.stats.combat.health.max += 5;
+                updatedPlayer.stats.combat.resources.mana.max += 10;
                 break;
         }
 
@@ -575,9 +598,12 @@ export default (() => {
         getAbilityLevelEffect,
         getStatus,
         getActionValue,
+        getCanLevelUp,
         getLoot,
         getXpReceived,
         getLevelUpReq,
+        getRank,
+        getRankValue,
         getItem,
         removeItem,
         applyItem,
@@ -586,6 +612,7 @@ export default (() => {
         assignXp,
         assignItem,
         assignMaxOrMinStat,
+        assignRankStatUpsByRole,
         assignBuffs,
         createPlayer,
         createEnemy,

@@ -197,6 +197,18 @@
     background-color: red;
 }
 
+.rankup_box {
+    position: absolute;
+    bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--black-l-gradient);
+    border-bottom: 2px solid goldenrod;
+    box-shadow: 4px 4px 12px black;
+}
+
 .gamelog_pos {
     position: absolute;
     bottom: 1rem;

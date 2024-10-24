@@ -15,6 +15,7 @@ import CharacterProfile from "../components/CharacterProfile";
 import Log from "../components/Log";
 import UIButtonBar from "../components/UIBtnBar";
 import Shop from "./Shop";
+import Guild from "./Guild";
 
 const { 
     getParties, createParty, joinParty, leaveParty, destroyRoom, uploadParty,
@@ -183,7 +184,7 @@ export default function Town() {
                 <button 
                     className="menu_btn" 
                     onClick={() => { 
-                        setIsInnOpen((prev) => !prev);
+                        setIsGuildOpen((prev) => !prev);
                         toggleOffMenus("guildMenu");
                     }}
                     disabled={town?.guild?.level < 1}
@@ -252,6 +253,14 @@ export default function Town() {
             &&
             <Shop 
                 town={town}
+                logMessage={logMessage}
+            />
+            }
+            { isGuildOpen
+            &&
+            <Guild 
+                town={town}
+                uploadCharacterTown={uploadCharacterTown}
                 logMessage={logMessage}
             />
             }
