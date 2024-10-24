@@ -239,6 +239,7 @@ export default function Combat() {
     /**CLIENT STATE*/
     const [selectedPlayer, setSelectedPlayer] = useState<{state: PlayerSchema, index: number} | null>({ state: players[0], index: 0 });
     const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
+    const [selectedTargetType, setSelectedTargetType] = useState("");
     const [isHost, setIsHost] = useState(user?.uid ? party.players[0].pid === character.pid : false);
     const [messages, setMessages] = useState<string[]>([]);
     const characterIndex = user?.uid ? getPlayer(party.players, character.pid).index : 0;
@@ -291,36 +292,37 @@ export default function Combat() {
     }
 
     const selectTarget = (target: string) => {
+        const targetPlayer = getPlayer([...players, ...enemies], target)?.state;
         setSelectedTargets((prev) => {
-            if(!prev.length || prev[0] !== target) return [target];
+            if(!prev.length || prev[0] !== target) { 
+                setSelectedTargetType(() => targetPlayer.npc ? "single" : targetPlayer.pid === character.pid ? "self" : "ally");
+                return [target];
+            }
             else return [];    
         });
     }
 
     const selectTargetByAbility = (ability: string) => {
         const filteredPlayers = [...enemies]; 
-        if(ability === "single") {
+        if(ability === "single" && selectedTargetType !== "single") {
             if(!filteredPlayers.length) return;
-            if(selectedTargets.length) {
-                if(selectedTargets.length > 1) {
-                    setSelectedTargets(() => [filteredPlayers[0].pid]);
-                }
-            } else if(!selectedTargets.length) {
-                setSelectedTargets(() => [filteredPlayers[0].pid]);
-
-            }
+            setSelectedTargets(() => [filteredPlayers[0].pid]);
+            setSelectedTargetType(() => "single");
         }
         else if(ability === "aoe") {
             setSelectedTargets(() => {
                 return Array.from(filteredPlayers, (player) => player.pid);
             });
-        } else if(ability === "ally") {
+            setSelectedTargetType(() => "aoe");
+        } else if(ability === "ally" && selectedTargetType !== "ally") {
             setSelectedTargets(() => {
                 const selectableTargets = [...players].filter((p) => p.pid !== character.pid);
                 return selectableTargets.length ? [selectableTargets[0].pid] : [];
             })
-        } else if(ability === "self") {
+            setSelectedTargetType(() => "ally");
+        } else if(ability === "self" && selectedTargetType !== "self") {
             setSelectedTargets(() => [character.pid]);
+            setSelectedTargetType(() => "self");
         }
     }
 

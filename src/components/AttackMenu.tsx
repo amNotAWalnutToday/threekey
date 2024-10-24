@@ -70,6 +70,7 @@ export default function AttackMenu(
                 <button 
                     key={`ability-${ind}`}
                     onClick={() => { 
+                        if(!selectedTargets.length) return;
                         if(!checkCanUseAbility(ability, selectedPlayer.state)) return;
                         target(Array.from(selectedTargets), ability);
                     }} 
