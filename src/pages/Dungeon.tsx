@@ -80,6 +80,7 @@ export default function Dungeon() {
                 >
                     <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p>
                     <p>{tile.type}</p>
+                    {index === 4 && <div className={`back ${character.role} minimap_player`} />}
                 </div>
             ) : (
                 <div

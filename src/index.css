@@ -118,6 +118,12 @@ hr {
   background-color: white;
 }
 
+.minimap_player {
+  width: 64px;
+  height: 64px;
+  transform: translate(10px, -30px);
+}
+
 .target {
   box-shadow: 0px -5px 32px 4px crimson;
 }

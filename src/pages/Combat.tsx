@@ -244,9 +244,9 @@ export default function Combat() {
     const [messages, setMessages] = useState<string[]>([]);
     const characterIndex = user?.uid ? getPlayer(party.players, character.pid).index : 0;
 
-    const logMessage = (message: string) => {
+    const logMessage = (receivedMessages: string[]) => {
         const updatedGamelog = [...messages];
-        updatedGamelog.push(message);
+        receivedMessages.forEach((message) => updatedGamelog.push(message));
         if(updatedGamelog.length > 101) updatedGamelog.shift();
         setMessages(() => updatedGamelog);
     }
@@ -478,6 +478,14 @@ export default function Combat() {
         return damage > 0 ? damage : 1;
     }
 
+    const chooseLogMessage = (damageType: string, name: string, amount: number, status: string) => {
+        let message = "";
+        if(damageType === "damage") message = `${name} took ${amount} damage`;
+        else if(damageType === "heal") message = `${name} has received ${amount} of healing`;
+        else if(damageType === "status") message = `${name} has received the status ${status}`
+        return message;
+    }
+
     const attack = useCallback((userId: string, targets: string[], ability: AbilitySchema) => {
         const user = getPlayer([...players, ...enemies], userId).state;
         const targetNames = Array.from(targets, (id) => {
@@ -486,7 +494,9 @@ export default function Combat() {
         const abilityRef = getAbilityRef(user, ability.id).state;
         const { damageType } = ability;
 
-        logMessage(`${user.name} uses ${ability.name} on ${targetNames.join(", ")}`);
+        const messagesToLog = [];
+        messagesToLog.push(`${user.name} uses ${ability.name}`);
+
         targets.forEach((targetRef: string, i: number) => {
             const target = getPlayer([...players, ...enemies], targetRef);
             let amount = (
@@ -494,6 +504,7 @@ export default function Combat() {
                     ? ability.damage + abilityRef.level
                     : getDamageFormula(user, target.state, ability.damage, abilityRef.level)
             );
+            messagesToLog.push(chooseLogMessage(damageType, target.state.name, amount, ability.name));
             if(damageType === "status" && ability.damage < 1) amount = 0;
 
             if(target.state.npc && !user.npc) {
@@ -510,6 +521,8 @@ export default function Combat() {
             }
         });
 
+        logMessage(messagesToLog);
+        console.log(messagesToLog);
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: { fieldId: field.id }});
     }, [players, enemies]);
 
