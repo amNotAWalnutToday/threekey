@@ -59,33 +59,52 @@ hr {
 
 .sidemenu {
   position: absolute;
-  height: 100vh;
-  width: 200px;
+  bottom: 1rem;
+  left: 1rem;
+  height: 240px;
+  width: 600px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
   background-color: #44444433;
-  padding: 1.5rem 0;
+  /* padding: 1.5rem 0; */
+  z-index: 5;
+}
+
+.attacks_menu {
+  overflow-y: auto;
+  display: grid;
+  height: 100%;
+  width: 100%;
+  grid-template-columns: repeat(4, 128px);
+  grid-template-rows: repeat(auto-fit, 64px);
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid_header {
+  grid-column: 2 / -1;
 }
 
 .side_1 {
   position: absolute;
   display: flex;
   justify-content: space-around;
-  top: 250px;
-  left: 100px;
-  width: 1000px;
-  height: 100%;
+  top: 20%;
+  left: 0%;
+  width: 100%;
+  height: 100px;
 }
 
 .side_2 {
   position: absolute;
   display: flex;
   justify-content: space-around;
-  bottom: 200px;
-  left: 100px;
-  width: 1000px;
+  top: 60%;
+  left: 0%;
+  width: 100%;
   height: 100px;
 }
 
@@ -134,10 +153,42 @@ hr {
 }
 
 .battleTimer {
+  position: absolute;
+  top: 1rem;
   width: 1000px;
   height: 15px;
   background-color: rgba(218, 165, 32, 0.613);
   z-index: 1;
+  box-shadow: 4px 4px 16px black;
+}
+
+.action_queue {
+  position: absolute;
+  top: 10%;
+  left: 5rem;
+  height: 300px;
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(#24242487, #1111117a);
+  box-shadow: 4px 4px 16px black;
+}
+
+.action_group {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.5rem;
+}
+
+.action {
+  text-align: center;
+  background: var(--white-r-gradient);
+}
+
+.action p {
+  text-shadow: 2.5px 2px 1px black;
 }
 
 .cen-flex {

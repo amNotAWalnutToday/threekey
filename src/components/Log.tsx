@@ -26,7 +26,7 @@ export default function Log({messages}: Props) {
     }
 
     return (
-        <div className="gamelog menu">
+        <div className="gamelog gamelog_pos">
             <div className="gamelog_message_group" ref={container} >{mapMessages()}</div>
         </div>
     )

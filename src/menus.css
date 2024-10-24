@@ -62,6 +62,17 @@
     text-align: center; 
 }
 
+.small_menu_btn {
+    font-size: 16px;
+    text-shadow: 2.5px 2px 1px black;
+    padding: 0.5rem 1rem;
+    color: white;
+    border: var(--border_white_outset);
+    background-color: var(--silver);
+    border-radius: 3px;
+    text-align: center; 
+}
+
 .menu_btn.selected {
     background-color: goldenrod;
 }
@@ -186,22 +197,34 @@
     background-color: red;
 }
 
-.gamelog {
+.gamelog_pos {
     position: absolute;
     bottom: 1rem;
     right: 1rem;
     min-height: 200px;
     max-height: 200px;
     min-width: 600px;
-    max-width: 600px;
+    max-width: 600px; 
+}
+
+.gamelog {
     display: flex;
-    justify-content: flex-end;
     gap: 1rem;
+    background: linear-gradient(#242424, #111);
+    display: flex;
+    border-bottom: 2px solid goldenrod;
+    box-shadow: 4px 4px 16px black;
 }
 
 .gamelog_message_group {
     overflow-y: scroll;
+    width: 100%;
     padding-top: 1rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .message {

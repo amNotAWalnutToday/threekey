@@ -9,6 +9,8 @@ import abiltyData from '../data/abilities.json';
 import statusData from '../data/statuses.json';
 import PlayersContainer from "../components/PlayersContainer";
 import AttackMenu from "../components/AttackMenu";
+import Log from "../components/Log";
+import ActionQueue from "../components/ActionQueue";
 import UserContext from "../data/Context";
 import AbilitySchema from "../schemas/AbilitySchema";
 import ActionSchema from "../schemas/ActionSchema";
@@ -223,7 +225,7 @@ export default function Combat() {
 
     /**GAME DATA*/
     const [field, setField] = useState<FieldSchema>({
-        id: party.players[0].pid,
+        id: user?.uid ? party?.players[0]?.pid : "",
         start: false,
         joinedPlayers: 0,
         players: [],
@@ -237,8 +239,16 @@ export default function Combat() {
     /**CLIENT STATE*/
     const [selectedPlayer, setSelectedPlayer] = useState<{state: PlayerSchema, index: number} | null>({ state: players[0], index: 0 });
     const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
-    const [isHost, setIsHost] = useState(party.players[0].pid === character.pid);
-    const characterIndex = getPlayer(party.players, character.pid).index;
+    const [isHost, setIsHost] = useState(user?.uid ? party.players[0].pid === character.pid : false);
+    const [messages, setMessages] = useState<string[]>([]);
+    const characterIndex = user?.uid ? getPlayer(party.players, character.pid).index : 0;
+
+    const logMessage = (message: string) => {
+        const updatedGamelog = [...messages];
+        updatedGamelog.push(message);
+        if(updatedGamelog.length > 101) updatedGamelog.shift();
+        setMessages(() => updatedGamelog);
+    }
 
     const initialize = (
         players: PlayerSchema[], 
@@ -468,10 +478,13 @@ export default function Combat() {
 
     const attack = useCallback((userId: string, targets: string[], ability: AbilitySchema) => {
         const user = getPlayer([...players, ...enemies], userId).state;
+        const targetNames = Array.from(targets, (id) => {
+            return getPlayer([...players, ...enemies], id).state.name;
+        });
         const abilityRef = getAbilityRef(user, ability.id).state;
         const { damageType } = ability;
 
-
+        logMessage(`${user.name} uses ${ability.name} on ${targetNames.join(", ")}`);
         targets.forEach((targetRef: string, i: number) => {
             const target = getPlayer([...players, ...enemies], targetRef);
             let amount = (
@@ -658,6 +671,7 @@ export default function Combat() {
                 {...props}
                 selectedPlayer={{state: character, index: -1}}
                 target={target}
+                actionValue={actionValue}
             />
             <PlayersContainer
                 {...props}
@@ -669,9 +683,17 @@ export default function Combat() {
                 players={field.players}
                 sideIndex={2}
             />
+            <Log 
+                messages={messages}
+            />
+            <ActionQueue 
+                actionQueue={actionQueue}
+                players={field.players}
+                enemies={field.enemies}
+            />
             <div className="cen-flex">
                 <div className="battleTimer">
-                    <div style={{width: getTime()}} className="fill">{actionValue}AV</div>
+                    <div style={{width: getTime()}} className="fill" />
                 </div>
             </div>
             {

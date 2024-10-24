@@ -7,10 +7,11 @@ import combatFns from "../utils/combatFns";
 const { getAbility, getAbilityRef } = combatFns;
 
 type Props = {
-    selectedPlayer: { state: PlayerSchema, index: number } | null
-    selectedTargets: string[],
+    selectedPlayer: { state: PlayerSchema, index: number } | null;
+    selectedTargets: string[];
     target: (targets: string[], ability: AbilitySchema) => void;
     selectTargetByAbility: (ability: string) => void;
+    actionValue: number;
 }
 
 export default function AttackMenu(
@@ -18,7 +19,8 @@ export default function AttackMenu(
         selectedPlayer, 
         selectedTargets,
         target, 
-        selectTargetByAbility
+        selectTargetByAbility,
+        actionValue,
     }: Props
 ) {
     const [abilities, setAbilities] = useState<AbilitySchema[]>([]);
@@ -72,7 +74,7 @@ export default function AttackMenu(
                         target(Array.from(selectedTargets), ability);
                     }} 
                     onMouseEnter={() => selectTargetByAbility(ability.type)}
-                    className="btn"
+                    className="small_menu_btn"
                 >
                     {ability.name}
                 </button>
@@ -81,11 +83,14 @@ export default function AttackMenu(
     }
 
     return (
-        <div className="sidemenu" >
-            <div>
+        <div className="sidemenu gamelog" >
+            {/* <div>
                 <p>{selectedPlayer?.state?.name ?? "*_____*"}</p>
-            </div> 
-            { mapAbilities() }
+            </div>  */}
+            <div className="attacks_menu">
+                <h2 className="grid_header" >Action Points: {actionValue}</h2>
+                { mapAbilities() }
+            </div>
         </div>
     )
 }
