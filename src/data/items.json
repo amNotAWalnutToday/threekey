@@ -3,7 +3,7 @@
         "id": "000",
         "name": "Coins",
         "rarity": "common",
-        "price": 1,
+        "price": 0,
         "stack": 2000000,
         "usable": false,
         "chestOnly": false,
@@ -17,6 +17,7 @@
         "price": 100,
         "stack": 5,
         "usable": true,
+        "shopLevel": 1,
         "chestOnly": false,
         "biomes": ["forest", "scrapyard", "crypt"],
         "minFloor": 0

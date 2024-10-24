@@ -5,6 +5,7 @@ import itemData from '../data/items.json';
 import UserContext from "../data/Context";
 import townFns from "../utils/townFns";
 import Item from "./Item";
+import PlayerSchema from "../schemas/PlayerSchema";
 
 const { populateItem, applyItem, removeItem, getPlayer, assignItem, getItem } = combatFns;
 const { uploadParty, syncPartyMemberToAccount } = partyFns;
@@ -40,12 +41,23 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                 <Item 
                     key={`item-${index}`}
                     item={fullItem}
-                    amount={item.amount}
+                    amount={getButton("buy") ? fullItem.price : item.amount}
                     selected={selectedItem?.state?.id === item.id}
                     click={selectItem}
                 />
             )
         });
+    }
+
+    const uploadCharacterInventory = async (updatedPlayer: PlayerSchema) => {
+        if(party.players) {
+            const playerIndex = getPlayer(party.players, character.pid).index;
+            party.players[playerIndex] = updatedPlayer;
+            await uploadParty("players", { partyId: party.players[0].pid, players: party.players });
+        }
+        await syncPartyMemberToAccount(updatedPlayer);
+        setSelectedItem(() => ({state: null, index: 0}));
+        setCharacter(updatedPlayer);
     }
 
     const getButton = (button: string) => {
@@ -55,10 +67,13 @@ export default function Inventory({inventory, position, buttons, storage, limit,
     const getMaxRange = () => {
         if (!selectedItem?.state || !inventory.length) return 0;
         const stackSize = selectedItem.state.stack;
-        let amount = inventory[selectedItem.index]?.amount || 0;
-        if(getButton("withdraw")) {
-            amount = getItem(character.inventory, {id: selectedItem.state.id, amount: 0}).state.amount;
-            return stackSize - amount > stackSize ? 0 : stackSize - amount;
+        const amount = inventory[selectedItem.index]?.amount || 0;
+        if(getButton("withdraw") || getButton("buy")) {
+            const amountInCharacterInventory = getItem(character.inventory, {id: selectedItem.state.id, amount: 0}).state.amount;
+            return Math.min(stackSize - amountInCharacterInventory, stackSize, amount);
+        }
+        if(getButton("sell") && !selectedItem.state.price) {
+            return 0;
         }
         return amount;
     }
@@ -78,17 +93,11 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                     <button
                         onClick={async () => {
                             const updatedPlayer = applyItem({ id: inventory[selectedItem.index].id, amount: selectedAmount}, { player: character } );
-                            if(party.players) {
-                                const playerIndex = getPlayer(party.players, character.pid).index;
-                                party.players[playerIndex] = updatedPlayer;
-                                await uploadParty("players", { partyId: party.players[0].pid, players: party.players });
-                            }
-                            await syncPartyMemberToAccount(updatedPlayer);
-                            setSelectedItem(() => ({state: null, index: 0}));
-                            setCharacter(updatedPlayer);
+                            uploadCharacterInventory(updatedPlayer);
                             logMessage(`${character.name} has used a ${selectedItem.state?.name}.`);
                         }}
                         className="menu_btn"
+                        disabled={!selectedItem?.state || !selectedItem?.state?.usable}
                     >
                         Use
                     </button>
@@ -99,14 +108,7 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                         className="menu_btn"
                         onClick={async () => {
                             const updatedPlayer = removeItem(character, { id: inventory[selectedItem.index].id, amount: selectedAmount} )
-                            if(party.players) {
-                                const playerIndex = getPlayer(party.players, character.pid).index;
-                                party.players[playerIndex] = updatedPlayer;
-                                await uploadParty("players", { partyId: party.players[0].pid, players: party.players });
-                            }
-                            await syncPartyMemberToAccount(updatedPlayer);
-                            setSelectedItem(() => ({state: null, index: 0}));
-                            setCharacter(updatedPlayer);
+                            uploadCharacterInventory(updatedPlayer);
                         }}
                         disabled={!selectedItem.state}
                     >
@@ -121,15 +123,8 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                             if(!selectedItem.state || !storage) return;
                             const updatedPlayer = removeItem(character, { id: inventory[selectedItem.index].id, amount: selectedAmount} )
                             const updatedStorageInventory = assignItemToStorage(storage, {id: selectedItem.state.id, amount: selectedAmount});
-                            uploadTown("inventory", {storageInventory: updatedStorageInventory});
-                            if(party.players) {
-                                const playerIndex = getPlayer(party.players, character.pid).index;
-                                party.players[playerIndex] = updatedPlayer;
-                                await uploadParty("players", { partyId: party.players[0].pid, players: party.players });
-                            }
-                            await syncPartyMemberToAccount(updatedPlayer);
-                            setSelectedItem(() => ({state: null, index: 0}));
-                            setCharacter(updatedPlayer);
+                            await uploadTown("inventory", {storageInventory: updatedStorageInventory});
+                            await uploadCharacterInventory(updatedPlayer);
                         }}
                         disabled={!selectedItem.state}
                     >
@@ -146,18 +141,45 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                             const updatedPlayer = assignItem(character, { id: inventory[selectedItem.index].id, amount: selectedAmount} )
                             const updatedStorageInventory = removeStoredItem(inventory, {id: selectedItem.state.id, amount: selectedAmount});
                             uploadTown("inventory", {storageInventory: updatedStorageInventory});
-                            if(party.players) {
-                                const playerIndex = getPlayer(party.players, character.pid).index;
-                                party.players[playerIndex] = updatedPlayer;
-                                await uploadParty("players", { partyId: party.players[0].pid, players: party.players });
-                            }
-                            await syncPartyMemberToAccount(updatedPlayer);
-                            setSelectedItem(() => ({state: null, index: 0}));
-                            setCharacter(updatedPlayer);
+                            uploadCharacterInventory(updatedPlayer);
                         }}
                         disabled={!selectedItem.state || getMaxRange() < 1}
                     >
                         Withdraw
+                    </button>
+                    }
+                    {getButton("buy")
+                    &&
+                    <button
+                        className="menu_btn"
+                        onClick={async () => {
+                            if(!selectedItem.state) return;
+                            if(getMaxRange() < 1) return;
+                            if(getItem(character?.inventory ?? [], { id: "000", amount: 0 })?.state.amount < selectedItem?.state.price * selectedAmount) return
+                            let updatedPlayer = assignItem(character, { id: inventory[selectedItem.index].id, amount: selectedAmount} );
+                            updatedPlayer = removeItem(updatedPlayer, { id: "000", amount: selectedItem.state.price * selectedAmount });
+                            uploadCharacterInventory(updatedPlayer);
+                        }}
+                        disabled={!selectedItem.state || getMaxRange() < 1}
+                    >
+                        Buy {selectedAmount && selectedItem.state && selectedItem?.state?.price * selectedAmount}G
+                    </button>
+                    }
+                    {getButton("sell")
+                    &&
+                    <button
+                        className="menu_btn"
+                        onClick={async () => {
+                            if(!selectedItem.state) return;
+                            if(getMaxRange() < 1) return;
+                            const price = Math.floor(selectedItem.state.price / 2) * selectedAmount
+                            let updatedPlayer = removeItem(character, { id: selectedItem.state.id, amount: selectedAmount });
+                            updatedPlayer = assignItem(updatedPlayer, { id: "000", amount: price });
+                            uploadCharacterInventory(updatedPlayer);
+                        }}
+                        disabled={!selectedItem.state || selectedAmount * Math.floor(selectedItem.state.price / 2) < 1}
+                    >
+                        Sell {selectedAmount && selectedItem.state && Math.floor((selectedItem?.state.price / 2)) * selectedAmount}G
                     </button>
                     }
                     {toggleOff
@@ -173,7 +195,7 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                 <div className="cen-flex" style={{gap: '1rem'}}>
                     <input
                         className="menu_input"
-                        min={0}
+                        min={1}
                         max={getMaxRange()}
                         type="number"
                         onChange={(e) => {
@@ -186,7 +208,7 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                     />
                     <input
                         type="range"
-                        min={0}
+                        min={1}
                         max={getMaxRange()}
                         onChange={(e) => setSelectedAmount(() => Number(e.target.value) )}
                         value={selectedAmount}

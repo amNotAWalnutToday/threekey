@@ -14,6 +14,7 @@ import Tree from "../components/Tree";
 import CharacterProfile from "../components/CharacterProfile";
 import Log from "../components/Log";
 import UIButtonBar from "../components/UIBtnBar";
+import Shop from "./Shop";
 
 const { 
     getParties, createParty, joinParty, leaveParty, destroyRoom, uploadParty,
@@ -43,6 +44,8 @@ export default function Town() {
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
     const [isInnOpen, setIsInnOpen] = useState(false);
     const [isTreeOpen, setIsTreeOpen] = useState(false);
+    const [isShopOpen, setIsShopOpen] = useState(false);
+    const [isGuildOpen, setIsGuildOpen] = useState(false);
     const [inspectCharacter, setInspectCharacter] = useState({} as PlayerSchema);
 
     const toggleOffMenus = (exception: string) => {
@@ -51,6 +54,8 @@ export default function Town() {
         if(exception !== "innMenu") setIsInnOpen(() => false);
         if(exception !== "characterProfileMenu") setInspectCharacter(() => ({} as PlayerSchema));
         if(exception !== "treeMenu") setIsTreeOpen(() => false);
+        if(exception !== "shopMenu") setIsShopOpen(() => false);
+        if(exception !== "guildMenu") setIsGuildOpen(() => false);
     }
 
     const mapParties = () => {
@@ -155,7 +160,7 @@ export default function Town() {
                 { isPartyMenuOpen ? mapParties() : null }
             </div>
             <div>
-                <button 
+            <button 
                     className="menu_btn" 
                     onClick={() => { 
                         setIsInnOpen((prev) => !prev);
@@ -164,6 +169,26 @@ export default function Town() {
                     disabled={town?.inn?.level < 1}
                 >
                     Inn
+                </button>
+                <button 
+                    className="menu_btn" 
+                    onClick={() => { 
+                        setIsShopOpen((prev) => !prev);
+                        toggleOffMenus("shopMenu");
+                    }}
+                    disabled={town?.shop?.level < 1}
+                >
+                    Shop
+                </button>
+                <button 
+                    className="menu_btn" 
+                    onClick={() => { 
+                        setIsInnOpen((prev) => !prev);
+                        toggleOffMenus("guildMenu");
+                    }}
+                    disabled={town?.guild?.level < 1}
+                >
+                    Guild
                 </button>
                 <button 
                     className="menu_btn" 
@@ -220,6 +245,13 @@ export default function Town() {
             <Tree 
                 town={town}
                 uploadCharacter={uploadCharacterTown}
+                logMessage={logMessage}
+            />
+            }
+            { isShopOpen
+            &&
+            <Shop 
+                town={town}
                 logMessage={logMessage}
             />
             }

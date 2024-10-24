@@ -60,6 +60,20 @@ export default (() => {
         }
     }
 
+    const getShopStock = (shopLvl: number) => {
+        const stock = [];
+        for(const item of itemData) {
+            if(!item.shopLevel) continue;
+            console.log(item);
+            if(item.shopLevel <= shopLvl) {
+                const convertedItem = { id: item.id, amount: 999 }
+                stock.push(convertedItem);
+            }
+        }
+
+        return stock;
+    }
+
     const removeStoredItem = (inventory: typeof template.storage.inventory, item: {id: string, amount: number}) => {
         let shouldRemoveFullStack = false;
         let itemIndex = -1;
@@ -130,6 +144,7 @@ export default (() => {
     return {
         createTown,
         connectTown,
+        getShopStock,
         removeStoredItem,
         assignItemToStorage,
         assignBuildingLevel,
