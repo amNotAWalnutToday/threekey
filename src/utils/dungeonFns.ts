@@ -462,6 +462,7 @@ export default (() => {
         getFloor,
         getTrap,
         getPossibleItems,
+        getRandomBiome,
         getTileNeighbours,
         getChestLoot,
         getEnemies,

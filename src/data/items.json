@@ -74,6 +74,19 @@
         "stack": 5,
         "usable": false,
         "chestOnly": false,
+        "questRank": 9,
+        "biomes": [],
+        "minFloor": 0
+    },
+    {
+        "id": "007",
+        "name": "Vine",
+        "rarity": "common",
+        "price": 20,
+        "stack": 100,
+        "usable": false,
+        "chestOnly": false,
+        "questRank": 1,
         "biomes": [],
         "minFloor": 0
     }

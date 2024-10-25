@@ -177,6 +177,8 @@
 
 .inventory_item {
     border: var(--border_white_outset);
+    min-width: 64px;
+    min-height: 64px;
 }
 
 .box.selected,
@@ -207,6 +209,31 @@
     background: var(--black-l-gradient);
     border-bottom: 2px solid goldenrod;
     box-shadow: 4px 4px 12px black;
+}
+
+.quest_board {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    width: 600px;
+    gap: 1rem;
+    top: 20%;
+    padding: 1rem;
+    background: var(--black-l-gradient);
+    border-bottom: 2px solid goldenrod;
+    box-shadow: 4px 4px 12px black; 
+    overflow: auto;
+}
+
+.quest {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-around;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid goldenrod;
 }
 
 .gamelog_pos {
@@ -351,6 +378,7 @@
 }
 
 .left_abs_hor {
+    position: absolute;
     transform: translateX(-25%);
     left: 25%;
 }
@@ -362,6 +390,10 @@
 
 .small_title_font {
     font-size: 16px;
+}
+
+.text_shadow {
+    text-shadow: 2.5px 2px 1px black;
 }
 
 button:hover {

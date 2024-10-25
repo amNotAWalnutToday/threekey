@@ -13,7 +13,7 @@ import FloorSchema from "../schemas/FloorSchema";
 import UserSchema from "../schemas/UserSchema";
 import PartySchema from "../schemas/PartySchema";
 
-const { db } = accountFns;
+const { db, createPlayer } = accountFns;
 
 export default (() => {
     const getPlayer = (players: PlayerSchema[], pid: string) => {
@@ -140,7 +140,7 @@ export default (() => {
     }
 
     const getItem = (inventory: {id: string, amount: number}[], item: {id: string, amount: number}) => {
-        for(let i = 0; i < inventory.length; i++) {
+        for(let i = 0; i < inventory?.length; i++) {
             if(item.id === inventory[i].id) return {state: inventory[i], index: i};
         }
         for(let i = 0; i < itemData.length; i++) {
@@ -284,47 +284,6 @@ export default (() => {
         }
         
         return amount;
-    }
-
-    const assignAbilities = (playerClass: string) => {
-        const usableAbilities = [];
-
-        for(const ability of abiltyData.all) {
-            for(const users of ability.users) {
-                const abilityRef = {
-                    id: ability.id,
-                    level: 0,
-                }
-                if(users === playerClass) usableAbilities.push(abilityRef);
-            }
-        }
-
-        return usableAbilities;
-    }
-
-    const createPlayer = (
-        name: string, pid: string, playerClass: string, 
-        combatStats: typeof classData.naturalist.stats, 
-        status: StatusSchema[], location: { map: string, XY: number[] },
-        inventory: { id: string, amount: number }[], abilityRefs: {id: string, level: number}[],
-    ) => {
-        const stats = combatStats ? combatStats : classData.naturalist.stats;
-        const abilities = abilityRefs ?? assignAbilities(playerClass);
-        const player: PlayerSchema = {
-            name,
-            role: playerClass,
-            pid,
-            npc: false,
-            dead: false,
-            isAttacking: 0,
-            location: location ?? { map: "-1", XY: [1, 1] },
-            inventory: inventory ?? [],
-            status: status ?? [],
-            stats,
-            abilities,
-        }
-
-        return player;
     }
 
     const createEnemy = (
@@ -614,7 +573,6 @@ export default (() => {
         assignMaxOrMinStat,
         assignRankStatUpsByRole,
         assignBuffs,
-        createPlayer,
         createEnemy,
         createAction,
         createStatus,

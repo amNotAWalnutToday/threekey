@@ -4,6 +4,10 @@ import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "firebas
 import firebaseConfig from '../../firebaseConfig';
 import UserSchema from "../schemas/UserSchema";
 import PlayerSchema from "../schemas/PlayerSchema";
+import StatusSchema from "../schemas/StatusSchema";
+import abilityData from '../data/abilities.json';
+import classData from '../data/classes.json';
+
 
 export default (() => {
     const app = initializeApp(firebaseConfig);
@@ -51,18 +55,66 @@ export default (() => {
 
     const getCharacters = async (user: UserSchema): Promise<PlayerSchema[] | false> => {
         const charactersRef = ref(db, `/users/${user.uid}/characters`);
-        let characters = false;
+        let hasCharacters = false;
+        const characters: PlayerSchema[] = [];
         await get(charactersRef).then( async (snapshot) => {
             const data = snapshot.val();
-            if(data) characters = data;
+            if(!data) return;
+            data?.forEach((character: PlayerSchema) => {
+                const convertedCharacter = createPlayer(character.name, character.pid, character.role, character.stats, character.status, character.location, character.inventory, character.abilities);
+                characters.push(convertedCharacter);
+                hasCharacters = true;
+            });
         });
 
-        return characters;
+        return hasCharacters ? characters : [];
+    }
+
+    const createPlayer = (
+        name: string, pid: string, playerClass: string, 
+        combatStats: typeof classData.naturalist.stats, 
+        status: StatusSchema[], location: { map: string, XY: number[] },
+        inventory: { id: string, amount: number }[], abilityRefs: {id: string, level: number}[],
+    ) => {
+        const stats = combatStats ? combatStats : classData.naturalist.stats;
+        const abilities = abilityRefs ?? assignAbilities(playerClass);
+        const player: PlayerSchema = {
+            name,
+            role: playerClass,
+            pid,
+            npc: false,
+            dead: false,
+            isAttacking: 0,
+            location: location ?? { map: "-1", XY: [1, 1] },
+            inventory: inventory ?? [],
+            status: status ?? [],
+            stats,
+            abilities,
+        }
+
+        return player;
+    }
+
+    const assignAbilities = (playerClass: string) => {
+        const usableAbilities = [];
+
+        for(const ability of abilityData.all) {
+            for(const users of ability.users) {
+                const abilityRef = {
+                    id: ability.id,
+                    level: 0,
+                }
+                if(users === playerClass) usableAbilities.push(abilityRef);
+            }
+        }
+
+        return usableAbilities;
     }
 
     return {
         db,
         createAccountAnon,
+        createPlayer,
         getCharacters,
     }
 })();

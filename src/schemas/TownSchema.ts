@@ -1,3 +1,5 @@
+import QuestSchema from "./QuestSchema"
+
 interface TownSchema {
     storage: {
         level: number,
@@ -8,8 +10,9 @@ interface TownSchema {
     },
     guild: {
         level: number,
-        quests: {id: string, amount: number}[],
-        questsCompleted: {pid: string, name: string, amount: number}[],
+        quests: QuestSchema[],
+        questsCompleted: {pid: string, name: string, amount: number, score: number}[],
+        cancelCd: number,
     },
     shop: {
         level: number,
