@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PlayerSchema from "../schemas/PlayerSchema";
 import ResourceBar from "./ResourceBar";
+import StatusBox from "./StatusBox";
 
 type Props = {
     player: PlayerSchema,
@@ -64,13 +65,16 @@ export default function Player(
                 type={"mana"}
                 index={5}
             />
-            { player?.status?.map((status, index) => {
-                return (
-                    <div key={`${player.pid}-${index}`} >
-                        <p style={{fontSize: "30px", color: "red"}} >{status.name}: {status.duration}</p>
-                    </div>
-                )
-            }) }
+            <div className="status_bar">
+                { player?.status?.map((status, index) => {
+                    return (
+                        <StatusBox
+                            key={`status-${player.pid}-${index}`}
+                            status={status}
+                        />
+                    )
+                }) }
+            </div>
         </div>
     )
 }

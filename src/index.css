@@ -198,6 +198,18 @@ hr {
   text-shadow: 2.5px 2px 1px black;
 }
 
+.status_bar {
+  position: absolute;
+  transform: translateX(100px);
+}
+
+.status {
+  background: var(--black-l-gradient);
+  border-bottom: 1px solid goldenrod;
+  white-space: nowrap;
+  padding: 0 0.25rem;
+}
+
 .cen-flex {
   display: flex;
   justify-content: center;
