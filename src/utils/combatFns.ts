@@ -111,11 +111,21 @@ export default (() => {
         return rankXp * floorXp;
     }
 
+    const getPreviousRankMaxLevelXp = (rank: string) => {
+        let rankValue = getRankValue(rank);
+        const currentMaxLevel = rankValue > 0 ? rankValue * 10 : 5;
+        const baseXp = 5;
+        rankValue++;
+        const increment = (currentMaxLevel * baseXp) * rankValue;
+        return baseXp + increment;
+    }
+
     const getLevelUpReq = (level: number, rank: string) => {
         const baseXp = 5;
         const rankValue = 1 + getRankValue(rank);
         const increment = (level * baseXp) * rankValue;
-        return baseXp + increment;
+        const previousRankXp = rankValue > 1 ? getPreviousRankMaxLevelXp(rank) : 0;
+        return baseXp + increment + previousRankXp;
     }
 
     const getCanLevelUp = (player: PlayerSchema) => {
