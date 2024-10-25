@@ -24,7 +24,7 @@ const {
     getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
-    assignXp, getAbilityRef, getAbilityLevelEffect
+    assignXp, getAbilityRef, getAbilityLevelEffect, assignAbilityLevelStats,
 } = combatFns;
 const { db } = accountFns;
 const { uploadParty } = partyFns;
@@ -474,7 +474,8 @@ export default function Combat() {
         attack = assignBuffs(user.status, 'attack', attack);
         defence = assignBuffs(target.status, 'defence', defence);
 
-        const damage = Math.floor(((attack / 4) * (abilityDamage + (abilityLevel * 2)))) - defence;
+        const updatedAbilityDamage = assignAbilityLevelStats(abilityDamage, abilityLevel, "damage");
+        const damage = Math.floor((attack) * (updatedAbilityDamage / 100)) - defence;
         return damage > 0 ? damage : 1;
     }
 

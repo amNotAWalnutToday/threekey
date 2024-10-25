@@ -1,6 +1,6 @@
 interface StatusSchema {
     name: string,
-    type: "dot" | "buff" | "debuff",
+    type: string, //"dot" | "buff" | "debuff",
     amount: number, 
     duration: number,
     affects: string[],

@@ -83,6 +83,7 @@
             },
             "av": 1,
             "users": ["naturalist"],
+            "description": "Inflicts poison",
             "unlocks": {
                 "max": 5,
                 "req": [{"id": "001", "amount": 1}]
@@ -99,6 +100,7 @@
             },
             "av": 1,
             "users": ["naturalist"],
+            "description": "Gain defence",
             "unlocks": {
                 "max": 5,
                 "req": [{"id": "001", "amount": 5}]
@@ -115,6 +117,7 @@
             },
             "av": 1,
             "users": ["naturalist"],
+            "description": "Gain speed",
             "unlocks": {
                 "max": 5,
                 "req": [{"id": "001", "amount": 5}],
@@ -132,6 +135,7 @@
             },
             "av": 1,
             "users": ["naturalist"],
+            "description": "Lower defence and attack",
             "unlocks": {
                 "max": 5,
                 "req": [{"id": "001", "amount": 5}]

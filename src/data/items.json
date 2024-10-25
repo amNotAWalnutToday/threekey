@@ -19,6 +19,7 @@
         "usable": true,
         "shopLevel": 1,
         "chestOnly": false,
+        "description": "Use to heal 20 health",
         "biomes": ["forest", "scrapyard", "crypt"],
         "minFloor": 0
     },

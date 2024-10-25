@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import PlayerSchema from "../schemas/PlayerSchema";
 import AbilitySchema from "../schemas/AbilitySchema";
-import abilityData from '../data/abilities.json';
 import combatFns from "../utils/combatFns";
+import AbilityButton from "./AbilityButton";
 
 const { getAbility, getAbilityRef } = combatFns;
 
@@ -66,19 +66,19 @@ export default function AttackMenu(
         return abilities.map((ability, ind) => {
             const abilityRef = getAbilityRef(selectedPlayer.state, ability.id);
             if(!abilityRef.state.level) return;
+            function clickHandler() {
+                if(!selectedTargets.length) return;
+                if(!selectedPlayer) return;
+                if(!checkCanUseAbility(ability, selectedPlayer.state)) return;
+                target(Array.from(selectedTargets), ability);
+            }
             return (
-                <button 
+                <AbilityButton
                     key={`ability-${ind}`}
-                    onClick={() => { 
-                        if(!selectedTargets.length) return;
-                        if(!checkCanUseAbility(ability, selectedPlayer.state)) return;
-                        target(Array.from(selectedTargets), ability);
-                    }} 
-                    onMouseEnter={() => selectTargetByAbility(ability.type)}
-                    className="small_menu_btn"
-                >
-                    {ability.name}
-                </button>
+                    selectTargetByAbility={selectTargetByAbility}
+                    ability={ability}
+                    click={clickHandler}
+                />
             )
         });
     }

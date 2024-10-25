@@ -73,6 +73,17 @@
     text-align: center; 
 }
 
+.ability_btn {
+    font-size: 16px;
+    text-shadow: 2.5px 2px 1px black;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    color: white;
+    background: var(--black-l-gradient);
+    border: 2px inset goldenrod;
+}
+
 .menu_btn.selected {
     background-color: goldenrod;
 }
@@ -271,6 +282,25 @@
     font-size: 16px;
 }
 
+.tooltip {
+    position: absolute;
+    margin-top: 32px;
+    margin-left: 32px;
+    padding: 0.5rem;
+    white-space: nowrap;
+    background: var(--black-l-gradient);
+    z-index: 5;
+    box-shadow: 4px 4px 12px solid black;
+    pointer-events: none;
+    text-shadow: 2.5px 2px 1px black;
+    border-bottom: 1px solid goldenrod;
+}
+
+.ability_btn .tooltip {
+    margin-top: -48px;
+    text-align: right;
+}
+
 .profile_status {
     border: 1px solid white;
     padding: 0.25rem 0.5rem;
@@ -343,16 +373,36 @@
     background: var(--green-r-gradient);
 }
 
+.uncommon_text {
+    color: springgreen;
+}
+
 .rare {
     background: var(--blue-r-gradient);
+}
+
+.rare_text {
+    color: rgb(20, 70, 208);
 }
 
 .epic {
     background: var(--purple-r-gradient);
 }
 
+.epic_text {
+    color: purple;
+}
+
 .legendary {
     background: var(--orange-r-gradient);
+}
+
+.legendary_text {
+    color: orange;
+}
+
+.red_text {
+    color: crimson;
 }
 
 .border_red {

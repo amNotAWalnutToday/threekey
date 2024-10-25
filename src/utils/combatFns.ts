@@ -10,6 +10,7 @@ import classData from '../data/classes.json';
 import accountFns from '../utils/accountFns';
 import { set, ref, get, child, onValue } from "firebase/database";
 import FloorSchema from "../schemas/FloorSchema";
+import statusData from '../data/statuses.json';
 import UserSchema from "../schemas/UserSchema";
 import PartySchema from "../schemas/PartySchema";
 
@@ -225,7 +226,7 @@ export default (() => {
         switch(item.id) {
             case "001":
                 if(!updatedPlayer) return updatedPlayer;
-                updatedPlayer.stats.combat.health.cur += 50 * item.amount;
+                updatedPlayer.stats.combat.health.cur += 20 * item.amount;
                 updatedPlayer = assignMaxOrMinStat(updatedPlayer, [player], 0)[0];
                 break;
         }
@@ -265,6 +266,18 @@ export default (() => {
         return player;
     }
 
+    const assignAbilityLevelStats = (abilityDamage: number, abilityLevel: number, abilityType: string, statusName?: string) => {
+        if(abilityType === "damage") {
+            return abilityDamage + (abilityLevel * 2);
+        } else if (abilityType === "heal") {
+            return abilityDamage + (abilityLevel * 3);
+        } else if(abilityType === "status") {
+            const status = getStatus(statusData.all, statusName??"");
+            return status.state.amount + abilityLevel;
+        }
+        return 1;
+    }
+
     const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
         const { health, resources } = player.stats.combat;
         const { mana } = resources;
@@ -300,6 +313,7 @@ export default (() => {
         name: string, pid: string, maxHealth: number, abilityIds: string[],
         attack: number, defence: number, speed: number, status: StatusSchema[],
         dead: boolean, inventory: {id: string, amount: number}[], rank: string,
+        floorNum?: number,
     ) => {
         const health = {
             max: maxHealth,
@@ -318,7 +332,7 @@ export default (() => {
         for(const id of abilityIds) {
             const ability = {
                 id,
-                level: 1
+                level: floorNum ?? 1
             };
             if(ability) abilities.push(ability);
         }
@@ -400,12 +414,14 @@ export default (() => {
         }
 
         const enemyIds: string[] = [];
+        let floorNum = 1;
 
         const partyRef = ref(db, `party/${players[0].pid}`);
         await get(partyRef).then( async (snapshot) => {
             const data: PartySchema = await snapshot.val();
             for(const p in data.players) field.players.push(data.players[p]);
             for(const e of data.enemies) enemyIds.push(e);
+            if(Number(data.location.map) > 0) floorNum = Number(data.location.map); 
         });
 
         const enemyList = enemyData.all;
@@ -414,7 +430,7 @@ export default (() => {
             for(const enemy of enemyList) {
                 if(enemy.id === enemyIds[i]) {
                     const { rank, attack, defence, speed, name, health, abilities, inventory } = enemy;
-                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory, rank); 
+                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory, rank, floorNum); 
                     enemies.push(newEnemy);
                 }    
             }
@@ -445,7 +461,7 @@ export default (() => {
         return Array.from(enemies, (enemy: PlayerSchema) => {
             const abilities = Array.from(enemy.abilities, (e) => e.id); 
             const { attack, defence, speed } = enemy.stats.combat;
-            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory, enemy.stats.rank);
+            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory, enemy.stats.rank, enemy.abilities[0].level);
             updatedEnemy.stats.combat.health.cur = enemy.stats.combat.health.cur;
             return updatedEnemy;
         });
@@ -582,6 +598,7 @@ export default (() => {
         assignItem,
         assignMaxOrMinStat,
         assignRankStatUpsByRole,
+        assignAbilityLevelStats,
         assignBuffs,
         createEnemy,
         createAction,

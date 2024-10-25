@@ -16,6 +16,7 @@ interface AbilitySchema {
     },
     av: number,
     users: string[],
+    description?: string,
     unlocks: Requirements
 }
 
