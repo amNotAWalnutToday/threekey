@@ -390,7 +390,7 @@ export default (() => {
         return action;
     }
 
-    const createStatus = (name: string, type: "dot" | "buff" | "debuff", amount: number, duration: number, affects: string[], refs: string[]) => {
+    const createStatus = (name: string, type: string, amount: number, duration: number, affects: string[], refs: string[]) => {
         const status = {
             name,
             type,
@@ -408,6 +408,7 @@ export default (() => {
             players: [],
             enemies: [],
             actionQueue: [],
+            loot: [],
             start: false,
             joinedPlayers: 0,
             id: '',
@@ -468,7 +469,7 @@ export default (() => {
     }
 
     const connectToBattle = async (
-        initialize: (players: PlayerSchema[], enemies: PlayerSchema[], actionQueue: ActionSchema[], fieldId: string, start: boolean, joinedPlayers: number) => void,
+        initialize: (players: PlayerSchema[], enemies: PlayerSchema[], actionQueue: ActionSchema[], fieldId: string, start: boolean, joinedPlayers: number, loot: {id: string, amount: number, pid: string}[]) => void,
         party: PartySchema,
     ) => {
         try {
@@ -484,29 +485,29 @@ export default (() => {
                 const joinedPlayers = data.joinedPlayers + 1;
                 await set(child(fieldRef, '/joinedPlayers'), joinedPlayers);
                 const shouldStart = joinedPlayers === party.players.length;
-                initialize(updatedPlayers ?? [], updatedEnemies ?? [], data.actionQueue ?? [], data.id, shouldStart, joinedPlayers);
+                initialize(updatedPlayers ?? [], updatedEnemies ?? [], data.actionQueue ?? [], data.id, shouldStart, joinedPlayers, data.loot ?? []);
             });
             await onValue(fieldRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const shouldStart = data.joinedPlayers === party.players.length;
-                initialize([], [], [], '', shouldStart, data.joinedPlayers);
+                initialize([], [], [], '', shouldStart, data.joinedPlayers, data.loot ?? []);
             });
             await onValue(playersRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedPlayers = populatePlayers(data);
-                initialize(updatedPlayers ?? [], [], [], '', data.start, data.joinedPlayers);
+                initialize(updatedPlayers ?? [], [], [], '', data.start, data.joinedPlayers, data.loot ?? []);
             });
             await onValue(enemyRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedEnemies = populateEnemies(data);
-                initialize([], updatedEnemies ?? [], [], '', data.start, data.joinedPlayers);
+                initialize([], updatedEnemies ?? [], [], '', data.start, data.joinedPlayers, data.loot ?? []);
             });
             await onValue(actionRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedActionQueue = !data ? [] : Array.from(data ?? [], (action: ActionSchema) => {
                     return createAction(action.ability, action.user, action.targets ?? []);
                 });
-                initialize([], [], updatedActionQueue ?? [], '', data.start, data.joinedPlayers);
+                initialize([], [], updatedActionQueue ?? [], '', data.start, data.joinedPlayers, data.loot ?? []);
             });
         } catch(e) {
             console.error(e);
@@ -521,9 +522,10 @@ export default (() => {
             actionQueue?: ActionSchema[],
             user?: UserSchema,
             player?: { state: PlayerSchema, index: number },
+            loot?: { id: string, amount: number, pid: string }[],
         }
     ) => {
-        const { fieldId, field, actionQueue, player, user } = payload;
+        const { fieldId, field, actionQueue, player, user, loot } = payload;
 
         switch(type) {
             case "field":
@@ -539,6 +541,10 @@ export default (() => {
             case "enemy":
                 if(!player) return console.error("No Enemy");
                 uploadEnemy(player.state, player.index, fieldId);
+                break;
+            case "loot":
+                if(!loot) return;
+                uploadLoot(loot, fieldId);
                 break;
             case "character":
                 if(!player || !user) return; 
@@ -567,6 +573,11 @@ export default (() => {
     const uploadEnemy = async (enemy: PlayerSchema, index: number, fieldId: string) => {
         const enemyRef = ref(db, `/fields/${fieldId}/enemies/${index}`);
         await set(enemyRef, assignMaxOrMinStat(enemy, [enemy], 0)[0]);
+    }
+    
+    const uploadLoot = async (loot: {id: string, amount: number, pid: string}[], fieldId: string) => {
+        const lootRef = ref(db, `/fields/${fieldId}/loot`);
+        await set(lootRef, loot);
     }
 
     const uploadCharacter = async (user: UserSchema, player: PlayerSchema, index: number) => {

@@ -19,12 +19,14 @@ import PLAYERS_REDUCER_ACTIONS from "../schemas/reducers/PLAYER_REDUCER_ACTIONS"
 import accountFns from '../utils/accountFns';
 import partyFns from "../utils/partyFns";
 import { ref, set } from "firebase/database";
+import Inventory from "../components/Inventory";
+import ResourceBar from "../components/ResourceBar";
 
 const { 
     getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
-    assignXp, getAbilityRef, getAbilityLevelEffect, assignAbilityLevelStats,
+    assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq,
 } = combatFns;
 const { db } = accountFns;
 const { uploadParty } = partyFns;
@@ -231,6 +233,7 @@ export default function Combat() {
         players: [],
         enemies: [],
         actionQueue: [],
+        loot: [],
     });
     const [actionQueue, dispatchActionQueue] = useReducer(actionQueueReducer, field.actionQueue);
     const [players, dispatchPlayers] = useReducer(playersReducer, field.players);
@@ -241,12 +244,21 @@ export default function Combat() {
     const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
     const [selectedTargetType, setSelectedTargetType] = useState("");
     const [isHost, setIsHost] = useState(user?.uid ? party.players[0].pid === character.pid : false);
+    const [loot, setLoot] = useState<{id: string, amount: number}[]>([]);
+    const [xp, setXp] = useState(0);
     const [messages, setMessages] = useState<string[]>([]);
     const characterIndex = user?.uid ? getPlayer(party.players, character.pid).index : 0;
 
     const logMessage = (receivedMessages: string[]) => {
         const updatedGamelog = [...messages];
         receivedMessages.forEach((message) => updatedGamelog.push(message));
+        if(updatedGamelog.length > 101) updatedGamelog.shift();
+        setMessages(() => updatedGamelog);
+    }
+
+    const logSingleMessage = (receivedMessage: string) => {
+        const updatedGamelog = [...messages];
+        updatedGamelog.push(receivedMessage);
         if(updatedGamelog.length > 101) updatedGamelog.shift();
         setMessages(() => updatedGamelog);
     }
@@ -258,12 +270,18 @@ export default function Combat() {
         fieldId: string, 
         start: boolean,
         joinedPlayers: number,
+        loot: {id: string, amount: number, pid: string}[],
     ) => {
         if(players.length) dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.REPLACE_ALL, payload: { pid: '' , replaceArr: players, fieldId }});
         if(enemies.length) dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.REPLACE_ALL, payload: { pid: '' , replaceArr: enemies, fieldId }});
         if(actionQueue.length) dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REPLACE, payload: { replacement: actionQueue, fieldId }});
+        if(loot.length) setLoot(() => {
+            const yourItems = [];
+            for(const item of loot) if(item.pid === character.pid) yourItems.push(item);
+            return yourItems;
+        });
         setField((prev) => {
-            return Object.assign({}, prev, { id: fieldId.length ? fieldId : prev.id, start, joinedPlayers })
+            return Object.assign({}, prev, { id: fieldId.length ? fieldId : prev.id, start, joinedPlayers, loot: loot?.length ? loot : []});
         })
     }
 
@@ -496,9 +514,10 @@ export default function Combat() {
         const { damageType } = ability;
 
         const messagesToLog = [];
-        messagesToLog.push(`${user.name} uses ${ability.name}`);
+        if(!user.dead) messagesToLog.push(`${user.name} uses ${ability.name}`);
 
         targets.forEach((targetRef: string, i: number) => {
+            if(user.dead) return;
             const target = getPlayer([...players, ...enemies], targetRef);
             let amount = (
                 damageType === "heal"
@@ -523,7 +542,6 @@ export default function Combat() {
         });
 
         logMessage(messagesToLog);
-        console.log(messagesToLog);
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.REMOVE_TOP, payload: { fieldId: field.id }});
     }, [players, enemies]);
 
@@ -645,14 +663,38 @@ export default function Combat() {
         return () => clearInterval(interval);
     }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn]);
 
-    const lootAndSync = async () => {
+    const dummyLoot = async () => {
         const loot = getLoot(field.enemies);
+        const assignedLoot: {id: string, amount: number, pid: string}[] = [];
         for(const item of loot) {
             const ran = Math.floor(Math.random() * field.players.length);
-            const player = assignItem(field.players[ran], item);
-            if(!player) return;
-            await upload("player", { fieldId: field.id, player: { state: player, index: ran} });
+            const convertedItem = { id: item.id, amount: item.amount, pid: field.players[ran].pid };
+            assignedLoot.push(convertedItem);
         }
+        await upload("loot", { loot: assignedLoot, fieldId: field.id});
+    }
+
+    const dummyXp = () => {
+        let totalXp = 0;
+        for(const enemy of field.enemies) {
+            const xp = getXpReceived(enemy, party);
+            totalXp += xp;
+        }
+        setXp(() => totalXp);
+    }
+
+    const assignLoot = async () => {
+        for(const item of field.loot) {
+            const convertedItem = { id: item.id, amount: item.amount };
+            const player = getPlayer(field.players, item.pid);
+            const updatedPlayer = assignItem(player.state, convertedItem);
+            if(!player || !updatedPlayer) return;
+            await upload("player", { fieldId: field.id, player: { state: updatedPlayer, index: player.index} });
+        }
+    }
+
+    const lootAndSync = async () => {
+        await assignLoot();
         for(let i = 0; i < field.players.length; i++) {
             let updatedPlayer = {...field.players[i]};
             for(const enemy of field.enemies) {
@@ -665,8 +707,9 @@ export default function Combat() {
     }
 
     useEffect(() => {
+        if(isWon) dummyXp();
         if(isWon && isHost) {
-            lootAndSync();
+            dummyLoot();
         }
     }, [isWon]);
 
@@ -712,19 +755,42 @@ export default function Combat() {
                     <div style={{width: getTime()}} className="fill" />
                 </div>
             </div>
-            {
-                isWon 
-                &&
-                <div style={{transform: "translateY(100px)"}} >
-                    <button 
-                        onClick={async () => {
-                            await uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: [] });
-                            await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
-                        }}
-                    >
-                        Return to Dungeon
-                    </button>
-                </div>
+            { loot.length && isWon
+            ?
+            <Inventory 
+                inventory={loot}
+                position="center"
+                buttons={[]}
+                limit={100}
+                logMessage={logSingleMessage}
+                toggleOff={ async () => { 
+                    setLoot(() => []);
+                }}
+            />
+            : xp > 0 && isWon
+            &&
+            <div className="inventory character_profile menu center_abs_hor" >
+                <h1 className="menu_title_text">{character.name}</h1>
+                <p>Lvl: {character.stats.level} Rank: {character.stats.rank}</p>
+                <ResourceBar 
+                    max={getLevelUpReq(character.stats.level, character.stats.rank)}
+                    cur={character.stats.xp + xp}
+                    index={0}
+                    type={"xp"}
+                />
+                <p>received: {xp} XP</p>
+                <button
+                    className="menu_btn"
+                    onClick={async () => {
+                        await lootAndSync();
+                        await uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: [] });
+                        await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
+                    }}
+                    disabled={!isHost}
+                >
+                        Return
+                </button>
+            </div>
             }
             {/* <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button> */}
             <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log({players, enemies})}>enemies</button>
