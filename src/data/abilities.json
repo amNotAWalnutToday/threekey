@@ -5,20 +5,19 @@
             "name": "seed shot",
             "type": "single",
             "damageType": "damage",
-            "damage": 40,
+            "damage": 100,
             "cost": {
                 "health": 5
             },
             "av": 1,
             "users": ["naturalist"],
             "unlocks": {
-                "max": 5,
                 "req": [
-                    {"id": "001", "amount": 1}, 
                     {"id": "002", "amount": 1}, 
                     {"id": "003", "amount": 1}, 
                     {"id": "004", "amount": 1}, 
-                    {"id": "005", "amount": 1}
+                    {"id": "005", "amount": 1}, 
+                    {"id": "006", "amount": 1}
                 ]
             }
         },
@@ -34,7 +33,6 @@
             "av": 1,
             "users": ["naturalist"],
             "unlocks": {
-                "max": 5,
                 "req": [{"id": "001", "amount": 5}],
                 "pre": "P01"
             }
@@ -51,7 +49,6 @@
             "av": 1,
             "users": ["naturalist"],
             "unlocks": {
-                "max": 5,
                 "req": [{"id": "001", "amount": 1}]
             }
         },
@@ -67,7 +64,6 @@
             "av": 1,
             "users": ["naturalist"],
             "unlocks": {
-                "max": 5,
                 "req": [{"id": "001", "amount": 5}],
                 "pre": "P03"
             }
@@ -85,7 +81,6 @@
             "users": ["naturalist"],
             "description": "Inflicts poison",
             "unlocks": {
-                "max": 5,
                 "req": [{"id": "001", "amount": 1}]
             }
         },
@@ -102,7 +97,6 @@
             "users": ["naturalist"],
             "description": "Gain defence",
             "unlocks": {
-                "max": 5,
                 "req": [{"id": "001", "amount": 5}]
             }
         },
@@ -119,7 +113,6 @@
             "users": ["naturalist"],
             "description": "Gain speed",
             "unlocks": {
-                "max": 5,
                 "req": [{"id": "001", "amount": 5}],
                 "pre": "I01"
             }
@@ -137,7 +130,6 @@
             "users": ["naturalist"],
             "description": "Lower defence and attack",
             "unlocks": {
-                "max": 5,
                 "req": [{"id": "001", "amount": 5}]
             }
         }

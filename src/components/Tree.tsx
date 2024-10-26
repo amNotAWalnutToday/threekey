@@ -103,10 +103,11 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
         const abilities = Array.from(character.abilities, (ref) => {
             const ability = getAbility(ref.id) ?? {} as AbilitySchema;
             const itemIds = ability.unlocks?.req;
-            const idIndex = Math.floor(ref.level / 10);
+            const idIndex = Math.floor(ref.level / 20);
             const safeIndex = Math.min(idIndex, itemIds.length - 1);
             const id = itemIds[safeIndex].id;
-            const requirements = [{id, amount: Math.max(ref.level % 10, 1)}];
+            const amount = Math.max(ref.level % 20, 1);
+            const requirements = [{id, amount: amount}];
             if(requirements[0].amount < 0) requirements[0].amount = 1; 
             const category: Category = { 
                 level: ref.level,

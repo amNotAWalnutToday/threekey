@@ -5,8 +5,6 @@
         "rarity": "common",
         "price": 0,
         "stack": 2000000,
-        "usable": false,
-        "chestOnly": false,
         "biomes": ["forest", "scrapyard", "crypt"],
         "minFloor": 0
     },
@@ -18,7 +16,6 @@
         "stack": 5,
         "usable": true,
         "shopLevel": 1,
-        "chestOnly": false,
         "description": "Use to heal 20 health",
         "biomes": ["forest", "scrapyard", "crypt"],
         "minFloor": 0
@@ -29,7 +26,6 @@
         "rarity": "common",
         "price": 1000,
         "stack": 5,
-        "usable": false,
         "chestOnly": true,
         "biomes": ["forest", "scrapyard", "crypt"],
         "minFloor": 0
@@ -40,7 +36,6 @@
         "rarity": "uncommon",
         "price": 1000,
         "stack": 5,
-        "usable": false,
         "chestOnly": true,
         "biomes": ["forest", "scrapyard", "crypt"],
         "minFloor": 0
@@ -51,8 +46,7 @@
         "rarity": "rare",
         "price": 1000,
         "stack": 5,
-        "usable": false,
-        "chestOnly": false,
+        "chestOnly": true,
         "biomes": [],
         "minFloor": 0
     },
@@ -62,10 +56,9 @@
         "rarity": "epic",
         "price": 1000,
         "stack": 5,
-        "usable": false,
-        "chestOnly": false,
+        "chestOnly": true,
         "biomes": [],
-        "minFloor": 0
+        "minFloor": 70
     },
     {
         "id": "006",
@@ -73,11 +66,9 @@
         "rarity": "legendary",
         "price": 1000,
         "stack": 5,
-        "usable": false,
-        "chestOnly": false,
-        "questRank": 9,
+        "chestOnly": true,
         "biomes": [],
-        "minFloor": 0
+        "minFloor": 80
     },
     {
         "id": "007",
@@ -85,8 +76,6 @@
         "rarity": "common",
         "price": 20,
         "stack": 100,
-        "usable": false,
-        "chestOnly": false,
         "questRank": 1,
         "biomes": [],
         "minFloor": 0

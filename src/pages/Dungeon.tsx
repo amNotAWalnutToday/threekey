@@ -441,8 +441,8 @@ export default function Dungeon() {
                     <button
                         className='menu_btn'
                         onClick={() => {
-                            console.log(getTile(floor.tiles, { event: 'chest' }))
-                            // console.log(getChestLoot(floor.biome, floor.number));
+                            // console.log(getTile(floor.tiles, { event: 'chest' }))
+                            console.log(getChestLoot(floor.biome, floor.number));
                         }}
                     >
                         event

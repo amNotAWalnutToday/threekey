@@ -177,6 +177,13 @@
     z-index: 5;
     min-height: 500px;
     max-height: 500px;
+    padding: 1.5rem 2.5rem;
+    background: var(--black-l-gradient);
+    box-shadow: 4px 4px 12px black;
+    outline: var(--outline_gold_inset);
+    outline-offset: 2px;
+    border: var(--border_gold_outset);
+    border-radius: 5px;
 }
 
 .inventory_items {
@@ -190,6 +197,7 @@
     border: var(--border_white_outset);
     min-width: 64px;
     min-height: 64px;
+    box-shadow: 0px 0px 6px black;
 }
 
 .box.selected,

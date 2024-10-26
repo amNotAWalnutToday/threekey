@@ -100,7 +100,6 @@ export default (() => {
         const highBiomes = ['cataclysmic desert', 'simulation', 'realm of divinity'];
         if(floorNum > 24) defaultBiomes = defaultBiomes.concat(medBiomes);
         if(floorNum > 49) defaultBiomes = defaultBiomes.concat(highBiomes);
-        console.log(defaultBiomes);
         return defaultBiomes;        
     }
 
@@ -326,8 +325,10 @@ export default (() => {
 
         const chosenBiome = getRandomBiome(floorNum);
 
-        for(let i = 10; i > 0; i--) {
-            for(let j = 10; j > 0; j--) {
+        let width = 10 + Math.floor(floorNum / 5);
+        let height = 10 + Math.floor(floorNum / 5); 
+        for(width; width > 0; width--) {
+            for(height; height > 0; height--) {
                 const roomRan = Math.floor(Math.random() * 40); 
                 const check = roomRan === 1 && totalRooms.length <= 3;
                 if(check) totalRooms.push([j, i]);

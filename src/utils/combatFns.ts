@@ -198,6 +198,19 @@ export default (() => {
         return updatedPlayer;
     }
 
+    const assignFloorStatsToEnemy = (enemy: typeof enemyData.all[0], floorNum: number) => {
+        const updatedEnemy = {...enemy};
+        const rankValue = getRankValue(enemy.rank);
+        const totalValue = floorNum * rankValue;
+        if(totalValue < 1) return enemy;
+        updatedEnemy.health = updatedEnemy.health * totalValue;
+        updatedEnemy.shield = updatedEnemy.shield * totalValue; 
+        updatedEnemy.attack = updatedEnemy.attack + totalValue;
+        updatedEnemy.defence = updatedEnemy.defence + totalValue;
+        updatedEnemy.speed = updatedEnemy.speed + Math.floor(floorNum / 5); 
+        return updatedEnemy;
+    }
+
     const respawn = async (player: PlayerSchema) => {
         let updatedPlayer = {...player};
         updatedPlayer = assignHeal(updatedPlayer, player.stats.combat.health.max, true);
@@ -457,8 +470,9 @@ export default (() => {
         const enemies = [];
         for(let i = 0; i < enemyIds.length; i++) {
             for(const enemy of enemyList) {
+                const updatedEnemy = assignFloorStatsToEnemy(enemy, floorNum);
                 if(enemy.id === enemyIds[i]) {
-                    const { rank, attack, defence, speed, name, health, abilities, inventory, shield } = enemy;
+                    const { rank, attack, defence, speed, name, health, abilities, inventory, shield } = updatedEnemy;
                     const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory, rank, floorNum, shield); 
                     enemies.push(newEnemy);
                 }    
@@ -490,7 +504,7 @@ export default (() => {
         return Array.from(enemies, (enemy: PlayerSchema) => {
             const abilities = Array.from(enemy.abilities, (e) => e.id); 
             const { attack, defence, speed, shield } = enemy.stats.combat;
-            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory, enemy.stats.rank, enemy.abilities[0].level, shield);
+            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory, enemy.stats.rank, enemy.abilities[0].level, shield.cur);
             updatedEnemy.stats.combat.health.cur = enemy.stats.combat.health.cur;
             updatedEnemy.stats.combat.shield.cur = enemy.stats.combat.shield.cur;
             return updatedEnemy;

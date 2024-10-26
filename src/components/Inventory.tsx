@@ -79,7 +79,7 @@ export default function Inventory({inventory, position, buttons, storage, limit,
     }
 
     return (
-        <div className={`inventory menu ${position}_abs_hor`} >
+        <div className={`inventory ${position}_abs_hor`} >
             <div className="inventory_items">
                 {mapInventory()}
             </div>
