@@ -23,10 +23,10 @@ import Inventory from "../components/Inventory";
 import ResourceBar from "../components/ResourceBar";
 
 const { 
-    getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
+    getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, assignHeal,
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
-    assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq, assignHeal,
+    assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq, assignDamage,
     respawn,
 } = combatFns;
 const { db } = accountFns;
@@ -196,7 +196,9 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
             return [...players];
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             if(!damageType || !amount) return state;
-            players[player.index].stats.combat.health.cur -= damageType === "heal" ? amount * -1 : amount ?? 0;
+            // players[player.index].stats.combat.health.cur -= damageType === "heal" ? amount * -1 : amount ?? 0;
+            if(damageType === "heal") players[player.index] = assignHeal(player.state, amount, true);
+            else players[player.index] = assignDamage(player.state, amount);
             upload(playersOrEnemies ?? '', { player, fieldId });
             return assignMaxOrMinStat(player.state, players, player.index);
         case PLAYERS_REDUCER_ACTIONS.resource_change:

@@ -177,6 +177,7 @@ export default (() => {
                 updatedPlayer.stats.combat.attack += 1;
                 updatedPlayer.stats.combat.defence += 1;
                 updatedPlayer.stats.combat.health.max += 3;
+                updatedPlayer.stats.combat.shield.max += 3;
                 break;
         }
 
@@ -189,6 +190,7 @@ export default (() => {
             case "naturalist":
                 updatedPlayer.stats.combat.speed += 5;
                 updatedPlayer.stats.combat.health.max += 5;
+                updatedPlayer.stats.combat.shield.max += 5;
                 updatedPlayer.stats.combat.resources.mana.max += 10;
                 break;
         }
@@ -243,11 +245,23 @@ export default (() => {
         return updatedPlayer;
     }
 
+    const assignDamage = (player: PlayerSchema, amount: number) => {
+        const updatedPlayer = {...player};
+        let totalAmount = amount;
+        if(player.stats.combat.shield.cur > 0 && totalAmount > 0) {
+            const shieldDamage = Math.min(updatedPlayer.stats.combat.shield.cur, totalAmount);
+            updatedPlayer.stats.combat.shield.cur -= amount;
+            totalAmount -= shieldDamage;
+        }
+        if(totalAmount > 0) updatedPlayer.stats.combat.health.cur -= totalAmount;
+        return assignMaxOrMinStat(updatedPlayer, [updatedPlayer], 0)[0];
+    }
+
     const assignHeal = (player: PlayerSchema, amount: number, isHeal: boolean) => {
         const updatedPlayer = {...player};
         const updatedHealth = isHeal ? amount : amount * -1
         updatedPlayer.stats.combat.health.cur += updatedHealth;
-        return assignMaxOrMinStat(player, [player], 0)[0];
+        return assignMaxOrMinStat(updatedPlayer, [updatedPlayer], 0)[0];
     }
 
     const assignResource = (player: PlayerSchema, amount: number) => {
@@ -287,7 +301,7 @@ export default (() => {
     }
 
     const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
-        const { health, resources } = player.stats.combat;
+        const { health, resources, shield } = player.stats.combat;
         const { mana } = resources;
     
         if(health.cur <= 0) { 
@@ -301,6 +315,12 @@ export default (() => {
             players[index].stats.combat.resources.mana.cur = 0;
         } else if(mana.cur > mana.max) {
             players[index].stats.combat.resources.mana.cur = mana.max;
+        }
+
+        if(shield.cur <= 0) {
+            players[index].stats.combat.shield.cur = 0;
+        } else if(shield.cur > shield.max) {
+            players[index].stats.combat.shield.cur = shield.max;
         }
     
         return [...players];
@@ -321,7 +341,7 @@ export default (() => {
         name: string, pid: string, maxHealth: number, abilityIds: string[],
         attack: number, defence: number, speed: number, status: StatusSchema[],
         dead: boolean, inventory: {id: string, amount: number}[], rank: string,
-        floorNum?: number,
+        floorNum: number, currentShield: number,
     ) => {
         const health = {
             max: maxHealth,
@@ -329,7 +349,7 @@ export default (() => {
         }
         const shield = {
             max: maxHealth,
-            cur: maxHealth,
+            cur: currentShield,
         }
         const mana = {
             max: 0,
@@ -438,8 +458,8 @@ export default (() => {
         for(let i = 0; i < enemyIds.length; i++) {
             for(const enemy of enemyList) {
                 if(enemy.id === enemyIds[i]) {
-                    const { rank, attack, defence, speed, name, health, abilities, inventory } = enemy;
-                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory, rank, floorNum); 
+                    const { rank, attack, defence, speed, name, health, abilities, inventory, shield } = enemy;
+                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory, rank, floorNum, shield); 
                     enemies.push(newEnemy);
                 }    
             }
@@ -469,9 +489,10 @@ export default (() => {
     const populateEnemies = (enemies: PlayerSchema[]) => {
         return Array.from(enemies, (enemy: PlayerSchema) => {
             const abilities = Array.from(enemy.abilities, (e) => e.id); 
-            const { attack, defence, speed } = enemy.stats.combat;
-            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory, enemy.stats.rank, enemy.abilities[0].level);
+            const { attack, defence, speed, shield } = enemy.stats.combat;
+            const updatedEnemy = createEnemy(enemy.name, enemy.pid, enemy.stats.combat.health.max, abilities, attack, defence, speed, enemy.status, enemy.dead ?? false, enemy.inventory, enemy.stats.rank, enemy.abilities[0].level, shield);
             updatedEnemy.stats.combat.health.cur = enemy.stats.combat.health.cur;
+            updatedEnemy.stats.combat.shield.cur = enemy.stats.combat.shield.cur;
             return updatedEnemy;
         });
     }
@@ -612,6 +633,7 @@ export default (() => {
         removeItem,
         respawn,
         applyItem,
+        assignDamage,
         assignHeal,
         assignResource,
         assignXp,

@@ -89,6 +89,7 @@ export default function Town() {
         let updatedCharacter = assignHeal(character, character.stats.combat.health.max, true);
         if(town.inn.level >= 2) updatedCharacter = assignResource(updatedCharacter, character.stats.combat.resources.mana.max);
         if(town.inn.level >= 3) updatedCharacter.status = [];
+        updatedCharacter.stats.combat.shield.cur = 0;
         uploadCharacterTown(updatedCharacter);
     }
 

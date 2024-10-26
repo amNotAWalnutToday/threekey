@@ -53,6 +53,15 @@ export default function Player(
                 selectTarget(player.pid)
             }}
         >
+            {player.stats.combat.shield.cur > 0 
+            &&
+            <ResourceBar
+                max={player.stats.combat.shield.max + player.stats.combat.health.max}
+                cur={player.stats.combat.shield.cur}
+                type={"shield"}
+                index={1}
+            />
+            }
             <ResourceBar
                 max={player.stats.combat.health.max}
                 cur={player.stats.combat.health.cur}
