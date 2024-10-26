@@ -344,6 +344,9 @@ export default function Combat() {
         } else if(ability === "self" && selectedTargetType !== "self") {
             setSelectedTargets(() => [character.pid]);
             setSelectedTargetType(() => "self");
+        } else if(ability === "ally_all" && selectedTargetType !== "ally_all") {
+            setSelectedTargets(() => Array.from([...players], (p) => p.pid));
+            setSelectedTargetType(() => "ally_all");
         }
     }
 
@@ -361,9 +364,10 @@ export default function Combat() {
             case "mana":
                 return ability.cost.mana;
             case "health":
-                return ability.cost.health;
+                if(!ability.cost.health) return 0;
+                return Math.ceil((character.stats.combat.health.max / 100) * ability.cost.health);
         }
-        return;
+        return 0;
     }
 
     const target = useCallback((targets: string[], ability: AbilitySchema) => {
@@ -526,7 +530,7 @@ export default function Combat() {
             const target = getPlayer([...players, ...enemies], targetRef);
             let amount = (
                 damageType === "heal"
-                    ? ability.damage + abilityRef.level
+                    ? ability.damage + (abilityRef.level * 3)
                     : getDamageFormula(user, target.state, ability.damage, abilityRef.level)
             );
             messagesToLog.push(chooseLogMessage(damageType, target.state.name, amount, ability.name));
@@ -561,14 +565,14 @@ export default function Combat() {
                         status: state,
                     }
                 });
-                if(state.type !== 'dot') return; 
+                if(state.type !== 'dot' && state.type !== 'hot') continue; 
                 dispatchEnemies({
                     type: PLAYERS_REDUCER_ACTIONS.receive_damage,
                     payload: {
                         fieldId: field.id,
                         pid: unit.pid,
                         amount: state.amount,
-                        damageType: "damage",
+                        damageType: state.type === "dot" ? "damage" : "heal",
                     }
                 });
             } else {
@@ -580,14 +584,14 @@ export default function Combat() {
                         status: state,
                     }
                 });
-                if(state.type !== 'dot') return; 
+                if(state.type !== 'dot' && state.type !== 'hot') continue; 
                 dispatchPlayers({
                     type: PLAYERS_REDUCER_ACTIONS.receive_damage,
                     payload: {
                         fieldId: field.id,
                         pid: unit.pid,
                         amount: state.amount,
-                        damageType: "damage",
+                        damageType: state.type === "dot" ? "damage" : "heal",
                     }
                 });
             }
@@ -624,7 +628,7 @@ export default function Combat() {
                 const ran = Math.floor(Math.random() * enemy.abilities.length);
                 const ability = getAbility(enemy.abilities[ran].id);
                 if(!ability) continue;
-                const targets = getTargets(ability.name, ability.type === 'ally' ? enemies : players, enemy.pid);
+                const targets = getTargets(ability.name, ability.type === 'ally' || ability.type === "ally_all" ? enemies : players, enemy.pid);
                 const action = createAction(ability.name, enemy.pid, [...targets]); 
                 dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id }});
                 av -= ability.av;

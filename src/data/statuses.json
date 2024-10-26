@@ -6,7 +6,15 @@
             "duration": 3,
             "amount": 1,
             "affects": [""],
-            "refs": ["P05"]
+            "refs": ["P08"]
+        },
+        {
+            "name": "regeneration",
+            "type": "hot",
+            "duration": 3,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["P03"]
         },
         {
             "name": "beetle armour",

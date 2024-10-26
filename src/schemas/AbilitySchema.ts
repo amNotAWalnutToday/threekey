@@ -1,5 +1,4 @@
 interface Requirements {
-    max: number,
     req: {id: string, amount: number}[],
     pre?: string,
 }

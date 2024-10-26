@@ -5,7 +5,7 @@
         "rarity": "common",
         "price": 0,
         "stack": 2000000,
-        "biomes": ["forest", "scrapyard", "crypt"],
+        "biomes": ["any"],
         "minFloor": 0
     },
     {
@@ -13,71 +13,206 @@
         "name": "Health Potion",
         "rarity": "common",
         "price": 100,
-        "stack": 5,
+        "stack": 10,
         "usable": true,
         "shopLevel": 1,
         "description": "Use to heal 20 health",
-        "biomes": ["forest", "scrapyard", "crypt"],
-        "minFloor": 0
+        "biomes": ["any"],
+        "minFloor": 1
     },
     {
         "id": "002",
-        "name": "Town Skill Scroll",
+        "name": "Town Scroll",
         "rarity": "common",
-        "price": 1000,
+        "price": 200,
         "stack": 5,
         "chestOnly": true,
-        "biomes": ["forest", "scrapyard", "crypt"],
-        "minFloor": 0
+        "biomes": ["any"],
+        "minFloor": 2
     },
     {
         "id": "003",
-        "name": "Town Skill Scroll",
+        "name": "Town Scroll",
         "rarity": "uncommon",
-        "price": 1000,
+        "price": 500,
         "stack": 5,
         "chestOnly": true,
-        "biomes": ["forest", "scrapyard", "crypt"],
-        "minFloor": 0
+        "biomes": ["any"],
+        "minFloor": 20
     },
     {
         "id": "004",
-        "name": "Town Skill Scroll",
+        "name": "Town Scroll",
         "rarity": "rare",
         "price": 1000,
         "stack": 5,
         "chestOnly": true,
-        "biomes": [],
-        "minFloor": 0
+        "biomes": ["any"],
+        "minFloor": 40
     },
     {
         "id": "005",
-        "name": "Town Skill Scroll",
+        "name": "Town Scroll",
         "rarity": "epic",
-        "price": 1000,
+        "price": 5000,
         "stack": 5,
         "chestOnly": true,
-        "biomes": [],
-        "minFloor": 70
+        "biomes": ["any"],
+        "minFloor": 60
     },
     {
         "id": "006",
-        "name": "Town Skill Scroll",
+        "name": "Town Scroll",
         "rarity": "legendary",
-        "price": 1000,
+        "price": 10000,
         "stack": 5,
         "chestOnly": true,
-        "biomes": [],
+        "biomes": ["any"],
         "minFloor": 80
     },
     {
         "id": "007",
+        "name": "Plant Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 20,
+        "biomes": ["forest", "factory", "realm_of_divinity"],
+        "minFloor": 0
+    },
+    {
+        "id": "008",
+        "name": "Plant Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 20,
+        "biomes": ["forest", "factory", "realm_of_divinity"],
+        "minFloor": 20
+    },
+    {
+        "id": "009",
+        "name": "Plant Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 20,
+        "biomes": ["forest", "factory", "realm_of_divinity"],
+        "minFloor": 40
+    },
+    {
+        "id": "010",
+        "name": "Plant Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 20,
+        "biomes": ["forest", "factory", "realm_of_divinity"],
+        "minFloor": 60
+    },
+    {
+        "id": "011",
+        "name": "Plant Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 20,
+        "biomes": ["forest", "factory", "realm_of_divinity"],
+        "minFloor": 80
+    },
+    {
+        "id": "012",
+        "name": "Insect Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 20,
+        "biomes": ["crypt", "hive", "simulation"],
+        "minFloor": 0
+    },
+    {
+        "id": "013",
+        "name": "Insect Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 20,
+        "biomes": ["crypt", "hive", "simulation"],
+        "minFloor": 20
+    },
+    {
+        "id": "014",
+        "name": "Insect Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 20,
+        "biomes": ["crypt", "hive", "simulation"],
+        "minFloor": 40
+    },
+    {
+        "id": "015",
+        "name": "Insect Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 20,
+        "biomes": ["crypt", "hive", "simulation"],
+        "minFloor": 60
+    },
+    {
+        "id": "016",
+        "name": "Insect Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 20,
+        "biomes": ["crypt", "hive", "simulation"],
+        "minFloor": 80
+    },
+    {
+        "id": "017",
+        "name": "Weather Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 20,
+        "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
+        "minFloor": 0
+    },
+    {
+        "id": "018",
+        "name": "Weather Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 20,
+        "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
+        "minFloor": 20
+    },
+    {
+        "id": "019",
+        "name": "Weather Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 20,
+        "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
+        "minFloor": 40
+    },
+    {
+        "id": "020",
+        "name": "Weather Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 20,
+        "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
+        "minFloor": 60
+    },
+    {
+        "id": "021",
+        "name": "Weather Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 20,
+        "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
+        "minFloor": 80
+    },
+    {
+        "id": "100",
         "name": "Vine",
         "rarity": "common",
         "price": 20,
         "stack": 100,
         "questRank": 1,
-        "biomes": [],
+        "biomes": ["forest"],
         "minFloor": 0
     }
 ]

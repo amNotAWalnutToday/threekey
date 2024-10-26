@@ -2,6 +2,116 @@
     "all": [
         {
             "id": "P01",
+            "name": "Healing Herbcraft",
+            "type": "self",
+            "damageType": "heal",
+            "damage": 10,
+            "cost": {
+                "mana": 5
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "P02",
+            "name": "Life Transfer",
+            "type": "ally",
+            "damageType": "heal",
+            "damage": 25,
+            "cost": {
+                "health": 25
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ],
+                "pre": "P01"
+            }
+        },
+        {
+            "id": "P03",
+            "name": "Herbal Regeneration",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "mana": 1
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Heal over time",
+            "unlocks": {
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ],
+                "pre": "P02"
+            }
+        },
+        {
+            "id": "P04",
+            "name": "Herbal Injection",
+            "type": "ally",
+            "damageType": "heal",
+            "damage": 100,
+            "cost": {
+                "mana": 10
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ],
+                "pre": "P03"
+            }
+        },
+        {
+            "id": "P05",
+            "name": "Flower Shower",
+            "type": "ally_all",
+            "damageType": "heal",
+            "damage": 60,
+            "cost": {
+                "mana": 20
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ],
+                "pre": "P04"
+            }
+        },
+        {
+            "id": "P06",
             "name": "seed shot",
             "type": "single",
             "damageType": "damage",
@@ -13,63 +123,38 @@
             "users": ["naturalist"],
             "unlocks": {
                 "req": [
-                    {"id": "002", "amount": 1}, 
-                    {"id": "003", "amount": 1}, 
-                    {"id": "004", "amount": 1}, 
-                    {"id": "005", "amount": 1}, 
-                    {"id": "006", "amount": 1}
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
                 ]
             }
         },
         {
-            "id": "P02",
+            "id": "P07",
             "name": "seed spread shot",
             "type": "aoe",
             "damageType": "damage",
-            "damage": 5,
+            "damage": 80,
             "cost": {
                 "health": 10
             },
             "av": 1,
             "users": ["naturalist"],
             "unlocks": {
-                "req": [{"id": "001", "amount": 5}],
-                "pre": "P01"
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ],
+                "pre": "P06"
             }
         },
         {
-            "id": "P03",
-            "name": "meditate",
-            "type": "self",
-            "damageType": "heal",
-            "damage": 50,
-            "cost": {
-                "mana": 5
-            },
-            "av": 1,
-            "users": ["naturalist"],
-            "unlocks": {
-                "req": [{"id": "001", "amount": 1}]
-            }
-        },
-        {
-            "id": "P04",
-            "name": "life transfer",
-            "type": "ally",
-            "damageType": "heal",
-            "damage": 25,
-            "cost": {
-                "health": 25
-            },
-            "av": 1,
-            "users": ["naturalist"],
-            "unlocks": {
-                "req": [{"id": "001", "amount": 5}],
-                "pre": "P03"
-            }
-        },
-        {
-            "id": "P05",
+            "id": "P08",
             "name": "poison thorn",
             "type": "single",
             "damageType": "status",
@@ -81,7 +166,13 @@
             "users": ["naturalist"],
             "description": "Inflicts poison",
             "unlocks": {
-                "req": [{"id": "001", "amount": 1}]
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ]
             }
         },
         {

@@ -187,7 +187,7 @@ export default function Dungeon() {
         if(!trap) return;
         if(trap.disarmType === "random") {
             const ran = Math.floor(Math.random() * 100);
-            if(ran > 2) {
+            if(ran > 50) {
                 logMessage(`${trap.type} has been disarmed.`)
                 disarmTrap(tile, floor);
             } else { 
@@ -205,7 +205,7 @@ export default function Dungeon() {
 
     const avoidFight = () => {
         const ran = Math.floor(Math.random() * 100);
-        if(ran > 1) {
+        if(ran > 51) {
             logMessage('You successfully avoided the enemies.');
             uploadParty("enemies", { partyId: party.players[0].pid, enemyIds: [] });
         } else { 
@@ -235,7 +235,7 @@ export default function Dungeon() {
             uploadCharacterDungeon(updatedPlayer);
 
             logMessage(`${character.name} inspected their surroundings and found ${chosenItem.name} x${convertedItem.amount}`);
-        } else if(chance > 49) {
+        } else if(chance > 59) {
             getEncounters(true);
         } else {
             logMessage(`You see nothing around other than the ${thisTile.type} scenery`);
@@ -443,6 +443,10 @@ export default function Dungeon() {
                         onClick={() => {
                             // console.log(getTile(floor.tiles, { event: 'chest' }))
                             console.log(getChestLoot(floor.biome, floor.number));
+                            
+                            let updatedPlayer = {...character};
+                            updatedPlayer = assignItem(updatedPlayer, {id: "018", amount: 1});
+                            uploadCharacterDungeon(updatedPlayer);
                         }}
                     >
                         event

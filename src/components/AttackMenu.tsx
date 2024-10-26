@@ -53,7 +53,7 @@ export default function AttackMenu(
                     break;
                 case "health":
                     if(!health || !ability.cost.health) return;
-                    if(health.cur < ability.cost.health) return false;
+                    if(health.cur < Math.ceil((health.max / 100) * ability.cost.health)) return false;
                     break;
             }
         }

@@ -75,6 +75,9 @@ export default (() => {
                 if(biome === itemBiome && item.minFloor <= floorNum) {
                     if(item.chestOnly && !isChest) continue;
                     possibleItems.push(item);
+                } else if('any' === itemBiome && item.minFloor <= floorNum) {
+                    if(item.chestOnly && !isChest) continue;
+                    possibleItems.push(item);
                 }
             }
         }
@@ -97,7 +100,7 @@ export default (() => {
     const getBiomes = (floorNum: number) => {
         let defaultBiomes = ['forest', 'scrapyard', 'crypt']
         const medBiomes = ['hive', 'factory', 'abyss'] 
-        const highBiomes = ['cataclysmic desert', 'simulation', 'realm of divinity'];
+        const highBiomes = ['cataclysmic_desert', 'simulation', 'realm_of_divinity'];
         if(floorNum > 24) defaultBiomes = defaultBiomes.concat(medBiomes);
         if(floorNum > 49) defaultBiomes = defaultBiomes.concat(highBiomes);
         return defaultBiomes;        
@@ -325,10 +328,10 @@ export default (() => {
 
         const chosenBiome = getRandomBiome(floorNum);
 
-        let width = 10 + Math.floor(floorNum / 5);
-        let height = 10 + Math.floor(floorNum / 5); 
-        for(width; width > 0; width--) {
-            for(height; height > 0; height--) {
+        const width = 10 + Math.floor(floorNum / 5);
+        const height = 10 + Math.floor(floorNum / 5); 
+        for(let i = width; i > 0; i--) {
+            for(let j = height; j > 0; j--) {
                 const roomRan = Math.floor(Math.random() * 40); 
                 const check = roomRan === 1 && totalRooms.length <= 3;
                 if(check) totalRooms.push([j, i]);

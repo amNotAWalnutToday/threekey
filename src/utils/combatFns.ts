@@ -30,7 +30,7 @@ export default (() => {
         if(ability?.type === "single") {
             const ran = Math.floor(Math.random() * players.length);
             return [players[ran].pid];
-        } else if(ability?.type === "aoe") {
+        } else if(ability?.type === "aoe" || ability?.type === "ally_all") {
             return Array.from([...players], (p) => p.pid);
         } else if(ability?.type === "self") {
             return [userPid];
@@ -142,6 +142,8 @@ export default (() => {
     const getLoot = (enemies: PlayerSchema[]) => {
         const loot = [];
         for(const enemy of enemies) {
+            const coins = { id: "000", amount: (enemy.abilities[0].level * 20) + 1 };
+            enemy.inventory.push(coins);
             const ran = Math.floor(Math.random() * enemy.inventory.length);
             if(ran < enemy.inventory.length) {
                 loot.push(enemy.inventory[ran]);

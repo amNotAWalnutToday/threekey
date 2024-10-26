@@ -6,8 +6,10 @@ import combatFns from "../utils/combatFns";
 import Item from "./Item";
 import PlayerSchema from "../schemas/PlayerSchema";
 import AbilitySchema from "../schemas/AbilitySchema";
+import AbilityTooltip from "./AbilityTooltip";
+import Category from "./Category";
 
-const { populateItem, removeItem, getItem, getAbility, getAbilityRef } = combatFns;
+const { populateItem, removeItem, getItem, getAbility, getAbilityRef, getRank, getRankValue} = combatFns;
 const { assignBuildingLevel } = townFns
 
 type Props = {
@@ -29,6 +31,7 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
     const [categories, setCategories] = useState<Category[][]>([]);
     const [selectedSkill, setSelectedSkill] = useState({} as Category);
     const [selectedTab, setSelectedTab] = useState("");
+    const [selectedRankReq, setSelectedRankReq] = useState("");
 
     const selectTab = (tab: string) => {
         setSelectedTab(() => tab);
@@ -142,24 +145,21 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
         })
     }
 
-    const mapCategories = (category: Category[], groupIndex: number) => {
-        return category.map((building, index) => {
+    const mapCategories = (group: Category[], groupIndex: number) => {
+        return group.map((category, index) => {
             return (
-                <div 
+                <Category
                     key={`building-${groupIndex}-${index}`}
-                >
-                    { groupIndex === 0 
-                    &&
-                    <h2 className="category_title" >Tier {index}</h2>
-                    }
-                    <div
-                        className={`box ${building.name === selectedSkill.name ? 'selected' : ''}`}
-                        onClick={() => setSelectedSkill({name: building.name, level: building.level, requirements: building.requirements, id: building.id ?? '', pre: building.pre})}
-                    >
-                        <p>{building.name}</p>
-                        <p>{building.level}</p>
-                    </div>
-                </div>
+                    category={category}
+                    selected={selectedSkill.name === category.name}
+                    index={index}
+                    groupIndex={groupIndex}
+                    hasTooltip={selectedTab !== "town"}
+                    click={() => {
+                        setSelectedSkill({name: category.name, level: category.level, requirements: category.requirements, id: category.id ?? '', pre: category.pre})
+                        setSelectedRankReq(`${getRank(Math.min(index * 2, 7))}`)
+                    }}
+                />
             )
         });
     }
@@ -212,6 +212,7 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
 
     const levelUpAbility = () => {
         if(checkRequirements()) return;
+        if(getRankValue(character.stats.rank) < getRankValue(selectedRankReq)) return;
         const ability = getAbilityRef(character, selectedSkill?.id ?? '');
         const preAbility = getAbilityRef(character, selectedSkill?.pre ?? '');
         if(preAbility.index >= 0 && preAbility.state.level <= ability.state.level) return;
@@ -241,7 +242,13 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
             <div className="skill_tree" >
                 { mapTownTree() }
             </div>
-            <div className="cen-flex" >
+            <div className={`cen-flex tree_reqs`} >
+                {selectedRankReq && 
+                <p
+                    className={`${getRankValue(character.stats.rank) < getRankValue(selectedRankReq) ? "red_text" : "uncommon_text"}`}
+                >
+                    Rank: {character.stats.rank} / {selectedRankReq}
+                </p>}
                 { mapRequirements() }
             </div>
             {selectedSkill?.requirements?.length 
@@ -267,7 +274,6 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
                 <button 
                     className="menu_btn" 
                     onClick={() => { 
-                        //TBA
                         assignTownCategories();
                         selectTab("town")
                     }}
@@ -278,7 +284,6 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
                 <button 
                     className="menu_btn" 
                     onClick={() => { 
-                        //TBA
                         assignAbilityCategories();
                         selectTab("ability")
                     }}

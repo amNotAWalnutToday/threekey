@@ -1,10 +1,12 @@
 import { useState, useContext } from 'react';
 import UserContext from '../data/Context';
 import combatFns from '../utils/combatFns';
+import accountFns from '../utils/accountFns';
 import classData from '../data/classes.json';
 import { useNavigate } from 'react-router-dom';
 
-const { createPlayer, upload } = combatFns;
+const { createPlayer } = accountFns
+const { upload } = combatFns;
 
 export default function CharacterCreateMenu() {
     const { user, setCharacter } = useContext(UserContext);
@@ -33,14 +35,14 @@ export default function CharacterCreateMenu() {
         setSelectedClass(() => c);
     }
 
-    const createClass = () => {
+    const createClass = async () => {
         if(!user || !selectedClass.length) return;
         const role = getClass(selectedClass);
         if(!role) return;
-        const player = createPlayer(playerName, user.uid, selectedClass, role.stats, [], { map: "-1", XY: [1, 1] }, []);
-        setCharacter(player);
+        const player = createPlayer(playerName, user.uid, selectedClass, role.stats, [], { map: "-1", XY: [1, 1] }, [], []);
+        setCharacter(() => player);
         const index = user.characters ? user.characters.length : 0;
-        upload('character', { fieldId: '', user, player: { state: player, index } });
+        await upload('character', { fieldId: '', user, player: { state: player, index } });
         navigate('../town');
     }
 
