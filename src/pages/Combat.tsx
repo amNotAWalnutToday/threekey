@@ -26,10 +26,11 @@ const {
     getPlayer, getAbility, getAbilityCosts, assignMaxOrMinStat, createEnemy,
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
-    assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq,
+    assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq, assignHeal,
+    respawn,
 } = combatFns;
 const { db } = accountFns;
-const { uploadParty } = partyFns;
+const { uploadParty, leaveParty, syncPartyMemberToAccount } = partyFns;
 
 const battleTimer = {
     initTime: 0,
@@ -214,7 +215,7 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
 }
 
 export default function Combat() {
-    const { character, party, setCharacter, user } = useContext(UserContext);
+    const { character, party, setCharacter, user, setParty } = useContext(UserContext);
     const enemyIds = useContext(UserContext).enemies;
     const setEnemyIds = useContext(UserContext).setEnemies;
     const navigate = useNavigate();
@@ -321,7 +322,7 @@ export default function Combat() {
     }
 
     const selectTargetByAbility = (ability: string) => {
-        const filteredPlayers = [...enemies]; 
+        const filteredPlayers = [...enemies].filter((e) => !e.dead); 
         if(ability === "single" && selectedTargetType !== "single") {
             if(!filteredPlayers.length) return;
             setSelectedTargets(() => [filteredPlayers[0].pid]);
@@ -383,10 +384,12 @@ export default function Combat() {
         const count = [0, 0]
         for(const p of side1) if(p.dead) count[0]++;
         for(const p of side2) if(p.dead) count[1]++;
-        if(count[0] >= side1.length || count[1] >= side2.length) {
+        if(count[0] >= side1.length) {
             setInProgress(() => false);
             setIsWon(() => true);
-        }        
+        } else if(count[1] >= side2.length) {
+            setInProgress(() => false);
+        }
     }, [players, enemies]);
 
     const playerTargetsEnemy = (
@@ -706,6 +709,24 @@ export default function Combat() {
         await uploadParty("players", { partyId: field.id, players: field.players });
     }
 
+    const respawnParty = async() => {
+        if(!isHost) return;
+        const updatedPartyPlayers = [];
+        for(const player of party.players) {
+            const respawnedPlayer = await respawn(player);
+            updatedPartyPlayers.push(respawnedPlayer);
+        }
+        await uploadParty('players', { partyId: party.players[0].pid, players: updatedPartyPlayers });
+        for(const player of updatedPartyPlayers) {
+            await syncPartyMemberToAccount(player);
+        }
+
+        await uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: [] });
+        await uploadParty('inCombat', { partyId: party.players[0].pid, isInCombat: false });
+        await uploadParty('wasInCombat', { partyId: party.players[0].pid, isInCombat: false });
+        await uploadParty('location', { partyId: party.players[0].pid, location: { ...party.location, map: "-1" } });
+    }
+
     useEffect(() => {
         if(isWon) dummyXp();
         if(isWon && isHost) {
@@ -725,7 +746,7 @@ export default function Combat() {
     }
 
     return (
-        <div>
+        <div className={`${character.dead ? 'screen_dead' : ''}`} >
             <AttackMenu 
                 {...props}
                 selectedPlayer={{state: character, index: -1}}
@@ -791,6 +812,17 @@ export default function Combat() {
                         Return
                 </button>
             </div>
+            }
+            {character.dead
+            &&
+            <button
+                className="menu_btn center_abs_hor"
+                style={{bottom: "50px", position: "absolute"}}
+                onClick={() => respawnParty()}
+                disabled={!isHost}
+            >
+                Respawn
+            </button>
             }
             {/* <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button> */}
             <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log({players, enemies})}>enemies</button>

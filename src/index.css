@@ -320,6 +320,12 @@ hr {
   transform: rotate(180deg) scale(0.5);
 }
 
+.screen_dead {
+  box-shadow: inset 2px 2px 128px  crimson;
+  width: 100vw;
+  height: 100vh;
+}
+
 .naturalist.back {
   background: url('/src/assets/elf_back.png');
   background-repeat: no-repeat;

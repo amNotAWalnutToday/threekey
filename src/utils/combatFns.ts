@@ -196,6 +196,14 @@ export default (() => {
         return updatedPlayer;
     }
 
+    const respawn = async (player: PlayerSchema) => {
+        let updatedPlayer = {...player};
+        updatedPlayer = assignHeal(updatedPlayer, player.stats.combat.health.max, true);
+        updatedPlayer.inventory = [];
+        updatedPlayer.dead = false;
+        return updatedPlayer;
+    }
+
     const removeItem = (player: PlayerSchema, item: {id: string, amount: number}) => {
         const updatedPlayer = {...player};
         let shouldRemoveFullStack = false;
@@ -602,6 +610,7 @@ export default (() => {
         getRankValue,
         getItem,
         removeItem,
+        respawn,
         applyItem,
         assignHeal,
         assignResource,

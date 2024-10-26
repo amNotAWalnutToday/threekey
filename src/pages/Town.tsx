@@ -110,6 +110,7 @@ export default function Town() {
     useEffect(() => {
         if(!user?.uid) return navigate('/');
         connectTown(setTown);
+        if(character.dead && character.stats.combat.health.cur > 0) setCharacter((prev) => ({...prev, dead: false}));
         /*eslint-disable-next-line*/
     }, [])
     

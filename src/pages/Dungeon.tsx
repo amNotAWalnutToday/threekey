@@ -21,7 +21,7 @@ const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy,
     connectFloor, uploadDungeon, getTrap, disarmTrap, getEnemies,
     getPossibleItems, disconnectFloor, removeLock, getChestLoot, removeEvent,
 } = dungeonFns;
-const { assignItem, getPlayer } = combatFns;
+const { assignItem, getPlayer, respawn } = combatFns;
 
 export default function Dungeon() {
     const { character, enemies, setEnemies, setParty, party, user, setCharacter } = useContext(UserContext);
@@ -346,6 +346,20 @@ export default function Dungeon() {
         if(party?.inCombat) return navigate('/combat');
     }, [party.inCombat]);
 
+    const respawnParty = async() => {
+        if(!isHost) return;
+        const updatedPartyPlayers = [];
+        for(const player of party.players) {
+            const respawnedPlayer = await respawn(player);
+            updatedPartyPlayers.push(respawnedPlayer);
+        }
+        await uploadParty('players', { partyId: party.players[0].pid, players: updatedPartyPlayers });
+        for(const player of updatedPartyPlayers) {
+            await syncPartyMemberToAccount(player);
+        }
+        await uploadParty('location', { partyId: party.players[0].pid, location: { ...party.location, map: "-1" } });
+    }
+
     const checkCanMove = () => {
         if(!floor.tiles) return;
         const currentTile = getTile(floor.tiles, {XY: party.location.XY})?.state;
@@ -362,7 +376,7 @@ export default function Dungeon() {
     }
 
     return (
-        <div>
+        <div className={`${character.dead ? 'screen_dead' : ''}`} >
             {/* <div className="grid">{ mapFloor() }</div> */}
             <div className="dungeon_info" >
                 <p>Floor: {floor.number}</p>
@@ -523,6 +537,17 @@ export default function Dungeon() {
                     toggleOffMenus("characterProfileMenu");
                 }}
             />}
+            {character.dead
+            &&
+            <button
+                className="menu_btn center_abs_hor"
+                style={{bottom: "50px", position: "absolute"}}
+                onClick={() => respawnParty()}
+                disabled={!isHost}
+            >
+                Respawn
+            </button>
+            }
         </div>
     )
 }
