@@ -189,6 +189,12 @@ export default (() => {
                 updatedPlayer.stats.combat.health.max += 3;
                 updatedPlayer.stats.combat.shield.max += 3;
                 break;
+            case "technologist":
+                updatedPlayer.stats.combat.attack += 1;
+                updatedPlayer.stats.combat.defence += 3;
+                updatedPlayer.stats.combat.health.max += 2;
+                updatedPlayer.stats.combat.shield.max += 2;
+                break;
         }
 
         return updatedPlayer;
@@ -202,6 +208,11 @@ export default (() => {
                 updatedPlayer.stats.combat.health.max += 5;
                 updatedPlayer.stats.combat.shield.max += 5;
                 updatedPlayer.stats.combat.resources.mana.max += 10;
+                break;
+            case "technologist":
+                updatedPlayer.stats.combat.speed += 1;
+                updatedPlayer.stats.combat.health.max += 5;
+                updatedPlayer.stats.combat.shield.max += 5;
                 break;
         }
 
@@ -234,6 +245,24 @@ export default (() => {
             if(status.type === "cc") return true;
         }
         return false;
+    }
+
+    const assignStatus = (player: PlayerSchema, fullstatus: StatusSchema, statusName: string) => {
+        const updatedPlayer = {...player};
+        const status = getStatus(player.status, statusName)
+        if(status.index > -1) {
+            // refresh duration on already applied status //
+            updatedPlayer.status.splice(status.index, 1);
+        }
+        updatedPlayer.status.push(fullstatus);
+        return updatedPlayer;
+    }
+
+    const removeStatus = (player: PlayerSchema, statusName: string) => {
+        const updatedPlayer = {...player};
+        const status = getStatus(player.status, statusName);
+        updatedPlayer.status.splice(status.index, 1);
+        return updatedPlayer;
     }
 
     const removeItem = (player: PlayerSchema, item: {id: string, amount: number}) => {
@@ -282,8 +311,18 @@ export default (() => {
             const shieldDamage = Math.min(updatedPlayer.stats.combat.shield.cur, totalAmount);
             updatedPlayer.stats.combat.shield.cur -= amount;
             totalAmount -= shieldDamage;
+            if(player.role === "technologist") {
+                updatedPlayer.stats.combat.resources.msp.cur += 1;
+                updatedPlayer.stats.combat.resources.psp.cur -= 1;
+            }
         }
-        if(totalAmount > 0) updatedPlayer.stats.combat.health.cur -= totalAmount;
+        if(totalAmount > 0) {
+            updatedPlayer.stats.combat.health.cur -= totalAmount;
+            if(player.role === "technologist") {
+                updatedPlayer.stats.combat.resources.psp.cur += 1;
+                updatedPlayer.stats.combat.resources.msp.cur -= 1;
+            }
+        }
         return assignMaxOrMinStat(updatedPlayer, [updatedPlayer], 0)[0];
     }
 
@@ -294,9 +333,14 @@ export default (() => {
         return assignMaxOrMinStat(updatedPlayer, [updatedPlayer], 0)[0];
     }
 
-    const assignResource = (player: PlayerSchema, amount: number) => {
+    const assignResource = (player: PlayerSchema, amount: number, techType?: string) => {
         const updatedPlayer = {...player};
-        updatedPlayer.stats.combat.resources.mana.cur += amount;
+        if(player.role === "naturalist") {
+            updatedPlayer.stats.combat.resources.mana.cur += amount;
+        } else if(player.role === "technologist") {
+            if(techType === "psp") updatedPlayer.stats.combat.resources.psp.cur += amount;
+            if(techType === "msp") updatedPlayer.stats.combat.resources.msp.cur += amount;
+        }
         return assignMaxOrMinStat(player, [player], 0)[0];
     }
 
@@ -332,7 +376,7 @@ export default (() => {
 
     const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
         const { health, resources, shield } = player.stats.combat;
-        const { mana } = resources;
+        const { mana, msp, psp } = resources;
     
         if(health.cur <= 0) { 
             players[index].dead = true;
@@ -351,6 +395,23 @@ export default (() => {
             players[index].stats.combat.shield.cur = 0;
         } else if(shield.cur > shield.max) {
             players[index].stats.combat.shield.cur = shield.max;
+        }
+
+        if(msp.cur <= 0) {
+            players[index].stats.combat.resources.msp.cur = 0;
+        } else if(msp.cur >= msp.max) {
+            players[index].stats.combat.resources.msp.cur = msp.max;
+            const status = getStatus(statusData.all, "overload");
+            status.state.amount = player.stats.level * (getRankValue(player.stats.rank) + 1);
+            players[index] = assignStatus(players[index], status.state, status.state.name);
+        }
+
+        if(psp.cur <= 0) {
+            players[index].stats.combat.resources.psp.cur = 0;
+        } else if(psp.cur >= psp.max) {
+            players[index].stats.combat.resources.psp.cur = psp.max;
+            const status = getStatus(statusData.all, "overheat");
+            players[index] = assignStatus(players[index], status.state, status.state.name);
         }
     
         return [...players];
@@ -510,7 +571,7 @@ export default (() => {
 
     const populatePlayers = (players: PlayerSchema[]) => {
         return Array.from(players, (player: PlayerSchema) => {
-            return createPlayer(player.name, player.pid, 'naturalist', player.stats, player.status, player.location, player.inventory, player.abilities);
+            return createPlayer(player.name, player.pid, player.role, player.stats, player.status, player.location, player.inventory, player.abilities);
         });
     }
 
@@ -669,6 +730,7 @@ export default (() => {
         respawn,
         applyItem,
         assignDamage,
+        assignStatus,
         assignHeal,
         assignResource,
         assignXp,

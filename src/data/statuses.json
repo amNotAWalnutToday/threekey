@@ -119,6 +119,22 @@
             "amount": 1,
             "affects": [""],
             "refs": ["W01"]
+        },
+        {
+            "name": "overload",
+            "type": "buff",
+            "duration": 1,
+            "amount": 1,
+            "affects": ["attack", "speed"],
+            "refs": [""]
+        },
+        {
+            "name": "overheat",
+            "type": "cc",
+            "duration": 1,
+            "amount": 1,
+            "affects": [""],
+            "refs": [""]
         }
     ]
 }

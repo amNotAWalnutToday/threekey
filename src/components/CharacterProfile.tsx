@@ -40,6 +40,8 @@ export default function CharacterProfile({character}: Props) {
                         index={1}
                     />
                 </div>
+                {character.role === "naturalist" 
+                && 
                 <div className="profile_w_bar border_blue">
                     Mana
                     <ResourceBar
@@ -48,7 +50,24 @@ export default function CharacterProfile({character}: Props) {
                         type={"mana"}
                         index={1}
                     />
-                </div>
+                </div>}
+                {character.role === "technologist" 
+                && 
+                <div className="profile_w_bar border_blue">
+                    HSP | ESP
+                    <ResourceBar
+                        max={character.stats.combat.resources.psp.max}
+                        cur={character.stats.combat.resources.psp.cur}
+                        type={"overheat"}
+                        index={1}
+                    />
+                    <ResourceBar
+                        max={character.stats.combat.resources.msp.max}
+                        cur={character.stats.combat.resources.msp.cur}
+                        type={"overload"}
+                        index={1}
+                    />
+                </div>}
                 <div className="profile_w_bar border_aqua">
                     Xp
                     <ResourceBar

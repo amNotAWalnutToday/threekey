@@ -46,7 +46,7 @@ export default function Player(
 
     return (
         <div 
-            className={`${player.npc ? "enemy" : "player"} ${player.role} ${status} ${checkIfTargeted() ? "target" : ""} back ${player.dead ? "dead" : ""}`} 
+            className={`${player.npc ? "enemy" : "player"} ${player.npc ? `${player.name}` : ""} ${player.role} ${status} ${checkIfTargeted() ? "target" : ""} back ${player.dead ? "dead" : ""}`} 
             onClick={() => selectPlayer({state: player, index})}
             onContextMenu={(e) => {
                 e.preventDefault();
@@ -74,6 +74,20 @@ export default function Player(
                 type={"mana"}
                 index={5}
             />
+            <div className="cen-flex">
+                <ResourceBar
+                    max={player.stats.combat.resources?.psp?.max}
+                    cur={player.stats.combat.resources?.psp?.cur}
+                    type={"overheat"}
+                    index={5}
+                />
+                <ResourceBar
+                    max={player.stats.combat.resources?.msp?.max}
+                    cur={player.stats.combat.resources?.msp?.cur}
+                    type={"overload"}
+                    index={5}
+                />
+            </div>
             <div className="status_bar">
                 { player?.status?.map((status, index) => {
                     return (

@@ -8,7 +8,8 @@ type Props = {
 export default function ResourceBar({max, cur, type, index}: Props) {
     const getWidth = () => {
         const updatedCur = type === "shield" ? cur * 2 : cur; 
-        const width = Math.min(100 / max * updatedCur, 100);
+        const updatedMaxWidth = type === "overheat" || type === "overload" ? 50 : 100
+        const width = Math.min(updatedMaxWidth / max * updatedCur, 100);
         return width;
     }
 

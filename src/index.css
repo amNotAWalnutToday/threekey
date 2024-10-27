@@ -58,6 +58,14 @@ hr {
   border: 1px double white;
 }
 
+body {
+  min-height: 100vh;
+  min-width: 100vw;
+  background-repeat: no-repeat;
+  background-size: cover;
+  overflow: hidden;
+}
+
 .sidemenu {
   position: absolute;
   bottom: 1rem;
@@ -139,11 +147,11 @@ hr {
 
 .emptyBar.shield {
   height: 5px;
-  background-color: #800;
+  background: linear-gradient(#800, red);
 }
 
 .health_fill {
-  background-color: #800;
+  background: linear-gradient(#800, red);
   height: 100%;
   transition: width 0.5s ease-in-out;
 }
@@ -158,6 +166,34 @@ hr {
   background-color: #06A;
   height: 100%;
   transition: width 0.5s ease-in-out;
+}
+
+.overheat.emptyBar {
+  transform: rotate(180deg) translateY(40px);
+  width: 50px;
+  box-shadow: none !important;
+}
+
+.overload.emptyBar {
+  width: 50px;
+  box-shadow: none !important;
+}
+
+
+.overload_fill {
+  background: linear-gradient(aqua, black);
+  z-index: -1;
+}
+
+.overheat_fill {
+  background: radial-gradient(rgb(199, 199, 61), orangered, crimson);
+  transform: rotate(180deg);
+  color: black;
+  text-shadow: 1px 1px 1px black;
+}
+
+.overheat_fill p {
+  transform: translate(-25px);
 }
 
 .xp_fill {
@@ -349,6 +385,12 @@ hr {
   background: url('/src/assets/elf_front.png');
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.sproutling {
+  background: url('/src/assets/sproutling_front.png');
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 @keyframes sendAttackEnemy {

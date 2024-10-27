@@ -27,7 +27,7 @@ const {
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
     assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq, assignDamage,
-    respawn, checkIfCC
+    respawn, checkIfCC, assignStatus,
 } = combatFns;
 const { db } = accountFns;
 const { uploadParty, leaveParty, syncPartyMemberToAccount } = partyFns;
@@ -181,11 +181,7 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
             return [...players];
         case PLAYERS_REDUCER_ACTIONS.add_status:
             if(!status) return state;
-            if(getStatus(player.state.status, status.name).index > -1) {
-                // refresh duration on already applied status //
-                players[player.index].status.splice(getStatus(player.state.status, status.name).index, 1);
-            }
-            players[player.index].status.push(status);
+            players[player.index] = assignStatus(player.state, status, status.name);
             upload(playersOrEnemies ?? '', { player, fieldId });
             return [...players];
         case PLAYERS_REDUCER_ACTIONS.reduce_status_duration:

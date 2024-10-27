@@ -82,34 +82,34 @@
             "rank": "",
             "combat": {
                 "shield": {
-                    "max": 100,
+                    "max": 10,
                     "cur": 0
                 },
                 "health": {
-                    "max": 100,
-                    "cur": 100
+                    "max": 10,
+                    "cur": 10
                 },
                 "resources": {
                     "mana": {
-                        "max": 10,
-                        "cur": 10
+                        "max": 0,
+                        "cur": 0
                     },
                     "msp": {
-                        "max": 0,
-                        "cur": 0
+                        "max": 20,
+                        "cur": 10
                     },
                     "psp": {
-                        "max": 0,
-                        "cur": 0
+                        "max": 20,
+                        "cur": 10
                     },
                     "soul": {
                         "max": 0,
                         "cur": 0
                     }
                 },
-                "attack": 5,
-                "defence": 1,
-                "speed": 30
+                "attack": 1,
+                "defence": 5,
+                "speed": 1
             }
         }
     }

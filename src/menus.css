@@ -134,9 +134,13 @@
     gap: 1rem;
 }
 
-.character_profile .emptyBar,
+.character_profile .emptyBar:not(.overheat),
 .party_menu_bars .emptyBar {
     transform: translateY(0) !important
+}
+
+.character_profile .emptyBar.overheat {
+    transform: rotate(180deg) translate(-15px, 0) !important
 }
 
 .party_menu_player {

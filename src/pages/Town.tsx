@@ -87,7 +87,13 @@ export default function Town() {
 
     const applyRest = () => {
         let updatedCharacter = assignHeal(character, character.stats.combat.health.max, true);
-        if(town.inn.level >= 2) updatedCharacter = assignResource(updatedCharacter, character.stats.combat.resources.mana.max);
+        if(town.inn.level >= 2) { 
+            updatedCharacter = assignResource(updatedCharacter, character.stats.combat.resources.mana.max);
+            const MSPdifference = Math.floor((updatedCharacter.stats.combat.resources.msp.max / 2)) - updatedCharacter.stats.combat.resources.msp.cur;  
+            const PSPdifference = Math.floor((updatedCharacter.stats.combat.resources.psp.max / 2)) - updatedCharacter.stats.combat.resources.psp.cur;
+            updatedCharacter = assignResource(updatedCharacter, MSPdifference, "msp");
+            updatedCharacter = assignResource(updatedCharacter, PSPdifference, "psp");
+        }
         if(town.inn.level >= 3) updatedCharacter.status = [];
         updatedCharacter.stats.combat.shield.cur = 0;
         uploadCharacterTown(updatedCharacter);
