@@ -38,7 +38,7 @@ export default function Category({category, selected, groupIndex, index, hasTool
             <h2 className="category_title" >Tier {index + 1}</h2>
             }
             <div
-                className={`box category_box ${selected ? 'selected' : ''}`}
+                className={`box inventory_item category_box ${selected ? 'selected' : ''}`}
                 onClick={click}
                 onMouseEnter={() => setShowTooltip(() => true)}
                 onMouseLeave={() => setShowTooltip(() => false)}

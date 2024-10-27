@@ -2,8 +2,9 @@ import { useContext } from "react";
 import UserContext from "../data/Context"
 import AbilitySchema from "../schemas/AbilitySchema";
 import combatFns from "../utils/combatFns";
+import statusData from '../data/statuses.json';
 
-const { assignAbilityLevelStats, getAbilityRef } = combatFns;
+const { assignAbilityLevelStats, getAbilityRef, getStatus } = combatFns;
 
 type Props = {
     ability: AbilitySchema;
@@ -23,7 +24,12 @@ export default function AbilityTooltip({ability}: Props) {
         } else if(ability.damageType === "damage") {
             return `${getLeveledAbilityStats()}% DMG`
         } else if(ability.damageType === "status") {
-            return `${ability?.description} of ${getLeveledAbilityStats()}`
+            const status = getStatus(statusData.all, ability.id);
+            if(status.state.type === "cc") {
+                return `${ability?.description} of ${getLeveledAbilityStats}%`
+            } else {
+                return `${ability?.description} of ${getLeveledAbilityStats()}`
+            }
         }
     }
     

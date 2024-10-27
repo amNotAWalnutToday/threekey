@@ -144,7 +144,8 @@
 }
 
 .tree_menu {
-    width: 1000px;
+    width: 800px;
+    max-width: 800px;
     justify-content: space-between;
 }
 
@@ -200,6 +201,13 @@
     min-width: 64px;
     min-height: 64px;
     box-shadow: 0px 0px 6px black;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    line-height: 1rem;
+    align-items: center;
+    padding: 0.25rem;
+    gap: 0.5rem;
 }
 
 .box.selected,
@@ -310,10 +318,11 @@
     pointer-events: none;
     text-shadow: 2.5px 2px 1px black;
     border-bottom: 1px solid goldenrod;
+    line-height: 1.4rem;
 }
 
 .ability_btn .tooltip {
-    margin-top: -48px;
+    margin-top: -68px;
     text-align: right;
 }
 
@@ -377,6 +386,7 @@
 .category_title {
     position: absolute;
     border-bottom: 1px solid white;
+    background: var(--white-r-gradient);
     transform: translateY(-20px);
 }
 
@@ -385,9 +395,11 @@
 }
 
 .box {
+    box-shadow: 1px 1px 4px black;
     border: 1px solid white;
-    width: 64px;
+    width: 110px;
     height: 64px;
+    text-transform: capitalize;
 }
 
 .common {

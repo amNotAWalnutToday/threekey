@@ -27,7 +27,7 @@ const {
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
     assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq, assignDamage,
-    respawn,
+    respawn, checkIfCC
 } = combatFns;
 const { db } = accountFns;
 const { uploadParty, leaveParty, syncPartyMemberToAccount } = partyFns;
@@ -132,7 +132,6 @@ const actionQueueReducer = (state: ActionSchema[], action: ACTION_QUEUE_ACTIONS)
     const { fieldId } = action.payload;
     const updatedQueue = [...state];
 
-
     switch(action.type) {
         case ACTION_QUEUE_REDUCER_ACTIONS.target:
             if(action.payload.action) updatedQueue.push(action.payload.action);
@@ -176,6 +175,10 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
         case PLAYERS_REDUCER_ACTIONS.add_player:
             if(playerObj) players.push(playerObj);
             return [...players];
+        case PLAYERS_REDUCER_ACTIONS.revive_player:
+            players[player.index].dead = false;
+            upload(playersOrEnemies ?? '', { player, fieldId });
+            return [...players];
         case PLAYERS_REDUCER_ACTIONS.add_status:
             if(!status) return state;
             if(getStatus(player.state.status, status.name).index > -1) {
@@ -196,7 +199,6 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
             return [...players];
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             if(!damageType || !amount) return state;
-            // players[player.index].stats.combat.health.cur -= damageType === "heal" ? amount * -1 : amount ?? 0;
             if(damageType === "heal") players[player.index] = assignHeal(player.state, amount, true);
             else players[player.index] = assignDamage(player.state, amount);
             upload(playersOrEnemies ?? '', { player, fieldId });
@@ -347,6 +349,12 @@ export default function Combat() {
         } else if(ability === "ally_all" && selectedTargetType !== "ally_all") {
             setSelectedTargets(() => Array.from([...players], (p) => p.pid));
             setSelectedTargetType(() => "ally_all");
+        } else if(ability === "ally_any" && selectedTargetType !== "ally_any") {
+            setSelectedTargets(() => [players[0].pid]);
+            setSelectedTargetType(() => "ally_any");
+        } else if(ability === "field" && selectedTargetType !== "field") {
+            setSelectedTargets(() => Array.from([...players, ...enemies], (p) => p.pid));
+            setSelectedTargetType(() => "field");
         }
     }
 
@@ -417,6 +425,8 @@ export default function Combat() {
             const user = getPlayer(players, userId);
             const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
             status.amount += abilityLevel
+            const chance = Math.floor(Math.random() * 101);
+            if(type === "cc" && chance + amount < 100) return; 
             dispatchEnemies({
                 type: PLAYERS_REDUCER_ACTIONS.add_status,
                 payload: { pid: targets[i], amount, damageType, status: { ...status }, fieldId: field.id }
@@ -439,6 +449,8 @@ export default function Combat() {
             const user = getPlayer(players, userId);
             const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
             status.amount += abilityLevel
+            const chance = Math.floor(Math.random() * 101);
+            if(type === "cc" && chance + amount < 100) return; 
             dispatchPlayers({
                 type: PLAYERS_REDUCER_ACTIONS.add_status,
                 payload: { pid: targets[i], amount, damageType, status, fieldId: field.id }
@@ -465,6 +477,8 @@ export default function Combat() {
             const user = getPlayer(enemies, userId);
             const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
             status.amount += abilityLevel
+            const chance = Math.floor(Math.random() * 101);
+            if(type === "cc" && chance + amount < 100) return; 
             dispatchPlayers({
                 type: PLAYERS_REDUCER_ACTIONS.add_status,
                 payload: { pid: targets[i], amount, damageType, status, fieldId: field.id }
@@ -487,6 +501,8 @@ export default function Combat() {
             const user = getPlayer(enemies, userId);
             const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
             status.amount += abilityLevel
+            const chance = Math.floor(Math.random() * 101);
+            if(type === "cc" && chance + amount < 100) return; 
             dispatchEnemies({
                 type: PLAYERS_REDUCER_ACTIONS.add_status,
                 payload: { pid: targets[i], amount, damageType, status: { ...status }, fieldId: field.id }
@@ -516,14 +532,13 @@ export default function Combat() {
 
     const attack = useCallback((userId: string, targets: string[], ability: AbilitySchema) => {
         const user = getPlayer([...players, ...enemies], userId).state;
-        const targetNames = Array.from(targets, (id) => {
-            return getPlayer([...players, ...enemies], id).state.name;
-        });
         const abilityRef = getAbilityRef(user, ability.id).state;
         const { damageType } = ability;
 
         const messagesToLog = [];
-        if(!user.dead) messagesToLog.push(`${user.name} uses ${ability.name}`);
+        if(!user.dead) {
+            messagesToLog.push(`${user.name} uses ${ability.name}`);
+        }
 
         targets.forEach((targetRef: string, i: number) => {
             if(user.dead) return;
@@ -533,8 +548,27 @@ export default function Combat() {
                     ? ability.damage + (abilityRef.level * 3)
                     : getDamageFormula(user, target.state, ability.damage, abilityRef.level)
             );
-            messagesToLog.push(chooseLogMessage(damageType, target.state.name, amount, ability.name));
+            
             if(damageType === "status" && ability.damage < 1) amount = 0;
+            if(damageType === "damage") {
+                const status = getStatus(user.status, "lifesteal"); 
+                if(status.index > -1) {
+                    if(!user.npc) {
+                        dispatchPlayers({
+                            type: PLAYERS_REDUCER_ACTIONS.receive_damage,
+                            payload: {pid: userId, amount: Math.ceil((status.state.amount / 10) * amount), damageType: "heal", fieldId: field.id }
+                        });
+                    } else {
+                        dispatchEnemies({
+                            type: PLAYERS_REDUCER_ACTIONS.receive_damage,
+                            payload: {pid: userId, amount: Math.ceil((status.state.amount / 10) * amount), damageType: "heal", fieldId: field.id }
+                        });
+                    }
+                }
+            }
+
+            if(target.state.dead && ability.id !== "I05") return;
+            messagesToLog.push(chooseLogMessage(damageType, target.state.name, amount, ability.name));
 
             if(target.state.npc && !user.npc) {
                 playerTargetsEnemy(userId, damageType, amount, targets, i, ability.id);
@@ -575,6 +609,7 @@ export default function Combat() {
                         damageType: state.type === "dot" ? "damage" : "heal",
                     }
                 });
+                if(state.name === "revival") dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.revive_player, payload: {fieldId: field.id, pid: unit.pid }})
             } else {
                 dispatchPlayers({
                     type: PLAYERS_REDUCER_ACTIONS.reduce_status_duration,
@@ -594,6 +629,7 @@ export default function Combat() {
                         damageType: state.type === "dot" ? "damage" : "heal",
                     }
                 });
+                if(state.name === "revival") dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.revive_player, payload: {fieldId: field.id, pid: unit.pid }})
             }
         }
     }, [field.id]);
@@ -602,13 +638,16 @@ export default function Combat() {
         setActionValue(() => getActionValue(getPlayer(players, character.pid).state));
         if(!isHost) return;
         players.forEach((player) => {
+            const status = getStatus(player.status, "rain");
+            let amount = -1 * Math.floor(player.stats.combat.resources.mana.max / 10);
+            if(status.index > -1) amount += Math.ceil(status.state.amount / 2);
             dispatchPlayers({
                 type: PLAYERS_REDUCER_ACTIONS.resource_change, 
                 payload: { 
                     pid: player.pid,
                     fieldId: players[0].pid,
                     resource: "mana",
-                    amount: -1 * Math.floor(player.stats.combat.resources.mana.max / 10)
+                    amount,
                 }
             });
             procDot(player);
@@ -622,13 +661,13 @@ export default function Combat() {
         if(!isHost) return;
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action: {ability: 'sort', user: 'N/A', targets: [] }, fieldId: field.id }})
         enemies.forEach((enemy) => {
-            if(enemy.dead) return;
+            if(enemy.dead || checkIfCC(enemy)) return;
             let av = getActionValue(enemy);
             while(av > 0) {
                 const ran = Math.floor(Math.random() * enemy.abilities.length);
                 const ability = getAbility(enemy.abilities[ran].id);
                 if(!ability) continue;
-                const targets = getTargets(ability.name, ability.type === 'ally' || ability.type === "ally_all" ? enemies : players, enemy.pid);
+                const targets = getTargets(ability.name, ability.type === "field" ? [...players, ...enemies] : ability.type === 'ally' || ability.type === "ally_all" || ability.type === "ally_any" ? enemies : players, enemy.pid);
                 const action = createAction(ability.name, enemy.pid, [...targets]); 
                 dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id }});
                 av -= ability.av;
@@ -752,7 +791,7 @@ export default function Combat() {
     }
 
     return (
-        <div className={`${character.dead ? 'screen_dead' : ''}`} >
+        <div className={`combat_page ${character.dead ? 'screen_dead' : ''}`} >
             <AttackMenu 
                 {...props}
                 selectedPlayer={{state: character, index: -1}}

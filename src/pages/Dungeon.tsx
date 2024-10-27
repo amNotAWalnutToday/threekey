@@ -444,9 +444,9 @@ export default function Dungeon() {
                             // console.log(getTile(floor.tiles, { event: 'chest' }))
                             console.log(getChestLoot(floor.biome, floor.number));
                             
-                            let updatedPlayer = {...character};
-                            updatedPlayer = assignItem(updatedPlayer, {id: "018", amount: 1});
-                            uploadCharacterDungeon(updatedPlayer);
+                            // let updatedPlayer = {...character};
+                            // updatedPlayer = assignItem(updatedPlayer, {id: "018", amount: 1});
+                            // uploadCharacterDungeon(updatedPlayer);
                         }}
                     >
                         event

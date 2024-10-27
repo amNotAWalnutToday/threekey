@@ -158,7 +158,7 @@
             "name": "poison thorn",
             "type": "single",
             "damageType": "status",
-            "damage": 2,
+            "damage": 40,
             "cost": {
                 "mana": 2
             },
@@ -176,9 +176,55 @@
             }
         },
         {
+            "id": "P09",
+            "name": "Drowsy Dewdrops",
+            "type": "single",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "mana": 10
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Chance to Inflict sleep",
+            "unlocks": {
+                "pre": "P08",
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "P10",
+            "name": "Entangle Overgrowth",
+            "type": "aoe",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "mana": 20
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Chance to Inflict bind",
+            "unlocks": {
+                "pre": "P09",
+                "req": [
+                    {"id": "007", "amount": 1}, 
+                    {"id": "008", "amount": 1}, 
+                    {"id": "009", "amount": 1}, 
+                    {"id": "010", "amount": 1}, 
+                    {"id": "011", "amount": 1}
+                ]
+            }
+        },
+        {
             "id": "I01",
-            "name": "beetle armour",
-            "type": "self",
+            "name": "Beetle Aspect",
+            "type": "ally_any",
             "damageType": "status",
             "damage": 0,
             "cost": {
@@ -188,40 +234,350 @@
             "users": ["naturalist"],
             "description": "Gain defence",
             "unlocks": {
-                "req": [{"id": "001", "amount": 5}]
+                "req": [
+                    {"id": "012", "amount": 1},
+                    {"id": "013", "amount": 1},
+                    {"id": "014", "amount": 1},
+                    {"id": "015", "amount": 1},
+                    {"id": "016", "amount": 1}
+                ]
             }
         },
         {
             "id": "I02",
-            "name": "moth wings",
-            "type": "ally",
+            "name": "Mantis Aspect",
+            "type": "ally_any",
             "damageType": "status",
             "damage": 0,
-            "cost": {
-                "mana": 2
-            },
-            "av": 1,
-            "users": ["naturalist"],
-            "description": "Gain speed",
-            "unlocks": {
-                "req": [{"id": "001", "amount": 5}],
-                "pre": "I01"
-            }
-        },
-        {
-            "id": "I03",
-            "name": "wasp sting",
-            "type": "single",
-            "damageType": "status",
-            "damage": 5,
             "cost": {
                 "mana": 5
             },
             "av": 1,
             "users": ["naturalist"],
-            "description": "Lower defence and attack",
+            "description": "Gain attack",
             "unlocks": {
-                "req": [{"id": "001", "amount": 5}]
+                "pre": "I01",
+                "req": [
+                    {"id": "012", "amount": 1},
+                    {"id": "013", "amount": 1},
+                    {"id": "014", "amount": 1},
+                    {"id": "015", "amount": 1},
+                    {"id": "016", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "I03",
+            "name": "Dragonfly Aspect",
+            "type": "ally_any",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "mana": 10
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Gain speed",
+            "unlocks": {
+                "pre": "I02",
+                "req": [
+                    {"id": "012", "amount": 1},
+                    {"id": "013", "amount": 1},
+                    {"id": "014", "amount": 1},
+                    {"id": "015", "amount": 1},
+                    {"id": "016", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "I04",
+            "name": "Leech Aspect",
+            "type": "ally_any",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "mana": 20
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Gain lifesteal",
+            "unlocks": {
+                "pre": "I03",
+                "req": [
+                    {"id": "012", "amount": 1},
+                    {"id": "013", "amount": 1},
+                    {"id": "014", "amount": 1},
+                    {"id": "015", "amount": 1},
+                    {"id": "016", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "I05",
+            "name": "Butterfly Rebirth",
+            "type": "ally",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "mana": 60
+            },
+            "av": 2,
+            "users": ["naturalist"],
+            "description": "Revive fallen ally",
+            "unlocks": {
+                "pre": "I04",
+                "req": [
+                    {"id": "012", "amount": 1},
+                    {"id": "013", "amount": 1},
+                    {"id": "014", "amount": 1},
+                    {"id": "015", "amount": 1},
+                    {"id": "016", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "I06",
+            "name": "Spider Bite",
+            "type": "single",
+            "damageType": "status",
+            "damage": 40,
+            "cost": {
+                "mana": 2
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Inflicts venom",
+            "unlocks": {
+                "req": [
+                    {"id": "012", "amount": 1},
+                    {"id": "013", "amount": 1},
+                    {"id": "014", "amount": 1},
+                    {"id": "015", "amount": 1},
+                    {"id": "016", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "I07",
+            "name": "Wasp Sting",
+            "type": "single",
+            "damageType": "status",
+            "damage": 40,
+            "cost": {
+                "mana": 5
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Lower defence",
+            "unlocks": {
+                "pre": "I06",
+                "req": [
+                    {"id": "012", "amount": 1},
+                    {"id": "013", "amount": 1},
+                    {"id": "014", "amount": 1},
+                    {"id": "015", "amount": 1},
+                    {"id": "016", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "I08",
+            "name": "Venom Spray",
+            "type": "aoe",
+            "damageType": "status",
+            "damage": 100,
+            "cost": {
+                "mana": 10
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Inflics venom",
+            "unlocks": {
+                "pre": "I07",
+                "req": [
+                    {"id": "012", "amount": 1},
+                    {"id": "013", "amount": 1},
+                    {"id": "014", "amount": 1},
+                    {"id": "015", "amount": 1},
+                    {"id": "016", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "W01",
+            "name": "rain",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "mana": 5
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "req": [
+                    {"id": "017", "amount": 1},
+                    {"id": "018", "amount": 1},
+                    {"id": "019", "amount": 1},
+                    {"id": "020", "amount": 1},
+                    {"id": "021", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "W02",
+            "name": "lightning",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 240,
+            "cost": {
+                "mana": 10
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "pre": "W01",
+                "req": [
+                    {"id": "017", "amount": 1},
+                    {"id": "018", "amount": 1},
+                    {"id": "019", "amount": 1},
+                    {"id": "020", "amount": 1},
+                    {"id": "021", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "W03",
+            "name": "storm",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 200,
+            "cost": {
+                "mana": 20
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "pre": "W02",
+                "req": [
+                    {"id": "017", "amount": 1},
+                    {"id": "018", "amount": 1},
+                    {"id": "019", "amount": 1},
+                    {"id": "020", "amount": 1},
+                    {"id": "021", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "W04",
+            "name": "Flash Flood",
+            "type": "field",
+            "damageType": "damage",
+            "damage": 1000,
+            "cost": {
+                "mana": 40
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "pre": "W03",
+                "req": [
+                    {"id": "017", "amount": 1},
+                    {"id": "018", "amount": 1},
+                    {"id": "019", "amount": 1},
+                    {"id": "020", "amount": 1},
+                    {"id": "021", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "W05",
+            "name": "Tsunami",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 500,
+            "cost": {
+                "mana": 40
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "unlocks": {
+                "pre": "W04",
+                "req": [
+                    {"id": "017", "amount": 1},
+                    {"id": "018", "amount": 1},
+                    {"id": "019", "amount": 1},
+                    {"id": "020", "amount": 1},
+                    {"id": "021", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "W06",
+            "name": "Wildfire",
+            "type": "aoe",
+            "damageType": "status",
+            "damage": 100,
+            "cost": {
+                "mana": 10
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Inflicts burn",
+            "unlocks": {
+                "req": [
+                    {"id": "017", "amount": 1},
+                    {"id": "018", "amount": 1},
+                    {"id": "019", "amount": 1},
+                    {"id": "020", "amount": 1},
+                    {"id": "021", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "W07",
+            "name": "Earthquake",
+            "type": "field",
+            "damageType": "status",
+            "damage": 200,
+            "cost": {
+                "mana": 20
+            },
+            "av": 1,
+            "users": ["naturalist"],
+            "description": "Inflicts tremors",
+            "unlocks": {
+                "pre": "W06",
+                "req": [
+                    {"id": "017", "amount": 1},
+                    {"id": "018", "amount": 1},
+                    {"id": "019", "amount": 1},
+                    {"id": "020", "amount": 1},
+                    {"id": "021", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "W08",
+            "name": "Eruption",
+            "type": "aoe",
+            "damageType": "status",
+            "damage": 400,
+            "cost": {
+                "mana": 50
+            },
+            "av": 3,
+            "users": ["naturalist"],
+            "description": "Inflicts severe burn",
+            "unlocks": {
+                "pre": "W07",
+                "req": [
+                    {"id": "017", "amount": 1},
+                    {"id": "018", "amount": 1},
+                    {"id": "019", "amount": 1},
+                    {"id": "020", "amount": 1},
+                    {"id": "021", "amount": 1}
+                ]
             }
         }
     ]

@@ -27,10 +27,10 @@ export default (() => {
     const getTargets = (abilityName: string, players: PlayerSchema[], userPid: string) => {
         const ability = getAbility(abilityName);
         
-        if(ability?.type === "single") {
+        if(ability?.type === "single" || ability?.type === "ally_any") {
             const ran = Math.floor(Math.random() * players.length);
             return [players[ran].pid];
-        } else if(ability?.type === "aoe" || ability?.type === "ally_all") {
+        } else if(ability?.type === "aoe" || ability?.type === "ally_all" || ability?.type === "field") {
             return Array.from([...players], (p) => p.pid);
         } else if(ability?.type === "self") {
             return [userPid];
@@ -71,7 +71,14 @@ export default (() => {
 
     const getAbilityLevelEffect = (ability: AbilitySchema, abilityLevel: number) => {
         const updatedAbility = {...ability};
-        updatedAbility.damage += (abilityLevel * 3);
+        if(ability.damageType === "damage") {
+            updatedAbility.damage += (abilityLevel * 2);
+        } else if(ability.damageType === "heal") {
+            updatedAbility.damage += (abilityLevel * 3);
+        } else if(ability.damageType === "status") {
+            const status = getStatus(statusData.all, ability.id);
+            updatedAbility.damage = status.state.amount + abilityLevel;
+        }
         return updatedAbility;
     }
 
@@ -88,10 +95,11 @@ export default (() => {
     }
 
     const getActionValue = (player: PlayerSchema) => {
+        if(checkIfCC(player)) return 0;
         let speed = player.stats.combat.speed; 
         speed = assignBuffs(player.status, 'speed', speed);
 
-        const av = Math.floor(speed / 10);
+        const av = Math.floor(speed / 20);
         return av > 0 && speed > 0 ? av : 1;
     }
 
@@ -176,7 +184,7 @@ export default (() => {
         const updatedPlayer = {...player};
         switch(updatedPlayer.role) {
             case "naturalist":
-                updatedPlayer.stats.combat.attack += 1;
+                updatedPlayer.stats.combat.attack += 2;
                 updatedPlayer.stats.combat.defence += 1;
                 updatedPlayer.stats.combat.health.max += 3;
                 updatedPlayer.stats.combat.shield.max += 3;
@@ -219,6 +227,13 @@ export default (() => {
         updatedPlayer.inventory = [];
         updatedPlayer.dead = false;
         return updatedPlayer;
+    }
+
+    const checkIfCC = (player: PlayerSchema) => {
+        for(const status of player.status) {
+            if(status.type === "cc") return true;
+        }
+        return false;
     }
 
     const removeItem = (player: PlayerSchema, item: {id: string, amount: number}) => {
@@ -373,10 +388,13 @@ export default (() => {
 
         const abilities = [];
         for(const id of abilityIds) {
-            const ability = {
-                id,
-                level: floorNum ?? 1
-            };
+            const fullAbility = getAbility(id);
+            let level = floorNum ?? 1
+            if(fullAbility?.type === "status") {
+                const status = getStatus(statusData.all, id);
+                if(status.state.type === "cc") level = floorNum * 3; 
+            }
+            const ability = { id, level };
             if(ability) abilities.push(ability);
         }
 
@@ -646,6 +664,7 @@ export default (() => {
         getRank,
         getRankValue,
         getItem,
+        checkIfCC,
         removeItem,
         respawn,
         applyItem,

@@ -1,5 +1,6 @@
 const enum PLAYERS_REDUCER_ACTIONS {
     add_player,
+    revive_player,
     add_status,
     reduce_status_duration,
     receive_damage,

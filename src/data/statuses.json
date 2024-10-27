@@ -1,14 +1,6 @@
 {
     "all": [
         {
-            "name": "poison",
-            "type": "dot",
-            "duration": 3,
-            "amount": 1,
-            "affects": [""],
-            "refs": ["P08"]
-        },
-        {
             "name": "regeneration",
             "type": "hot",
             "duration": 3,
@@ -17,7 +9,63 @@
             "refs": ["P03"]
         },
         {
-            "name": "beetle armour",
+            "name": "poison",
+            "type": "dot",
+            "duration": 3,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["P08"]
+        },
+        {
+            "name": "venom",
+            "type": "dot",
+            "duration": 3,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["I06", "I08"]
+        },
+        {
+            "name": "burn",
+            "type": "dot",
+            "duration": 3,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["W06"]
+        },
+        {
+            "name": "severe burn",
+            "type": "dot",
+            "duration": 3,
+            "amount": 10,
+            "affects": [""],
+            "refs": ["W08"]
+        },
+        {
+            "name": "tremor",
+            "type": "dot",
+            "duration": 3,
+            "amount": 10,
+            "affects": [""],
+            "refs": ["W07"]
+        },
+        {
+            "name": "sleep",
+            "type": "cc",
+            "duration": 2,
+            "amount": 10,
+            "affects": [""],
+            "refs": ["P09"]
+        },
+        {
+            "name": "bind",
+            "type": "cc",
+            "duration": 0,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["P10"]
+        },
+        {
+            "name": "defence up",
             "type": "buff",
             "duration": 5,
             "amount": 1,
@@ -25,20 +73,52 @@
             "refs": ["I01"]
         },
         {
-            "name": "moth wings",
+            "name": "attack up",
             "type": "buff",
-            "duration": 5,
-            "amount": 10,
-            "affects": ["speed"],
+            "duration": 3,
+            "amount": 1,
+            "affects": ["attack"],
             "refs": ["I02"]
         },
         {
-            "name": "stung",
+            "name": "speed up",
+            "type": "buff",
+            "duration": 1,
+            "amount": 1,
+            "affects": ["speed"],
+            "refs": ["I03"]
+        },
+        {
+            "name": "lifesteal",
+            "type": "special",
+            "duration": 3,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["I04"]
+        },
+        {
+            "name": "revival",
+            "type": "hot",
+            "duration": 0,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["I05"]
+        },
+        {
+            "name": "defence down",
             "type": "debuff",
             "duration": 5,
-            "amount": 10,
-            "affects": ["attack", "defence"],
-            "refs": ["I03"]
+            "amount": 1,
+            "affects": ["defence"],
+            "refs": ["I07"]
+        },
+        {
+            "name": "rain",
+            "type": "buff",
+            "duration": 4,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["W01"]
         }
     ]
 }
