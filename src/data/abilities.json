@@ -579,6 +579,549 @@
                     {"id": "021", "amount": 1}
                 ]
             }
+        },
+        {
+            "id": "OH01",
+            "name": "Gun Fire",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 100,
+            "cost": {
+                "psp": 5
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "022", "amount": 1},
+                    {"id": "023", "amount": 1},
+                    {"id": "024", "amount": 1},
+                    {"id": "025", "amount": 1},
+                    {"id": "026", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OH02",
+            "name": "Grenade",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 140,
+            "cost": {
+                "psp": 5
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "OH01",
+                "req": [
+                    {"id": "022", "amount": 1},
+                    {"id": "023", "amount": 1},
+                    {"id": "024", "amount": 1},
+                    {"id": "025", "amount": 1},
+                    {"id": "026", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OH03",
+            "name": "Flamethrower",
+            "type": "aoe",
+            "damageType": "status",
+            "damage": 100,
+            "cost": {
+                "psp": 10
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "description": "Inflicts burn",
+            "unlocks": {
+                "pre": "OH02",
+                "req": [
+                    {"id": "022", "amount": 1},
+                    {"id": "023", "amount": 1},
+                    {"id": "024", "amount": 1},
+                    {"id": "025", "amount": 1},
+                    {"id": "026", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OH04",
+            "name": "Rocket Launcher",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 400,
+            "cost": {
+                "psp": 15
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "OH03",
+                "req": [
+                    {"id": "022", "amount": 1},
+                    {"id": "023", "amount": 1},
+                    {"id": "024", "amount": 1},
+                    {"id": "025", "amount": 1},
+                    {"id": "026", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OH05",
+            "name": "Nuclear Strike",
+            "type": "field",
+            "damageType": "damage",
+            "damage": 2000,
+            "cost": {
+                "psp": 20
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "OH04",
+                "req": [
+                    {"id": "022", "amount": 1},
+                    {"id": "023", "amount": 1},
+                    {"id": "024", "amount": 1},
+                    {"id": "025", "amount": 1},
+                    {"id": "026", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OH06",
+            "name": "Napalm Strike",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 1000,
+            "cost": {
+                "psp": 20
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "022", "amount": 1},
+                    {"id": "023", "amount": 1},
+                    {"id": "024", "amount": 1},
+                    {"id": "025", "amount": 1},
+                    {"id": "026", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OH07",
+            "name": "Heatwave Heckle",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "psp": 5
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "022", "amount": 1},
+                    {"id": "023", "amount": 1},
+                    {"id": "024", "amount": 1},
+                    {"id": "025", "amount": 1},
+                    {"id": "026", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OH08",
+            "name": "Stab",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 80,
+            "cost": {
+
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "022", "amount": 1},
+                    {"id": "023", "amount": 1},
+                    {"id": "024", "amount": 1},
+                    {"id": "025", "amount": 1},
+                    {"id": "026", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL01",
+            "name": "Energy Shield",
+            "type": "self",
+            "damageType": "shield",
+            "damage": 1,
+            "cost": {
+                "msp": 1
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL02",
+            "name": "Charge",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "description": "Chance to regen overload each turn",
+            "unlocks": {
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL03",
+            "name": "Charge Blade",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 80,
+            "cost": {
+                "msp": 1
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL04",
+            "name": "Discharge Blade",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 500,
+            "cost": {
+                "msp": 20
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "OL03",
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL05",
+            "name": "Laser Rifle",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 140,
+            "cost": {
+                "msp": 5
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL06",
+            "name": "Stun Grenade",
+            "type": "aoe",
+            "damageType": "status",
+            "damage": 100,
+            "cost": {
+                "msp": 10
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "description": "Chance to stun targets",
+            "unlocks": {
+                "pre": "OL05",
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL07",
+            "name": "Charge Cannon",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 200,
+            "cost": {
+                "msp": 10
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "OL06",
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL08",
+            "name": "Discharge Cannon",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 1000,
+            "cost": {
+                "msp": 20
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "OL07",
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "OL09",
+            "name": "Satelite Laser",
+            "type": "field",
+            "damageType": "damage",
+            "damage": 1000,
+            "cost": {
+                "msp": 15
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "OL08",
+                "req": [
+                    {"id": "027", "amount": 1},
+                    {"id": "028", "amount": 1},
+                    {"id": "029", "amount": 1},
+                    {"id": "030", "amount": 1},
+                    {"id": "031", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SH01",
+            "name": "Regeneration Shield",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "msp": 1
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "032", "amount": 1},
+                    {"id": "033", "amount": 1},
+                    {"id": "034", "amount": 1},
+                    {"id": "035", "amount": 1},
+                    {"id": "036", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SH02",
+            "name": "Shield Transfer",
+            "type": "ally",
+            "damageType": "shield",
+            "damage": 10,
+            "cost": {
+                "shield": 25
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "SH01",
+                "req": [
+                    {"id": "032", "amount": 1},
+                    {"id": "033", "amount": 1},
+                    {"id": "034", "amount": 1},
+                    {"id": "035", "amount": 1},
+                    {"id": "036", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SH03",
+            "name": "Reflect",
+            "type": "self",
+            "damageType": "shield",
+            "damage": 0,
+            "cost": {
+                "msp": 5
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "SH02",
+                "req": [
+                    {"id": "032", "amount": 1},
+                    {"id": "033", "amount": 1},
+                    {"id": "034", "amount": 1},
+                    {"id": "035", "amount": 1},
+                    {"id": "036", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SH04",
+            "name": "Plasma Shield Other",
+            "type": "ally_any",
+            "damageType": "shield",
+            "damage": 100,
+            "cost": {
+                "msp": 5
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "SH03",
+                "req": [
+                    {"id": "032", "amount": 1},
+                    {"id": "033", "amount": 1},
+                    {"id": "034", "amount": 1},
+                    {"id": "035", "amount": 1},
+                    {"id": "036", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SH05",
+            "name": "Plasma Shield All",
+            "type": "ally_all",
+            "damageType": "shield",
+            "damage": 100,
+            "cost": {
+                "msp": 20
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "SH04",
+                "req": [
+                    {"id": "032", "amount": 1},
+                    {"id": "033", "amount": 1},
+                    {"id": "034", "amount": 1},
+                    {"id": "035", "amount": 1},
+                    {"id": "036", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SH06",
+            "name": "Shield Conversion",
+            "type": "self",
+            "damageType": "shield",
+            "damage": 50,
+            "cost": {
+                "health": 50
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "032", "amount": 1},
+                    {"id": "033", "amount": 1},
+                    {"id": "034", "amount": 1},
+                    {"id": "035", "amount": 1},
+                    {"id": "036", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SH07",
+            "name": "Heat Shield",
+            "type": "self",
+            "damageType": "shield",
+            "damage": 10,
+            "cost": {
+                "psp": 5
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "pre": "SH06",
+                "req": [
+                    {"id": "032", "amount": 1},
+                    {"id": "033", "amount": 1},
+                    {"id": "034", "amount": 1},
+                    {"id": "035", "amount": 1},
+                    {"id": "036", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SH08",
+            "name": "Shield Discharge",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 1000,
+            "cost": {
+                "shield": 100,
+                "msp": 20
+            },
+            "av": 1,
+            "users": ["technologist"],
+            "unlocks": {
+                "req": [
+                    {"id": "032", "amount": 1},
+                    {"id": "033", "amount": 1},
+                    {"id": "034", "amount": 1},
+                    {"id": "035", "amount": 1},
+                    {"id": "036", "amount": 1}
+                ]
+            }
         }
     ]
 }

@@ -44,6 +44,7 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                     amount={getButton("buy") ? fullItem.price : item.amount}
                     selected={selectedItem?.state?.id === item.id}
                     click={selectItem}
+                    inShop={getButton("buy")}
                 />
             )
         });

@@ -326,8 +326,9 @@
 }
 
 .ability_btn .tooltip {
-    margin-top: -68px;
+    margin-top: -128px;
     text-align: right;
+    background: var(--black-l-strong-gradient);
 }
 
 .profile_status {
@@ -384,7 +385,7 @@
 }
 
 .tree_special_tooltip_holder .tooltip  {
-    transform: translateY(-48px);
+    transform: translateY(-200px);
 }
 
 .category_title {
@@ -392,6 +393,8 @@
     border-bottom: 1px solid white;
     background: var(--white-r-gradient);
     transform: translateY(-20px);
+    width: 110px;
+    text-align: center;
 }
 
 .category_box:nth-child(2) {

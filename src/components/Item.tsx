@@ -7,9 +7,10 @@ type Props = {
     requiredAmount?: number,
     selected: boolean,
     click?: () => void,
+    inShop?: boolean,
 }
 
-export default function Item({item, amount, requiredAmount, selected, click}: Props) {
+export default function Item({item, amount, requiredAmount, selected, inShop, click}: Props) {
     const [showTooltip, setShowTooltip] = useState(false); 
     
     return (
@@ -29,7 +30,7 @@ export default function Item({item, amount, requiredAmount, selected, click}: Pr
                 <p>Buy: {item.price} | Sell: {Math.floor(item.price / 2)}</p>
             </div>}
             <p>{item.name}</p>
-            <p>{amount} {requiredAmount && <span>/ {requiredAmount}</span>}</p>
+            <p>{amount}{inShop && " G"} {requiredAmount && <span>/ {requiredAmount}</span>}</p>
         </div>
     )
 }

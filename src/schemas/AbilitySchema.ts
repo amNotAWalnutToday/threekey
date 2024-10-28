@@ -11,7 +11,11 @@ interface AbilitySchema {
     damage: number,
     cost: {
         health?: number,
+        shield?: number,
         mana?: number,
+        psp?: number,
+        msp?: number,
+        soul?: number,
     },
     av: number,
     users: string[],

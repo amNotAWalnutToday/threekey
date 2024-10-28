@@ -28,6 +28,12 @@ export default (() => {
         const ability = getAbility(abilityName);
         
         if(ability?.type === "single" || ability?.type === "ally_any") {
+            for(const player of players) { 
+                const status = getStatus(player.status ?? [], "taunt");
+                if(status.index < 0) continue;
+                const chance = Math.floor(Math.random() * 101);
+                if (chance + status.state.amount > 100) return [player.pid];
+            }
             const ran = Math.floor(Math.random() * players.length);
             return [players[ran].pid];
         } else if(ability?.type === "aoe" || ability?.type === "ally_all" || ability?.type === "field") {
@@ -89,7 +95,7 @@ export default (() => {
         for(let i = 0; i < statuses.length; i++) {
            for(let j = 0; j < statuses[i].refs.length; j++) {
                 if(name === statuses[i].refs[j]) return {state: statuses[i], index: i}
-           }
+            }
         }
         return {state: statuses[0], index: -1};
     }
@@ -323,6 +329,13 @@ export default (() => {
                 updatedPlayer.stats.combat.resources.msp.cur -= 1;
             }
         }
+        return assignMaxOrMinStat(updatedPlayer, [updatedPlayer], 0)[0];
+    }
+
+    const assignShield = (player: PlayerSchema, amount: number) => {
+        const updatedPlayer = {...player};
+        const updatedShield = amount;
+        updatedPlayer.stats.combat.shield.cur += updatedShield;
         return assignMaxOrMinStat(updatedPlayer, [updatedPlayer], 0)[0];
     }
 
@@ -730,6 +743,7 @@ export default (() => {
         respawn,
         applyItem,
         assignDamage,
+        assignShield,
         assignStatus,
         assignHeal,
         assignResource,

@@ -26,6 +26,7 @@
         "rarity": "common",
         "price": 200,
         "stack": 5,
+        "questRank": 2,
         "chestOnly": true,
         "biomes": ["any"],
         "minFloor": 2
@@ -36,6 +37,7 @@
         "rarity": "uncommon",
         "price": 500,
         "stack": 5,
+        "questRank": 4,
         "chestOnly": true,
         "biomes": ["any"],
         "minFloor": 20
@@ -46,6 +48,7 @@
         "rarity": "rare",
         "price": 1000,
         "stack": 5,
+        "questRank": 6,
         "chestOnly": true,
         "biomes": ["any"],
         "minFloor": 40
@@ -56,6 +59,7 @@
         "rarity": "epic",
         "price": 5000,
         "stack": 5,
+        "questRank": 7,
         "chestOnly": true,
         "biomes": ["any"],
         "minFloor": 60
@@ -66,6 +70,7 @@
         "rarity": "legendary",
         "price": 10000,
         "stack": 5,
+        "questRank": 9,
         "chestOnly": true,
         "biomes": ["any"],
         "minFloor": 80
@@ -75,7 +80,7 @@
         "name": "Plant Scroll",
         "rarity": "common",
         "price": 200,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["forest", "factory", "realm_of_divinity"],
         "minFloor": 0
     },
@@ -84,7 +89,7 @@
         "name": "Plant Scroll",
         "rarity": "uncommon",
         "price": 400,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["forest", "factory", "realm_of_divinity"],
         "minFloor": 20
     },
@@ -93,7 +98,7 @@
         "name": "Plant Scroll",
         "rarity": "rare",
         "price": 1000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["forest", "factory", "realm_of_divinity"],
         "minFloor": 40
     },
@@ -102,7 +107,7 @@
         "name": "Plant Scroll",
         "rarity": "epic",
         "price": 5000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["forest", "factory", "realm_of_divinity"],
         "minFloor": 60
     },
@@ -111,7 +116,7 @@
         "name": "Plant Scroll",
         "rarity": "legendary",
         "price": 10000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["forest", "factory", "realm_of_divinity"],
         "minFloor": 80
     },
@@ -120,7 +125,7 @@
         "name": "Insect Scroll",
         "rarity": "common",
         "price": 200,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["crypt", "hive", "simulation"],
         "minFloor": 0
     },
@@ -129,7 +134,7 @@
         "name": "Insect Scroll",
         "rarity": "uncommon",
         "price": 400,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["crypt", "hive", "simulation"],
         "minFloor": 20
     },
@@ -138,7 +143,7 @@
         "name": "Insect Scroll",
         "rarity": "rare",
         "price": 1000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["crypt", "hive", "simulation"],
         "minFloor": 40
     },
@@ -147,7 +152,7 @@
         "name": "Insect Scroll",
         "rarity": "epic",
         "price": 5000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["crypt", "hive", "simulation"],
         "minFloor": 60
     },
@@ -156,7 +161,7 @@
         "name": "Insect Scroll",
         "rarity": "legendary",
         "price": 10000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["crypt", "hive", "simulation"],
         "minFloor": 80
     },
@@ -165,7 +170,7 @@
         "name": "Weather Scroll",
         "rarity": "common",
         "price": 200,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
         "minFloor": 0
     },
@@ -174,7 +179,7 @@
         "name": "Weather Scroll",
         "rarity": "uncommon",
         "price": 400,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
         "minFloor": 20
     },
@@ -183,7 +188,7 @@
         "name": "Weather Scroll",
         "rarity": "rare",
         "price": 1000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
         "minFloor": 40
     },
@@ -192,7 +197,7 @@
         "name": "Weather Scroll",
         "rarity": "epic",
         "price": 5000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
         "minFloor": 60
     },
@@ -201,8 +206,143 @@
         "name": "Weather Scroll",
         "rarity": "legendary",
         "price": 10000,
-        "stack": 20,
+        "stack": 60,
         "biomes": ["scrapyard", "abyss", "cataclysmic_desert"],
+        "minFloor": 80
+    },
+    {
+        "id": "022",
+        "name": "Overheat Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 60,
+        "biomes": ["forest", "abyss", "cataclysmic_desert"],
+        "minFloor": 0
+    },
+    {
+        "id": "023",
+        "name": "Overheat Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 60,
+        "biomes": ["forest", "abyss", "cataclysmic_desert"],
+        "minFloor": 20
+    },
+    {
+        "id": "024",
+        "name": "Overheat Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 60,
+        "biomes": ["forest", "abyss", "cataclysmic_desert"],
+        "minFloor": 40
+    },
+    {
+        "id": "025",
+        "name": "Overheat Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 60,
+        "biomes": ["forest", "abyss", "cataclysmic_desert"],
+        "minFloor": 60
+    },
+    {
+        "id": "026",
+        "name": "Overheat Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 60,
+        "biomes": ["forest", "abyss", "cataclysmic_desert"],
+        "minFloor": 80
+    },
+    {
+        "id": "027",
+        "name": "Overload Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 60,
+        "biomes": ["crypt", "hive", "realm_of_divinity"],
+        "minFloor": 0
+    },
+    {
+        "id": "028",
+        "name": "Overload Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 60,
+        "biomes": ["crypt", "hive", "realm_of_divinity"],
+        "minFloor": 20
+    },
+    {
+        "id": "029",
+        "name": "Overload Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 60,
+        "biomes": ["crypt", "hive", "realm_of_divinity"],
+        "minFloor": 40
+    },
+    {
+        "id": "030",
+        "name": "Overload Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 60,
+        "biomes": ["crypt", "hive", "realm_of_divinity"],
+        "minFloor": 60
+    },
+    {
+        "id": "031",
+        "name": "Overload Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 60,
+        "biomes": ["crypt", "hive", "realm_of_divinity"],
+        "minFloor": 80
+    },
+    {
+        "id": "032",
+        "name": "Shield Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "simulation"],
+        "minFloor": 0
+    },
+    {
+        "id": "033",
+        "name": "Shield Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "simulation"],
+        "minFloor": 20
+    },
+    {
+        "id": "034",
+        "name": "Shield Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "simulation"],
+        "minFloor": 40
+    },
+    {
+        "id": "035",
+        "name": "Shield Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "simulation"],
+        "minFloor": 60
+    },
+    {
+        "id": "036",
+        "name": "Shield Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "simulation"],
         "minFloor": 80
     },
     {

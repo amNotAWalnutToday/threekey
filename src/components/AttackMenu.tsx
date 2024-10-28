@@ -40,7 +40,7 @@ export default function AttackMenu(
 
     const checkCanUseAbility = (ability: AbilitySchema, player: PlayerSchema) => {
         if(player.dead) return false; 
-        const { health, resources } = player.stats.combat;
+        const { health, shield, resources } = player.stats.combat;
         const { mana, psp, msp, soul } = resources;
         const usedResources = [];
 
@@ -54,6 +54,18 @@ export default function AttackMenu(
                 case "health":
                     if(!health || !ability.cost.health) return;
                     if(health.cur < Math.ceil((health.max / 100) * ability.cost.health)) return false;
+                    break;
+                case "shield":
+                    if(!shield || !ability.cost.shield) return;
+                    if(shield.cur < Math.ceil((shield.max / 100) * ability.cost.shield)) return false;
+                    break;
+                case "psp":
+                    if(!psp || !ability.cost?.psp) return;
+                    if(psp.cur < ability.cost.psp) return false;
+                    break;
+                case "msp":
+                    if(!msp || !ability.cost?.msp) return;
+                    if(msp.cur < ability.cost.msp) return false;
                     break;
             }
         }

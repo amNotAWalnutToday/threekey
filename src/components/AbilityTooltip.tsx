@@ -41,6 +41,8 @@ export default function AbilityTooltip({ability}: Props) {
             <p className="uncommon_text" >{ability.av}AP</p>
             <p className="red_text" >{ability.cost.health && `${ability.cost.health}%Hp`}</p>
             <p className="rare_text" >{ability.cost.mana && `${ability.cost.mana}Mp`}</p>
+            <p className="red_text" >{ability.cost.psp && `${ability.cost.psp} OH`}</p>
+            <p className="rare_text" >{ability.cost.msp && `${ability.cost.msp} OL`}</p>
         </div>
     )
 }

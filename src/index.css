@@ -20,6 +20,7 @@
   --brown: rgba(114, 87, 18, 0.9);
 
   --black-l-gradient: linear-gradient(#24242487, #1111117a);
+  --black-l-strong-gradient: linear-gradient(#242424ef, #111111ec);
   --white-r-gradient: radial-gradient(rgb(193, 193, 193), rgb(79, 79, 79));
   --green-r-gradient: radial-gradient(lime, darkgreen);
   --blue-r-gradient: radial-gradient(rgb(0, 114, 213), rgb(23, 23, 209));

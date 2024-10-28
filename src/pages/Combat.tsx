@@ -27,7 +27,7 @@ const {
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
     assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq, assignDamage,
-    respawn, checkIfCC, assignStatus,
+    respawn, checkIfCC, assignStatus, assignShield
 } = combatFns;
 const { db } = accountFns;
 const { uploadParty, leaveParty, syncPartyMemberToAccount } = partyFns;
@@ -196,12 +196,16 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             if(!damageType || !amount) return state;
             if(damageType === "heal") players[player.index] = assignHeal(player.state, amount, true);
+            else if(damageType === "shield") players[player.index] = assignShield(player.state, amount);
             else players[player.index] = assignDamage(player.state, amount);
             upload(playersOrEnemies ?? '', { player, fieldId });
             return assignMaxOrMinStat(player.state, players, player.index);
         case PLAYERS_REDUCER_ACTIONS.resource_change:
             if(resource === "mana"  ) players[player.index].stats.combat.resources.mana.cur -= amount ?? 0;
             if(resource === "health") players[player.index].stats.combat.health.cur -= amount ?? 0
+            if(resource === "shield") players[player.index].stats.combat.shield.cur -= amount ?? 0
+            if(resource === "psp") players[player.index].stats.combat.resources.psp.cur -= amount ?? 0;
+            if(resource === "msp") players[player.index].stats.combat.resources.msp.cur -= amount ?? 0;
             upload(playersOrEnemies ?? '', { player, fieldId });
             return assignMaxOrMinStat(player.state, players, player.index);
         case PLAYERS_REDUCER_ACTIONS.play__attack_animation:
@@ -323,9 +327,17 @@ export default function Combat() {
 
     const selectTargetByAbility = (ability: string) => {
         const filteredPlayers = [...enemies].filter((e) => !e.dead); 
-        if(ability === "single" && selectedTargetType !== "single") {
+        let enemyWithTaunt: string = "";
+        for(const player of filteredPlayers) {
+            const hasTaunt = getStatus(player.status, "taunt");
+            if(hasTaunt.index > -1) enemyWithTaunt = player.pid; 
+        }
+
+        if(ability === "single" && (selectedTargetType !== "single" || enemyWithTaunt)) {
             if(!filteredPlayers.length) return;
-            setSelectedTargets(() => [filteredPlayers[0].pid]);
+            setSelectedTargets(() => {
+                return [enemyWithTaunt ? enemyWithTaunt : filteredPlayers[0].pid];
+            });
             setSelectedTargetType(() => "single");
         }
         else if(ability === "aoe") {
@@ -370,12 +382,20 @@ export default function Combat() {
             case "health":
                 if(!ability.cost.health) return 0;
                 return Math.ceil((character.stats.combat.health.max / 100) * ability.cost.health);
+            case "shield":
+                if(!ability.cost.shield) return 0;
+                return Math.ceil((character.stats.combat.shield.max / 100) * ability.cost.shield);
+            case "psp":
+                return ability.cost.psp;
+            case "msp":
+                return ability.cost.msp;
         }
         return 0;
     }
 
     const target = useCallback((targets: string[], ability: AbilitySchema) => {
-        if(ability.av > actionValue) return;
+        const exceptions = ["OH05", "OH06"];
+        if(ability.av > actionValue && !exceptions.includes(ability.id)) return;
         const action = createAction(ability.name, character.pid, targets);
         for(const resourceName of getAbilityCosts(ability.id)) {
             const amount = matchKeyToAmount(resourceName, ability);
@@ -383,6 +403,13 @@ export default function Combat() {
                 type: PLAYERS_REDUCER_ACTIONS.resource_change, 
                 payload: { pid: character.pid, amount: amount, resource: resourceName, fieldId: field.id  }
             });
+            if(amount && (resourceName === "psp" || resourceName === "msp")) {
+                const oppositeName = resourceName === "psp" ? "msp" : "psp";
+                dispatchPlayers({
+                    type: PLAYERS_REDUCER_ACTIONS.resource_change, 
+                    payload: { pid: character.pid, amount: (amount * -1), resource: oppositeName, fieldId: field.id  }
+                });
+            }
         }
         setActionValue((prev) => prev ? prev - ability.av : 0);
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id}});
@@ -540,29 +567,44 @@ export default function Combat() {
             if(user.dead) return;
             const target = getPlayer([...players, ...enemies], targetRef);
             let amount = (
-                damageType === "heal"
+                damageType === "heal" || damageType === "shield"
                     ? ability.damage + (abilityRef.level * 3)
                     : getDamageFormula(user, target.state, ability.damage, abilityRef.level)
             );
             
             if(damageType === "status" && ability.damage < 1) amount = 0;
             if(damageType === "damage") {
-                const status = getStatus(user.status, "lifesteal"); 
-                if(status.index > -1) {
+                const lifesteal = getStatus(user.status, "lifesteal"); 
+                if(lifesteal.index > -1) {
                     if(!user.npc) {
                         dispatchPlayers({
                             type: PLAYERS_REDUCER_ACTIONS.receive_damage,
-                            payload: {pid: userId, amount: Math.ceil((status.state.amount / 10) * amount), damageType: "heal", fieldId: field.id }
+                            payload: {pid: userId, amount: Math.ceil((lifesteal.state.amount / 100) * amount), damageType: "heal", fieldId: field.id }
                         });
                     } else {
                         dispatchEnemies({
                             type: PLAYERS_REDUCER_ACTIONS.receive_damage,
-                            payload: {pid: userId, amount: Math.ceil((status.state.amount / 10) * amount), damageType: "heal", fieldId: field.id }
+                            payload: {pid: userId, amount: Math.ceil((lifesteal.state.amount / 100) * amount), damageType: "heal", fieldId: field.id }
                         });
                     }
                 }
-            }
 
+                const reflect = getStatus(user.status, "reflect");
+                if(reflect.index > -1) {
+                    if(!user.npc) {
+                        dispatchPlayers({
+                            type: PLAYERS_REDUCER_ACTIONS.receive_damage,
+                            payload: {pid: userId, amount: Math.ceil((reflect.state.amount / 100) * amount), damageType: "damage", fieldId: field.id }
+                        });
+                    } else {
+                        dispatchEnemies({
+                            type: PLAYERS_REDUCER_ACTIONS.receive_damage,
+                            payload: {pid: userId, amount: Math.ceil((reflect.state.amount / 100) * amount), damageType: "damage", fieldId: field.id }
+                        });
+                    }
+                } 
+            }
+            // I05 is revive
             if(target.state.dead && ability.id !== "I05") return;
             messagesToLog.push(chooseLogMessage(damageType, target.state.name, amount, ability.name));
 
@@ -595,18 +637,40 @@ export default function Combat() {
                         status: state,
                     }
                 });
-                if(state.type !== 'dot' && state.type !== 'hot') continue; 
+                if(state.type !== 'dot' && state.type !== 'hot' && state.type !== 'sot') continue; 
                 dispatchEnemies({
                     type: PLAYERS_REDUCER_ACTIONS.receive_damage,
                     payload: {
                         fieldId: field.id,
                         pid: unit.pid,
                         amount: state.amount,
-                        damageType: state.type === "dot" ? "damage" : "heal",
+                        damageType: state.type === "dot" ? "damage" : state.type === "sot" ? "shield" : "heal",
                     }
                 });
                 if(state.name === "revival") dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.revive_player, payload: {fieldId: field.id, pid: unit.pid }})
             } else {
+                if(state.name === "overheat" && state.duration === 0) {
+                    dispatchPlayers({
+                        type: PLAYERS_REDUCER_ACTIONS.resource_change,
+                        payload: {
+                            fieldId: field.id,
+                            pid: unit.pid,
+                            resource: "psp",
+                            amount: unit.stats.combat.resources.psp.cur,
+                        }
+                    });
+                }
+                if(state.name === "overload" && state.duration === 0) {
+                    dispatchPlayers({
+                        type: PLAYERS_REDUCER_ACTIONS.resource_change,
+                        payload: {
+                            fieldId: field.id,
+                            pid: unit.pid,
+                            resource: "msp",
+                            amount: unit.stats.combat.resources.psp.cur,
+                        }
+                    });
+                }
                 dispatchPlayers({
                     type: PLAYERS_REDUCER_ACTIONS.reduce_status_duration,
                     payload: {
@@ -615,14 +679,14 @@ export default function Combat() {
                         status: state,
                     }
                 });
-                if(state.type !== 'dot' && state.type !== 'hot') continue; 
+                if(state.type !== 'dot' && state.type !== 'hot' && state.type !== 'sot') continue; 
                 dispatchPlayers({
                     type: PLAYERS_REDUCER_ACTIONS.receive_damage,
                     payload: {
                         fieldId: field.id,
                         pid: unit.pid,
                         amount: state.amount,
-                        damageType: state.type === "dot" ? "damage" : "heal",
+                        damageType: state.type === "dot" ? "damage" : state.type === "sot" ? "shield" : "heal",
                     }
                 });
                 if(state.name === "revival") dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.revive_player, payload: {fieldId: field.id, pid: unit.pid }})
@@ -646,6 +710,19 @@ export default function Combat() {
                     amount,
                 }
             });
+            const isCharge = getStatus(player.status, "charge");
+            const chargeChance = Math.floor(Math.random() * 101); 
+            if(isCharge.index > -1 && chargeChance + isCharge.state.amount > 100) {
+                dispatchPlayers({
+                    type: PLAYERS_REDUCER_ACTIONS.resource_change, 
+                    payload: { 
+                        pid: player.pid,
+                        fieldId: players[0].pid,
+                        resource: "msp",
+                        amount: -1,
+                    }
+                });
+            }
             procDot(player);
         });
         enemies.forEach((enemy) => {
