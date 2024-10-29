@@ -164,6 +164,35 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
         });
     }
 
+    const splitAtFirstNumber = (input: string): [string, string] => {
+        const match = input.match(/(\d)/);
+        if (match) {
+            const index = match.index!;
+            return [input.slice(0, index), input.slice(index)];
+        }
+        return [input, ''];
+    }
+
+    const matchIdToTree = (id: string) => {
+        switch(id) {
+            case "P":
+                return "plants";
+            case "I":
+                return "insects";
+            case "W":
+                return "weather";
+        }
+        return "";
+    }
+
+    const getRequiredAmount = (amount: number, id: string) => {
+        const townReqs = ["002", "003", "004", "005", "006"];
+        if(townReqs.includes(id)) return amount;
+        const currentSkillTree = matchIdToTree(splitAtFirstNumber(selectedSkill?.id ?? "")[0]);
+        const requiredAmount = currentSkillTree === character.order[0] ? amount : currentSkillTree === character.order[1] ? amount * 2 : amount * 3
+        return requiredAmount
+    }
+
     const mapRequirements = () => {
         if(!selectedSkill.name) return;
         return selectedSkill.requirements.map((req, index) => {
@@ -175,7 +204,7 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
                     key={`req-${index}`}
                     item={fullItem}
                     amount={fromInventory?.amount ?? 0}
-                    requiredAmount={req.amount}
+                    requiredAmount={getRequiredAmount(req.amount, req.id)}
                     selected={false}
                 />
             ) : (
@@ -192,7 +221,8 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
         let error = true;
         for(const req of selectedSkill.requirements) {
             for(const item of character.inventory) {
-                if(req.id === item.id && item.amount >= req.amount) error = false; 
+                const requiredAmount = getRequiredAmount(req.amount, req.id);
+                if(req.id === item.id && item.amount >= requiredAmount) error = false; 
             }
         }
         return error;
@@ -221,10 +251,12 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
         let updatedCharacter = {...character};
         updatedCharacter.abilities[ability.index] = ability.state;
         for(const req of selectedSkill.requirements) {
+            req.amount = getRequiredAmount(req.amount, req.id);
             updatedCharacter = removeItem(updatedCharacter, req);
         }
         uploadCharacter(updatedCharacter);
         logMessage(`${character.name} has leveled up the skill ${selectedSkill.name}`);
+        setSelectedSkill(() => ({} as Category));
     }
 
     useEffect(() => {

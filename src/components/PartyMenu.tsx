@@ -21,6 +21,12 @@ export default function PartyMenu({toggleCharacterProfile}: Props) {
                     <p>{player.name} Lvl.{player.stats.level} {player.stats.rank}</p>
                     <div className="party_menu_bars">
                         <ResourceBar
+                            max={player.stats.combat.shield.max}
+                            cur={player.stats.combat.shield.cur}
+                            type={"shield"}
+                            index={1}
+                        />
+                        <ResourceBar
                             max={player.stats.combat.health.max}
                             cur={player.stats.combat.health.cur}
                             type={"health"}
@@ -32,6 +38,20 @@ export default function PartyMenu({toggleCharacterProfile}: Props) {
                             type={"mana"}
                             index={1}
                         />
+                        <div style={{display: "flex"}} >
+                            <ResourceBar 
+                                max={player.stats.combat.resources?.psp?.max}
+                                cur={player.stats.combat.resources?.psp?.cur}
+                                type={"overheat"}
+                                index={5}
+                            />
+                            <ResourceBar
+                                max={player.stats.combat.resources?.msp?.max}
+                                cur={player.stats.combat.resources?.msp?.cur}
+                                type={"overload"}
+                                index={5}
+                            />
+                        </div>
                     </div>
                 </div>
             )

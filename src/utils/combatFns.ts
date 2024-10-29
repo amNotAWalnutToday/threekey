@@ -158,7 +158,7 @@ export default (() => {
         for(const enemy of enemies) {
             const coins = { id: "000", amount: (enemy.abilities[0].level * 20) + 1 };
             enemy.inventory.push(coins);
-            const ran = Math.floor(Math.random() * enemy.inventory.length);
+            const ran = Math.floor(Math.random() * (enemy.inventory.length * 2));
             if(ran < enemy.inventory.length) {
                 loot.push(enemy.inventory[ran]);
             }
@@ -298,11 +298,22 @@ export default (() => {
     ) => {
         const { player } = payload;
         let updatedPlayer = {...player};
+        const hpPotionValue = [20, 100, 200, 1000, 2000];
+        const hpIdValues = ["001", "037", "038", "039", "040"];
+        const hpPotionValueIndex = hpIdValues.indexOf(item.id);
+        if(!updatedPlayer) return updatedPlayer;
         switch(item.id) {
             case "001":
-                if(!updatedPlayer) return updatedPlayer;
-                updatedPlayer.stats.combat.health.cur += 20 * item.amount;
+            case "037":
+            case "038":
+            case "039":
+            case "040":
+                updatedPlayer.stats.combat.health.cur += hpPotionValue[hpPotionValueIndex] * item.amount;
                 updatedPlayer = assignMaxOrMinStat(updatedPlayer, [player], 0)[0];
+                break;
+            case "042":
+                updatedPlayer.stats.combat.health.cur = updatedPlayer.stats.combat.health.max;
+                updatedPlayer.dead = false;
                 break;
         }
 

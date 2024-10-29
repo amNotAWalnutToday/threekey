@@ -996,7 +996,7 @@
             "id": "SH03",
             "name": "Reflect",
             "type": "self",
-            "damageType": "shield",
+            "damageType": "status",
             "damage": 0,
             "cost": {
                 "msp": 5

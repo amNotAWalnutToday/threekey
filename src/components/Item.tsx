@@ -29,8 +29,8 @@ export default function Item({item, amount, requiredAmount, selected, inShop, cl
                 <p>Max Stack: {item.stack}</p>
                 <p>Buy: {item.price} | Sell: {Math.floor(item.price / 2)}</p>
             </div>}
-            <p>{item.name}</p>
-            <p>{amount}{inShop && " G"} {requiredAmount && <span>/ {requiredAmount}</span>}</p>
+            <p className='inventory_item_name' >{item.name}</p>
+            <p className='inventory_item_amount' >{amount}{inShop && " G"} {requiredAmount && <span>/ {requiredAmount}</span>}</p>
         </div>
     )
 }

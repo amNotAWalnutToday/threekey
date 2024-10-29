@@ -94,6 +94,10 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                     <button
                         onClick={async () => {
                             const updatedPlayer = applyItem({ id: inventory[selectedItem.index].id, amount: selectedAmount}, { player: character } );
+                            if(selectedItem?.state?.id === "041") { 
+                                uploadParty("location", { partyId: party.players[0].pid, location: { ...party.location, map: "-1" } });
+                                uploadParty("enemies", { partyId: party.players[0].pid, enemyIds: []});
+                            }
                             uploadCharacterInventory(updatedPlayer);
                             logMessage(`${character.name} has used a ${selectedItem.state?.name}.`);
                         }}

@@ -20,6 +20,7 @@ interface PlayerSchema {
     isAttacking: number,
     location: { map: string, XY: number[] },
     abilities: AbilityRefSchema[],
+    order: string[] //talent tree names,
     inventory: { id: string, amount: number }[], //IDS
     status: StatusSchema[],
     stats: {

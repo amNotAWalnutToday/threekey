@@ -88,6 +88,10 @@
     background-color: goldenrod;
 }
 
+.menu_btn.selected_secondary {
+    background-color: rgb(101, 23, 39);
+}
+
 .menu_btn:disabled {
     filter: brightness(50%);
     cursor: not-allowed;
@@ -134,13 +138,23 @@
     gap: 1rem;
 }
 
+.party_menu_bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
 .character_profile .emptyBar:not(.overheat),
-.party_menu_bars .emptyBar {
+.party_menu_bars .emptyBar:not(.overheat) {
     transform: translateY(0) !important
 }
 
 .character_profile .emptyBar.overheat {
     transform: rotate(180deg) translate(-15px, 0) !important
+}
+
+.party_menu_bars .emptyBar.overheat {
+    transform: rotate(180deg) translate(0px, 0) !important
 }
 
 .party_menu_player {
@@ -195,7 +209,7 @@
     display: grid;
     grid-template-columns: repeat(5, 64px);
     grid-template-rows: repeat(4, 64px);
-    overflow-y: scroll;
+    overflow-y: auto;
     max-height: 320px;
     gap: 1rem;
 }
@@ -212,6 +226,14 @@
     align-items: center;
     padding: 0.25rem;
     gap: 0.5rem;
+}
+
+.inventory_item_name {
+    font-size: 14px;
+}
+
+.inventory_item_amount {
+    font-size: 11px;
 }
 
 .box.selected,
@@ -311,9 +333,10 @@
 }
 
 .tooltip {
-    position: absolute;
+    position: fixed;
     margin-top: 32px;
     margin-left: 32px;
+    z-index: 25;
     padding: 0.5rem;
     white-space: nowrap;
     background: var(--black-l-gradient);
@@ -326,9 +349,11 @@
 }
 
 .ability_btn .tooltip {
-    margin-top: -128px;
+    /* margin-top: -128px; */
     text-align: right;
     background: var(--black-l-strong-gradient);
+    top: 65%;
+    left: 0%;
 }
 
 .profile_status {
@@ -385,7 +410,9 @@
 }
 
 .tree_special_tooltip_holder .tooltip  {
-    transform: translateY(-200px);
+    /* transform: translateY(-200px); */
+    top: 55%;
+    left: 38%;
 }
 
 .category_title {
@@ -447,6 +474,10 @@
 
 .red_text {
     color: crimson;
+}
+
+.aqua_text {
+    color:  aqua;
 }
 
 .border_red {

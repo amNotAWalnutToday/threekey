@@ -445,7 +445,7 @@ export default function Dungeon() {
                             console.log(getChestLoot(floor.biome, floor.number));
                             
                             let updatedPlayer = {...character};
-                            updatedPlayer = assignItem(updatedPlayer, {id: "032", amount: 100});
+                            updatedPlayer = assignItem(updatedPlayer, {id: "042", amount: 1});
                             uploadCharacterDungeon(updatedPlayer);
                         }}
                     >

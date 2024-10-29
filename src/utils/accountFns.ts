@@ -61,12 +61,12 @@ export default (() => {
             const data = snapshot.val();
             if(!data) return;
             data?.forEach((character: PlayerSchema) => {
-                const convertedCharacter = createPlayer(character.name, character.pid, character.role, character.stats, character.status, character.location, character.inventory, character.abilities);
+                const convertedCharacter = createPlayer(character.name, character.pid, character.role, character.stats, character.status, character.location, character.inventory, character.abilities, character.order);
                 characters.push(convertedCharacter);
                 hasCharacters = true;
             });
         });
-
+        
         return hasCharacters ? characters : [];
     }
 
@@ -75,6 +75,7 @@ export default (() => {
         combatStats: typeof classData.naturalist.stats, 
         status: StatusSchema[], location: { map: string, XY: number[] },
         inventory: { id: string, amount: number }[], abilityRefs: {id: string, level: number}[],
+        order: string[],
     ) => {
         const stats = combatStats ? combatStats : classData.naturalist.stats;
         const abilities = abilityRefs ?? assignAbilities(playerClass);
@@ -88,6 +89,7 @@ export default (() => {
             location: location ?? { map: "-1", XY: [1, 1] },
             inventory: inventory ?? [],
             status: status ?? [],
+            order: order ?? [],
             stats,
             abilities,
         }

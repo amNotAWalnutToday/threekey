@@ -589,7 +589,7 @@ export default function Combat() {
                     }
                 }
 
-                const reflect = getStatus(user.status, "reflect");
+                const reflect = getStatus(target.state.status, "reflect");
                 if(reflect.index > -1) {
                     if(!user.npc) {
                         dispatchPlayers({
@@ -667,7 +667,7 @@ export default function Combat() {
                             fieldId: field.id,
                             pid: unit.pid,
                             resource: "msp",
-                            amount: unit.stats.combat.resources.psp.cur,
+                            amount: unit.stats.combat.resources.msp.cur,
                         }
                     });
                 }

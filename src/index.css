@@ -21,6 +21,7 @@
 
   --black-l-gradient: linear-gradient(#24242487, #1111117a);
   --black-l-strong-gradient: linear-gradient(#242424ef, #111111ec);
+  --gold-l-gradient: linear-gradient(rgba(218, 165, 32, 0.613), goldenrod); 
   --white-r-gradient: radial-gradient(rgb(193, 193, 193), rgb(79, 79, 79));
   --green-r-gradient: radial-gradient(lime, darkgreen);
   --blue-r-gradient: radial-gradient(rgb(0, 114, 213), rgb(23, 23, 209));
@@ -142,7 +143,8 @@ body {
   transform: translateY(-40px);
   width: 100px;
   height: 15px;
-  background-color: rgba(218, 165, 32, 0.613);
+  /* background-color: rgba(218, 165, 32, 0.613); */
+  background: var(--gold-l-gradient);
   box-shadow: 2px 2px 6px black;
 }
 
@@ -184,6 +186,7 @@ body {
 .overload_fill {
   background: linear-gradient(aqua, black);
   z-index: -1;
+  transition: width 0.5s ease-in-out;
 }
 
 .overheat_fill {
@@ -191,10 +194,11 @@ body {
   transform: rotate(180deg);
   color: black;
   text-shadow: 1px 1px 1px black;
+  transition: width 0.5s ease-in-out;
 }
 
 .overheat_fill p {
-  transform: translate(-25px);
+  transform: translate(-30px);
 }
 
 .xp_fill {
