@@ -74,6 +74,12 @@ export default function Player(
                 type={"mana"}
                 index={5}
             />
+            <ResourceBar
+                max={player.stats.combat.resources?.soul?.max}
+                cur={player.stats.combat.resources?.soul?.cur}
+                type={"soul"}
+                index={5}
+            />
             <div className="cen-flex">
                 <ResourceBar
                     max={player.stats.combat.resources?.psp?.max}

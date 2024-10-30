@@ -201,6 +201,11 @@ export default (() => {
                 updatedPlayer.stats.combat.health.max += 2;
                 updatedPlayer.stats.combat.shield.max += 2;
                 break;
+            case "spiritualist":
+                updatedPlayer.stats.combat.attack += 3;
+                updatedPlayer.stats.combat.health.max += 1;
+                updatedPlayer.stats.combat.shield.max += 1;
+                break;
         }
 
         return updatedPlayer;
@@ -219,6 +224,13 @@ export default (() => {
                 updatedPlayer.stats.combat.speed += 1;
                 updatedPlayer.stats.combat.health.max += 5;
                 updatedPlayer.stats.combat.shield.max += 5;
+                break;
+            case "spiritualist":
+                updatedPlayer.stats.combat.speed += 5;
+                updatedPlayer.stats.combat.defence += 10;
+                updatedPlayer.stats.combat.health.max += 5;
+                updatedPlayer.stats.combat.shield.max += 5;
+                updatedPlayer.stats.combat.resources.soul.max += 10;
                 break;
         }
 
@@ -351,8 +363,11 @@ export default (() => {
     }
 
     const assignHeal = (player: PlayerSchema, amount: number, isHeal: boolean) => {
+        const hasCurse = getStatus(player.status, "curse");
+        let cursedAmount = amount;
+        if(hasCurse.index > -1) cursedAmount = Math.ceil(amount / hasCurse.state.amount);
         const updatedPlayer = {...player};
-        const updatedHealth = isHeal ? amount : amount * -1
+        const updatedHealth = hasCurse.index > -1 ? cursedAmount : isHeal ? amount : amount * -1
         updatedPlayer.stats.combat.health.cur += updatedHealth;
         return assignMaxOrMinStat(updatedPlayer, [updatedPlayer], 0)[0];
     }
@@ -364,6 +379,8 @@ export default (() => {
         } else if(player.role === "technologist") {
             if(techType === "psp") updatedPlayer.stats.combat.resources.psp.cur += amount;
             if(techType === "msp") updatedPlayer.stats.combat.resources.msp.cur += amount;
+        } else if(player.role === "spiritualist") {
+            updatedPlayer.stats.combat.resources.soul.cur += amount;
         }
         return assignMaxOrMinStat(player, [player], 0)[0];
     }
@@ -404,6 +421,7 @@ export default (() => {
     
         if(health.cur <= 0) { 
             players[index].dead = true;
+            players[index].status = [];
             players[index].stats.combat.health.cur = 0;
         } else if(health.cur > health.max) {
             players[index].stats.combat.health.cur = health.max;
@@ -494,6 +512,7 @@ export default (() => {
             isAttacking: 0,
             abilities,
             status: status ?? [],
+            order: [],
             stats: {
                 level: 1,
                 xp: 0,
@@ -595,7 +614,7 @@ export default (() => {
 
     const populatePlayers = (players: PlayerSchema[]) => {
         return Array.from(players, (player: PlayerSchema) => {
-            return createPlayer(player.name, player.pid, player.role, player.stats, player.status, player.location, player.inventory, player.abilities);
+            return createPlayer(player.name, player.pid, player.role, player.stats, player.status, player.location, player.inventory, player.abilities, player.order);
         });
     }
 

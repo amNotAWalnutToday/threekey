@@ -26,10 +26,11 @@ export default function CharacterProfile({character}: Props) {
     
     return (
         <div className="menu inventory center_abs_hor character_profile" >
-            <h1>{character.name} 
+            <h1 style={{display: "flex", gap: "2rem", alignItems: "baseline"}} >{character.name} 
                 <span className="small_title_font"> Lvl.{character.stats.level}</span>
                 <span className="small_title_font"> {character.stats.rank.length ? character.stats.rank :  "Unranked"}</span>
             </h1>
+            <h3>{character.role} <span className="small_title_font">[ {character?.order[0] ?? ""}, {character?.order[1] ?? ""} ]</span></h3>
             <div className="profile_menu_bars">
                 <div className="profile_w_bar border_red">
                     Health 
@@ -65,6 +66,17 @@ export default function CharacterProfile({character}: Props) {
                         max={character.stats.combat.resources.msp.max}
                         cur={character.stats.combat.resources.msp.cur}
                         type={"overload"}
+                        index={1}
+                    />
+                </div>}
+                {character.role === "spiritualist" 
+                && 
+                <div className="profile_w_bar border_blue">
+                    Soul
+                    <ResourceBar
+                        max={character.stats.combat.resources.soul.max}
+                        cur={character.stats.combat.resources.soul.cur}
+                        type={"soul"}
                         index={1}
                     />
                 </div>}

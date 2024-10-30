@@ -59,6 +59,7 @@ export default function CharacterCreateMenu() {
                     ?
                     <div style={{display: "flex", alignItems: "center", gap: "2rem"}} >
                         <div>
+                            <p>Health { stats.health.max }</p>
                             <p>Attack { stats.attack }</p>
                             <p>Defence { stats.defence }</p>
                             <p>Speed { stats.speed }</p>
@@ -191,6 +192,52 @@ export default function CharacterCreateMenu() {
                     }}
                 >
                     Shield
+                </button>
+            </div>}
+            {selectedClass === "spiritualist" 
+            && 
+            <div style={{display: "flex", gap: "0.5rem"}}>
+                <button
+                    className={`menu_btn ${selectedPrimary === 'spirits' ? "selected" : ""} ${selectedSecondary === 'spirits' ? "selected_secondary" : ""}`}
+                    onClick={() => { 
+                        if(selectedSecondary === "spirits") setSelectedSecondary("");
+                        setSelectedPrimary('spirits')
+                    }}
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        if(selectedPrimary === "spirits") setSelectedPrimary("");
+                        setSelectedSecondary("spirits");
+                    }}
+                >
+                    Spirits
+                </button>
+                <button
+                    className={`menu_btn ${selectedPrimary === 'divinity' ? "selected" : ""} ${selectedSecondary === 'divinity' ? "selected_secondary" : ""}`}
+                    onClick={() => {
+                        if(selectedSecondary === "divinity") setSelectedSecondary("");
+                        setSelectedPrimary('divinity')
+                    }}
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        if(selectedPrimary === "divinity") setSelectedPrimary("");
+                        setSelectedSecondary("divinity");
+                    }}
+                >
+                    Divinity
+                </button>
+                <button
+                    className={`menu_btn ${selectedPrimary === 'abyssal' ? "selected" : ""} ${selectedSecondary === 'abyssal' ? "selected_secondary" : ""}`}
+                    onClick={() => {
+                        if(selectedSecondary === "abyssal") setSelectedSecondary("");
+                        setSelectedPrimary('abyssal')
+                    }}
+                    onContextMenu={(e) => {
+                        e.preventDefault();
+                        if(selectedPrimary === "abyssal") setSelectedPrimary("");
+                        setSelectedSecondary("abyssal");
+                    }}
+                >
+                    Abyssal
                 </button>
             </div>}
             <hr />

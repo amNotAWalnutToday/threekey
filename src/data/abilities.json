@@ -702,6 +702,7 @@
             "av": 1,
             "users": ["technologist"],
             "unlocks": {
+                "pre": "OH07",
                 "req": [
                     {"id": "022", "amount": 1},
                     {"id": "023", "amount": 1},
@@ -1120,6 +1121,358 @@
                     {"id": "034", "amount": 1},
                     {"id": "035", "amount": 1},
                     {"id": "036", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP01",
+            "name": "Sylph",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 10
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP02",
+            "name": "Gnome",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 20
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "SP01",
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP03",
+            "name": "Undine",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 20
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "SP02",
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP04",
+            "name": "Salamander",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 20
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "SP03",
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP05",
+            "name": "Spirit Combo",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 70
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "SP04",
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP06",
+            "name": "Gale",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 60,
+            "cost": {
+                "soul": 1
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP07",
+            "name": "Stone Bullet",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 240,
+            "cost": {
+                "soul": 5
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "SP06",
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP08",
+            "name": "Water Hose",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 140,
+            "cost": {
+                "soul": 2
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "SP07",
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "SP09",
+            "name": "Flame Breath",
+            "type": "aoe",
+            "damageType": "damage",
+            "damage": 400,
+            "cost": {
+                "soul": 20
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "SP08",
+                "req": [
+                    {"id": "043", "amount": 1},
+                    {"id": "044", "amount": 1},
+                    {"id": "045", "amount": 1},
+                    {"id": "046", "amount": 1},
+                    {"id": "047", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "A01",
+            "name": "Demon Cocoon",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "req": [
+                    {"id": "048", "amount": 1},
+                    {"id": "049", "amount": 1},
+                    {"id": "050", "amount": 1},
+                    {"id": "051", "amount": 1},
+                    {"id": "052", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "A02",
+            "name": "Demon Possesion",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 20
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "A01",
+                "req": [
+                    {"id": "048", "amount": 1},
+                    {"id": "049", "amount": 1},
+                    {"id": "050", "amount": 1},
+                    {"id": "051", "amount": 1},
+                    {"id": "052", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "A03",
+            "name": "Dual Slash",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 50,
+            "cost": {
+
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "req": [
+                    {"id": "048", "amount": 1},
+                    {"id": "049", "amount": 1},
+                    {"id": "050", "amount": 1},
+                    {"id": "051", "amount": 1},
+                    {"id": "052", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "A04",
+            "name": "Demon Claws",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 200,
+            "cost": {
+                "soul": 1,
+                "health": 5
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "A03",
+                "req": [
+                    {"id": "048", "amount": 1},
+                    {"id": "049", "amount": 1},
+                    {"id": "050", "amount": 1},
+                    {"id": "051", "amount": 1},
+                    {"id": "052", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "A05",
+            "name": "Curse",
+            "type": "single",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 10
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "description": "Decreases enemies ability to heal",
+            "unlocks": {
+                "pre": "A04",
+                "req": [
+                    {"id": "048", "amount": 1},
+                    {"id": "049", "amount": 1},
+                    {"id": "050", "amount": 1},
+                    {"id": "051", "amount": 1},
+                    {"id": "052", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "A06",
+            "name": "Demon Dance",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 400,
+            "cost": {
+                "soul": 1,
+                "health": 20
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "A05",
+                "req": [
+                    {"id": "048", "amount": 1},
+                    {"id": "049", "amount": 1},
+                    {"id": "050", "amount": 1},
+                    {"id": "051", "amount": 1},
+                    {"id": "052", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "A07",
+            "name": "Contract Complete",
+            "type": "single",
+            "damageType": "damage",
+            "damage": 2000,
+            "cost": {
+                "soul": 40,
+                "health": 80
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "A06",
+                "req": [
+                    {"id": "048", "amount": 1},
+                    {"id": "049", "amount": 1},
+                    {"id": "050", "amount": 1},
+                    {"id": "051", "amount": 1},
+                    {"id": "052", "amount": 1}
                 ]
             }
         }

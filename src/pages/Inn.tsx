@@ -2,6 +2,9 @@ import { useContext } from "react"
 import UserContext from "../data/Context"
 import TownSchema from "../schemas/TownSchema"
 import Inventory from "../components/Inventory"
+import combatFns from "../utils/combatFns"
+
+const { getItem } = combatFns;
 
 type Props = {
     town: TownSchema
@@ -39,8 +42,9 @@ export default function Inn({town, applyRest, logMessage}: Props) {
                     applyRest();
                     logMessage(`${character.name} has rested and has recovered.`);
                 }}
+                disabled={getItem(character.inventory, { id: "000", amount: 100 }).state.amount < 100}
             >
-                Rest
+                Rest 100G
             </button>
         </div>
     )

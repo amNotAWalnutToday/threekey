@@ -67,6 +67,10 @@ export default function AttackMenu(
                     if(!msp || !ability.cost?.msp) return;
                     if(msp.cur < ability.cost.msp) return false;
                     break;
+                case "soul":
+                    if(!soul || !ability.cost?.soul) return;
+                    if(soul.cur < ability.cost.soul) return false;
+                    break;
             }
         }
 

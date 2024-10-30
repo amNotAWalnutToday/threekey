@@ -22,7 +22,7 @@ const {
     syncPartyMemberToAccount,
 } = partyFns;
 const { connectTown } = townFns;
-const { assignHeal, assignResource, getPlayer } = combatFns;
+const { assignHeal, assignResource, getPlayer, getItem, removeItem } = combatFns;
 
 export default function Town() {
     const { user, character, setCharacter, party, setParty } = useContext(UserContext);
@@ -86,7 +86,10 @@ export default function Town() {
     }
 
     const applyRest = () => {
-        let updatedCharacter = assignHeal(character, character.stats.combat.health.max, true);
+        let updatedCharacter = {...character};
+        const coins = getItem(updatedCharacter.inventory, { id: "000", amount: 100 });
+        if(coins.state.amount < 100) return;
+        updatedCharacter = assignHeal(updatedCharacter, character.stats.combat.health.max, true);
         if(town.inn.level >= 2) { 
             updatedCharacter = assignResource(updatedCharacter, character.stats.combat.resources.mana.max);
             const MSPdifference = Math.floor((updatedCharacter.stats.combat.resources.msp.max / 2)) - updatedCharacter.stats.combat.resources.msp.cur;  
@@ -96,6 +99,7 @@ export default function Town() {
         }
         if(town.inn.level >= 3) updatedCharacter.status = [];
         updatedCharacter.stats.combat.shield.cur = 0;
+        updatedCharacter = removeItem(updatedCharacter, coins.state);
         uploadCharacterTown(updatedCharacter);
     }
 

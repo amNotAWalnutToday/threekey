@@ -102,9 +102,10 @@ export default (() => {
 
         for(const ability of abilityData.all) {
             for(const users of ability.users) {
+                const starterSkills = ["P08", "OH08"];
                 const abilityRef = {
                     id: ability.id,
-                    level: 0,
+                    level: starterSkills.includes(ability.id) ? 1 : 0,
                 }
                 if(users === playerClass) usableAbilities.push(abilityRef);
             }

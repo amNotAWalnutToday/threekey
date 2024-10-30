@@ -129,6 +129,62 @@
             "refs": ["OH07"]
         },
         {
+            "name": "sylph",
+            "type": "special",
+            "duration": 4,
+            "amount": 10,
+            "affects": [""],
+            "refs": ["SP01"]
+        },
+        {
+            "name": "gnome",
+            "type": "buff",
+            "duration": 4,
+            "amount": 10,
+            "affects": ["defence"],
+            "refs": ["SP02"]
+        },
+        {
+            "name": "undine",
+            "type": "special",
+            "duration": 4,
+            "amount": 10,
+            "affects": [""],
+            "refs": ["SP03"]
+        },
+        {
+            "name": "salamander",
+            "type": "buff",
+            "duration": 4,
+            "amount": 10,
+            "affects": ["attack"],
+            "refs": ["SP04"]
+        },
+        {
+            "name": "spirit combo",
+            "type": "buff",
+            "duration": 4,
+            "amount": 1,
+            "affects": ["attack", "defence"],
+            "refs": ["SP05"]
+        },
+        {
+            "name": "demon cocoon",
+            "type": "special",
+            "duration": 4,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["A01"]
+        },
+        {
+            "name": "demon",
+            "type": "special",
+            "duration": 4,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["A02"]
+        },
+        {
             "name": "revival",
             "type": "hot",
             "duration": 0,
@@ -143,6 +199,14 @@
             "amount": 1,
             "affects": ["defence"],
             "refs": ["I07"]
+        },
+        {
+            "name": "curse",
+            "type": "special",
+            "duration": 2,
+            "amount": 1,
+            "affects": [""],
+            "refs": ["A05"]
         },
         {
             "name": "rain",

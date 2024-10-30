@@ -417,7 +417,142 @@
         "chestOnly": true,
         "description": "Use to revive",
         "biomes": ["any"],
-        "minFloor": 5
+        "minFloor": 11
+    },
+    {
+        "id": "043",
+        "name": "Spirit Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 60,
+        "biomes": ["forest", "hive", "cataclysmic_desert"],
+        "minFloor": 0
+    },
+    {
+        "id": "044",
+        "name": "Spirit Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 60,
+        "biomes": ["forest", "hive", "cataclysmic_desert"],
+        "minFloor": 20
+    },
+    {
+        "id": "045",
+        "name": "Spirit Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 60,
+        "biomes": ["forest", "hive", "cataclysmic_desert"],
+        "minFloor": 40
+    },
+    {
+        "id": "046",
+        "name": "Spirit Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 60,
+        "biomes": ["forest", "hive", "cataclysmic_desert"],
+        "minFloor": 60
+    },
+    {
+        "id": "047",
+        "name": "Spirit Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 60,
+        "biomes": ["forest", "hive", "cataclysmic_desert"],
+        "minFloor": 80
+    },
+    {
+        "id": "048",
+        "name": "Abyssal Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 60,
+        "biomes": ["crypt", "abyss", "simulation"],
+        "minFloor": 0
+    },
+    {
+        "id": "049",
+        "name": "Abyssal Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 60,
+        "biomes": ["crypt", "abyss", "simulation"],
+        "minFloor": 20
+    },
+    {
+        "id": "050",
+        "name": "Abyssal Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 60,
+        "biomes": ["crypt", "abyss", "simulation"],
+        "minFloor": 40
+    },
+    {
+        "id": "051",
+        "name": "Abyssal Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 60,
+        "biomes": ["crypt", "abyss", "simulation"],
+        "minFloor": 60
+    },
+    {
+        "id": "052",
+        "name": "Abyssal Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 60,
+        "biomes": ["crypt", "abyss", "simulation"],
+        "minFloor": 80
+    },
+    {
+        "id": "053",
+        "name": "Divinity Scroll",
+        "rarity": "common",
+        "price": 200,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "realm_of_divinity"],
+        "minFloor": 0
+    },
+    {
+        "id": "054",
+        "name": "Divinity Scroll",
+        "rarity": "uncommon",
+        "price": 400,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "realm_of_divinity"],
+        "minFloor": 20
+    },
+    {
+        "id": "055",
+        "name": "Divinity Scroll",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "realm_of_divinity"],
+        "minFloor": 40
+    },
+    {
+        "id": "056",
+        "name": "Divinity Scroll",
+        "rarity": "epic",
+        "price": 5000,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "realm_of_divinity"],
+        "minFloor": 60
+    },
+    {
+        "id": "057",
+        "name": "Divinity Scroll",
+        "rarity": "legendary",
+        "price": 10000,
+        "stack": 60,
+        "biomes": ["scrapyard", "factory", "realm_of_divinity"],
+        "minFloor": 80
     },
     {
         "id": "100",

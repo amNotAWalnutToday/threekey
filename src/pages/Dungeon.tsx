@@ -101,7 +101,14 @@ export default function Dungeon() {
         setCharacter(() => updatedPlayer);
     }
 
+    const checkAllDead = () => {
+        let count = 0;
+        for(const player of party.players) if(player.dead) count++;
+        return count >= party.players.length;
+    }
+
     const move = (dir: string) => {
+        if(checkAllDead()) return;
         const tile = getTile(floor.tiles, { XY: location.XY })?.state;
         if(!tile) return;
         let x = tile.XY[0];
@@ -445,7 +452,7 @@ export default function Dungeon() {
                             console.log(getChestLoot(floor.biome, floor.number));
                             
                             let updatedPlayer = {...character};
-                            updatedPlayer = assignItem(updatedPlayer, {id: "042", amount: 1});
+                            updatedPlayer = assignItem(updatedPlayer, {id: "048", amount: 100});
                             uploadCharacterDungeon(updatedPlayer);
                         }}
                     >

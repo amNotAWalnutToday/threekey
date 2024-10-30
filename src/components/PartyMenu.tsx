@@ -38,6 +38,12 @@ export default function PartyMenu({toggleCharacterProfile}: Props) {
                             type={"mana"}
                             index={1}
                         />
+                        <ResourceBar
+                            max={player.stats.combat.resources.soul.max}
+                            cur={player.stats.combat.resources.soul.cur}
+                            type={"soul"}
+                            index={1}
+                        />
                         <div style={{display: "flex"}} >
                             <ResourceBar 
                                 max={player.stats.combat.resources?.psp?.max}

@@ -192,7 +192,7 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
                 players[player.index].status[getStatus(player.state.status, status.name).index].duration -= 1;
             }
             upload(playersOrEnemies ?? '', { player, fieldId });
-            return [...players];
+            return assignMaxOrMinStat(player.state, players, player.index);
         case PLAYERS_REDUCER_ACTIONS.receive_damage:
             if(!damageType || !amount) return state;
             if(damageType === "heal") players[player.index] = assignHeal(player.state, amount, true);
@@ -206,6 +206,7 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
             if(resource === "shield") players[player.index].stats.combat.shield.cur -= amount ?? 0
             if(resource === "psp") players[player.index].stats.combat.resources.psp.cur -= amount ?? 0;
             if(resource === "msp") players[player.index].stats.combat.resources.msp.cur -= amount ?? 0;
+            if(resource === "soul") players[player.index].stats.combat.resources.soul.cur -= amount ?? 0;
             upload(playersOrEnemies ?? '', { player, fieldId });
             return assignMaxOrMinStat(player.state, players, player.index);
         case PLAYERS_REDUCER_ACTIONS.play__attack_animation:
@@ -389,6 +390,8 @@ export default function Combat() {
                 return ability.cost.psp;
             case "msp":
                 return ability.cost.msp;
+            case "soul":
+                return ability.cost.soul;
         }
         return 0;
     }
@@ -412,7 +415,13 @@ export default function Combat() {
             }
         }
         setActionValue((prev) => prev ? prev - ability.av : 0);
-        dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id}});
+
+        let amount = 1;
+        const hasDoubleAction = getStatus(character.status, "sylph");
+        const chance = Math.floor(Math.random() * 100);
+        if(hasDoubleAction.index > -1 && chance + hasDoubleAction.state.amount > 100) amount = 2;
+
+        for(amount; amount > 0; amount--) dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id}});
     }, [dispatchActionQueue, character, actionValue, field.id]);
 
     const checkIfBattleOver = useCallback(() => {
@@ -433,11 +442,18 @@ export default function Combat() {
         userId: string, damageType: string, amount: number, targets: string[], 
         i: number, abilityId: string,
     ) => {  
+        if(!isHost) return;      
+        const user = getPlayer(players, userId);
         dispatchPlayers({
             type: PLAYERS_REDUCER_ACTIONS.play__attack_animation, 
             payload: { pid: userId, fieldId: field.id }
         });
-        if(!isHost) return;      
+        if(user.state.role === "spiritualist") {
+            dispatchPlayers({
+                type: PLAYERS_REDUCER_ACTIONS.resource_change,
+                payload: { pid: userId, fieldId: field.id, resource: "soul", amount: -1 }
+            });
+        }
         dispatchEnemies({
             type: PLAYERS_REDUCER_ACTIONS.receive_damage, 
             payload: { pid: targets[i], amount, damageType, fieldId: field.id }
@@ -445,7 +461,6 @@ export default function Combat() {
         if(damageType === "status") {
             const { name, type, duration, amount, affects, refs } = getStatus([...statusData.all] as StatusSchema[], abilityId).state
             const status: StatusSchema = createStatus(name, type, amount, duration, affects, refs);
-            const user = getPlayer(players, userId);
             const abilityLevel = getAbilityRef(user.state, abilityId).state.level;
             status.amount += abilityLevel
             const chance = Math.floor(Math.random() * 101);
@@ -485,11 +500,11 @@ export default function Combat() {
         userId: string, damageType: string, amount: number, targets: string[], 
         i: number, abilityId: string,
     ) => {
+        if(!isHost) return;
         dispatchEnemies({
             type: PLAYERS_REDUCER_ACTIONS.play__attack_animation, 
             payload: { pid: userId, fieldId: field.id }
         });
-        if(!isHost) return;
         dispatchPlayers({
             type: PLAYERS_REDUCER_ACTIONS.receive_damage,
             payload: {pid: targets[i], amount, damageType, fieldId: field.id }
@@ -602,7 +617,11 @@ export default function Combat() {
                             payload: {pid: userId, amount: Math.ceil((reflect.state.amount / 100) * amount), damageType: "damage", fieldId: field.id }
                         });
                     }
-                } 
+                }
+
+                const evade = getStatus(target.state.status, "undine");
+                const evadeChance = Math.floor(Math.random() * 101);
+                if(evade.index > -1 && evadeChance + evade.state.amount > 100) return logMessage([`${target.state.name} has Evaded the incoming attack`]);
             }
             // I05 is revive
             if(target.state.dead && ability.id !== "I05") return;
@@ -741,8 +760,14 @@ export default function Combat() {
                 const ability = getAbility(enemy.abilities[ran].id);
                 if(!ability) continue;
                 const targets = getTargets(ability.name, ability.type === "field" ? [...players, ...enemies] : ability.type === 'ally' || ability.type === "ally_all" || ability.type === "ally_any" ? enemies : players, enemy.pid);
-                const action = createAction(ability.name, enemy.pid, [...targets]); 
-                dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id }});
+                const action = createAction(ability.name, enemy.pid, [...targets]);
+
+                const hasDoubleAction = getStatus(enemy.status, "sylph");
+                let actionAmount = 1;
+                const chance = Math.floor(Math.random() * 100);
+                if(hasDoubleAction.index > -1 && chance + hasDoubleAction.state.amount > 100) actionAmount = 2;
+                for(actionAmount; actionAmount > 0; actionAmount--) dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id }});
+                
                 av -= ability.av;
             }
         });

@@ -83,10 +83,6 @@ export default function Guild({town, logMessage, uploadCharacterTown}: Props) {
                 break;
             case 8:
                 item.id = "006";
-                item.amount = 5;
-                break;
-            case 9:
-                item.id = "006";
                 item.amount = 20;
                 break;
         }
@@ -117,6 +113,8 @@ export default function Guild({town, logMessage, uploadCharacterTown}: Props) {
                 cancelCd={town.guild.cancelCd}
                 guildLevel={town.guild.level}
             />
+            {getRankValue(character.stats.rank) < 9
+            &&
             <div className="rankup_box center_abs_hor">
                 <p>Guild Level: {town.guild.level} / {Math.floor(getRankValue(character.stats.rank) / 2) + 1}</p>
                 <p>Level: {character.stats.level} / {getRequiredXp().level}</p>
@@ -150,7 +148,7 @@ export default function Guild({town, logMessage, uploadCharacterTown}: Props) {
                 >
                     Rank Up
                 </button>
-            </div>
+            </div>}
         </div>
     )
 }

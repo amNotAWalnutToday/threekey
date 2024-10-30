@@ -181,6 +181,18 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
                 return "insects";
             case "W":
                 return "weather";
+            case "OH":
+                return "overheat";
+            case "OL":
+                return "overload";
+            case "SH":
+                return "shield";
+            case "SP":
+                return "spirits";
+            case "D":
+                return "divinity";
+            case "A":
+                return "abyssal";
         }
         return "";
     }
