@@ -102,7 +102,7 @@ export default (() => {
 
         for(const ability of abilityData.all) {
             for(const users of ability.users) {
-                const starterSkills = ["P08", "OH08"];
+                const starterSkills = ["P08", "OH08", "A03"];
                 const abilityRef = {
                     id: ability.id,
                     level: starterSkills.includes(ability.id) ? 1 : 0,

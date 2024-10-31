@@ -261,6 +261,7 @@ export default (() => {
     const checkIfCC = (player: PlayerSchema) => {
         for(const status of player.status) {
             if(status.type === "cc") return true;
+            if(status.name === "demon cocoon") return true;
         }
         return false;
     }

@@ -310,9 +310,6 @@ export default function Combat() {
             if(prev === null || player === null) return player;
             else return prev.state?.pid === player.state.pid ? null : player;
         });
-        // if(selectedPlayer) {
-        //     setSelectedPlayer(() => null);
-        // }
     }
 
     const selectTarget = (target: string) => {
@@ -366,15 +363,6 @@ export default function Combat() {
             setSelectedTargetType(() => "field");
         }
     }
-
-    // const spawnEnemy = useCallback(() => {
-    //     const enemyList = enemyData.all;
-    //     const { attack, defence, speed, name, health, abilities } = enemyList[0];
-                
-    //     const newEnemy = createEnemy(name, `E${enemies.length}`, health, abilities, attack, defence, speed, []); 
-
-    //     dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.add_player, payload: {pid: newEnemy.pid, playerObj: newEnemy}})
-    // }, [enemies]);
 
     const matchKeyToAmount = (key: string, ability: AbilitySchema) => {
         switch(key) {
@@ -578,6 +566,12 @@ export default function Combat() {
             messagesToLog.push(`${user.name} uses ${ability.name}`);
         }
 
+        const isBlind = getStatus(user.status, "blind");
+        if(isBlind.index > -1) {
+            const chance = Math.floor(Math.random() * 101);
+            if(chance + Math.ceil(isBlind.state.amount / 2) > 100) return logMessage([...messagesToLog, `${user.name} has missed due to there blindess`]);
+        }
+
         targets.forEach((targetRef: string, i: number) => {
             if(user.dead) return;
             const target = getPlayer([...players, ...enemies], targetRef);
@@ -590,7 +584,8 @@ export default function Combat() {
             if(damageType === "status" && ability.damage < 1) amount = 0;
             if(damageType === "damage") {
                 const lifesteal = getStatus(user.status, "lifesteal"); 
-                if(lifesteal.index > -1) {
+                const demonLifesteal = getStatus(user.status, "demon")
+                if(lifesteal.index > -1 || demonLifesteal.index > -1) {
                     if(!user.npc) {
                         dispatchPlayers({
                             type: PLAYERS_REDUCER_ACTIONS.receive_damage,
@@ -621,7 +616,10 @@ export default function Combat() {
 
                 const evade = getStatus(target.state.status, "undine");
                 const evadeChance = Math.floor(Math.random() * 101);
-                if(evade.index > -1 && evadeChance + evade.state.amount > 100) return logMessage([`${target.state.name} has Evaded the incoming attack`]);
+                if(evade.index > -1 && evadeChance + Math.floor(evade.state.amount / 2) > 100) return logMessage([`${target.state.name} has Evaded the incoming attack`]);
+            
+                const CCimmunity = getStatus(target.state.status, "guardian angel"); 
+                if(CCimmunity.index > -1 && evadeChance + Math.floor(CCimmunity.state.amount / 4) > 100) return logMessage([`${target.state.name} has been guarded from the incoming attack`]);
             }
             // I05 is revive
             if(target.state.dead && ability.id !== "I05") return;
@@ -742,6 +740,27 @@ export default function Combat() {
                     }
                 });
             }
+            const isDemonCocoon = getStatus(player.status, "demon cocoon");
+            if(isDemonCocoon.index > -1) {
+                dispatchPlayers({
+                    type: PLAYERS_REDUCER_ACTIONS.resource_change, 
+                    payload: { 
+                        pid: player.pid,
+                        fieldId: players[0].pid,
+                        resource: "soul",
+                        amount: (1 + Math.ceil(isDemonCocoon.state.amount / 4)) * -1,
+                    }
+                });
+                dispatchPlayers({
+                    type: PLAYERS_REDUCER_ACTIONS.resource_change, 
+                    payload: { 
+                        pid: player.pid,
+                        fieldId: players[0].pid,
+                        resource: "health",
+                        amount: Math.ceil((player.stats.combat.health.max / 10)),
+                    }
+                });
+            }
             procDot(player);
         });
         enemies.forEach((enemy) => {
@@ -761,6 +780,9 @@ export default function Combat() {
                 if(!ability) continue;
                 const targets = getTargets(ability.name, ability.type === "field" ? [...players, ...enemies] : ability.type === 'ally' || ability.type === "ally_all" || ability.type === "ally_any" ? enemies : players, enemy.pid);
                 const action = createAction(ability.name, enemy.pid, [...targets]);
+
+                const alreadyHasBuff = getStatus(enemy.status, ability.id);
+                if(alreadyHasBuff.index > -1) continue;
 
                 const hasDoubleAction = getStatus(enemy.status, "sylph");
                 let actionAmount = 1;
@@ -975,12 +997,7 @@ export default function Combat() {
                     sortBySpeed(actionQueue, [...players, ...enemies]);
                     console.log(actionQueue);
                 }}
-            >sort</button>   
-            <button style={{position: "absolute", zIndex: 5, transform: "translateY(400px)"}} onClick={() => { 
-                    const test = ref(db, `/test`);
-                    set(test, false);
-                }}
-            >dbtest</button>        
+            >sort</button>        
         </div>
     )
 }

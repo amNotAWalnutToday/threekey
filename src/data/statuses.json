@@ -83,7 +83,7 @@
         {
             "name": "defence up",
             "type": "buff",
-            "duration": 5,
+            "duration": 3,
             "amount": 1,
             "affects": ["defence"],
             "refs": ["I01"]
@@ -148,7 +148,7 @@
             "name": "undine",
             "type": "special",
             "duration": 4,
-            "amount": 10,
+            "amount": 20,
             "affects": [""],
             "refs": ["SP03"]
         },
@@ -171,7 +171,7 @@
         {
             "name": "demon cocoon",
             "type": "special",
-            "duration": 4,
+            "duration": 2,
             "amount": 1,
             "affects": [""],
             "refs": ["A01"]
@@ -185,6 +185,30 @@
             "refs": ["A02"]
         },
         {
+            "name": "guardian angel",
+            "type": "special",
+            "duration": 1,
+            "amount": 300,
+            "affects": [""],
+            "refs": ["D01"]
+        },
+        {
+            "name": "Charm",
+            "type": "cc",
+            "duration": 3,
+            "amount": 10,
+            "affects": [""],
+            "refs": ["D05"]
+        },
+        {
+            "name": "blind",
+            "type": "special",
+            "duration": 3,
+            "amount": 10,
+            "affects": [""],
+            "refs": ["D04"]
+        },
+        {
             "name": "revival",
             "type": "hot",
             "duration": 0,
@@ -195,10 +219,18 @@
         {
             "name": "defence down",
             "type": "debuff",
-            "duration": 5,
+            "duration": 3,
             "amount": 1,
             "affects": ["defence"],
             "refs": ["I07"]
+        },
+        {
+            "name": "attack down",
+            "type": "debuff",
+            "duration": 3,
+            "amount": 1,
+            "affects": ["attack"],
+            "refs": ["D03"]
         },
         {
             "name": "curse",

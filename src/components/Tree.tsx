@@ -90,7 +90,8 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
             const pre = key === "storage" ? "inn" : undefined;
             const itemIds = ["002", "003", "004", "005", "006"];
             const id = itemIds[value.level] ?? "";
-            const requirements = id.length ? [{id, amount: 5}] : [];
+            const amount = key === "inn" && value.level === 0 ? 1 : 5;
+            const requirements = id.length ? [{id, amount}] : [];
             const building = { level: value.level, name: key, pre, requirements };
             levelsArray.push(building);
         });

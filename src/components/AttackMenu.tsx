@@ -4,7 +4,7 @@ import AbilitySchema from "../schemas/AbilitySchema";
 import combatFns from "../utils/combatFns";
 import AbilityButton from "./AbilityButton";
 
-const { getAbility, getAbilityRef } = combatFns;
+const { getAbility, getAbilityRef, getStatus } = combatFns;
 
 type Props = {
     selectedPlayer: { state: PlayerSchema, index: number } | null;
@@ -43,6 +43,10 @@ export default function AttackMenu(
         const { health, shield, resources } = player.stats.combat;
         const { mana, psp, msp, soul } = resources;
         const usedResources = [];
+
+        const isDemon = getStatus(player.status, "demon");
+        const demonSkillIds = ["A04", "A05", "A06", "A07"];
+        if(demonSkillIds.includes(ability.id) && isDemon.index < 0) return false;
 
         for(const cost in ability.cost) usedResources.push(cost);
         for(const cost of usedResources) {

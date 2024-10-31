@@ -1135,6 +1135,7 @@
             },
             "av": 1,
             "users": ["spiritualist"],
+            "description": "Chance to double action",
             "unlocks": {
                 "req": [
                     {"id": "043", "amount": 1},
@@ -1156,6 +1157,7 @@
             },
             "av": 1,
             "users": ["spiritualist"],
+            "description": "Gain defence",
             "unlocks": {
                 "pre": "SP01",
                 "req": [
@@ -1178,6 +1180,7 @@
             },
             "av": 1,
             "users": ["spiritualist"],
+            "description": "Gain Evasion Chance",
             "unlocks": {
                 "pre": "SP02",
                 "req": [
@@ -1200,6 +1203,7 @@
             },
             "av": 1,
             "users": ["spiritualist"],
+            "description": "Gain attack",
             "unlocks": {
                 "pre": "SP03",
                 "req": [
@@ -1222,6 +1226,7 @@
             },
             "av": 1,
             "users": ["spiritualist"],
+            "description": "I Don't work yet",
             "unlocks": {
                 "pre": "SP04",
                 "req": [
@@ -1331,6 +1336,7 @@
             },
             "av": 1,
             "users": ["spiritualist"],
+            "description": "Convert hp into soul over time",
             "unlocks": {
                 "req": [
                     {"id": "048", "amount": 1},
@@ -1432,7 +1438,7 @@
         },
         {
             "id": "A06",
-            "name": "Demon Dance",
+            "name": "Demons Dance",
             "type": "single",
             "damageType": "damage",
             "damage": 400,
@@ -1455,7 +1461,7 @@
         },
         {
             "id": "A07",
-            "name": "Contract Complete",
+            "name": "Demons Banquet",
             "type": "single",
             "damageType": "damage",
             "damage": 2000,
@@ -1473,6 +1479,112 @@
                     {"id": "050", "amount": 1},
                     {"id": "051", "amount": 1},
                     {"id": "052", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "D01",
+            "name": "Guardian Angel",
+            "type": "ally_any",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 10
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "req": [
+                    {"id": "053", "amount": 1},
+                    {"id": "054", "amount": 1},
+                    {"id": "055", "amount": 1},
+                    {"id": "056", "amount": 1},
+                    {"id": "057", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "D02",
+            "name": "Archangel Possesion",
+            "type": "self",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 20
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "pre": "D01",
+                "req": [
+                    {"id": "053", "amount": 1},
+                    {"id": "054", "amount": 1},
+                    {"id": "055", "amount": 1},
+                    {"id": "056", "amount": 1},
+                    {"id": "057", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "D03",
+            "name": "Angels Feather",
+            "type": "single",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 3
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "req": [
+                    {"id": "053", "amount": 1},
+                    {"id": "054", "amount": 1},
+                    {"id": "055", "amount": 1},
+                    {"id": "056", "amount": 1},
+                    {"id": "057", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "D04",
+            "name": "Blinding Light",
+            "type": "single",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 10
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "req": [
+                    {"id": "053", "amount": 1},
+                    {"id": "054", "amount": 1},
+                    {"id": "055", "amount": 1},
+                    {"id": "056", "amount": 1},
+                    {"id": "057", "amount": 1}
+                ]
+            }
+        },
+        {
+            "id": "D05",
+            "name": "Cupids Arrow",
+            "type": "single",
+            "damageType": "status",
+            "damage": 0,
+            "cost": {
+                "soul": 10
+            },
+            "av": 1,
+            "users": ["spiritualist"],
+            "unlocks": {
+                "req": [
+                    {"id": "053", "amount": 1},
+                    {"id": "054", "amount": 1},
+                    {"id": "055", "amount": 1},
+                    {"id": "056", "amount": 1},
+                    {"id": "057", "amount": 1}
                 ]
             }
         }
