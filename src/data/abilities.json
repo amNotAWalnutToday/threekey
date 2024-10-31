@@ -1558,6 +1558,7 @@
             "av": 1,
             "users": ["spiritualist"],
             "unlocks": {
+                "pre": "D03",
                 "req": [
                     {"id": "053", "amount": 1},
                     {"id": "054", "amount": 1},
@@ -1579,6 +1580,7 @@
             "av": 1,
             "users": ["spiritualist"],
             "unlocks": {
+                "pre": "D04",
                 "req": [
                     {"id": "053", "amount": 1},
                     {"id": "054", "amount": 1},

@@ -6,7 +6,6 @@ import dungeonFns from '../utils/dungeonFns';
 import combatFns from '../utils/combatFns';
 import partyFns from '../utils/partyFns';
 import UserContext from '../data/Context';
-import enemydata from '../data/enemies.json';
 import PartySchema from '../schemas/PartySchema';
 import PlayerSchema from '../schemas/PlayerSchema';
 import Log from '../components/Log';
@@ -14,14 +13,14 @@ import UIButtonBar from '../components/UIBtnBar';
 import PartyMenu from '../components/PartyMenu';
 import Inventory from '../components/Inventory';
 import CharacterProfile from '../components/CharacterProfile';
-import Tree from '../components/Tree';
+import statusData from '../data/statuses.json';
 
 const { connectParty, uploadParty, syncPartyMemberToAccount } = partyFns;
-const { getTile, getTileNeighbours, getFloor, createFloor, createUIEnemy,
+const { getTile, getTileNeighbours, getFloor, createFloor,
     connectFloor, uploadDungeon, getTrap, disarmTrap, getEnemies,
     getPossibleItems, disconnectFloor, removeLock, getChestLoot, removeEvent,
 } = dungeonFns;
-const { assignItem, getPlayer, respawn } = combatFns;
+const { assignItem, getPlayer, respawn, assignStatus, assignDamage, getStatus } = combatFns;
 
 export default function Dungeon() {
     const { character, enemies, setEnemies, setParty, party, user, setCharacter } = useContext(UserContext);
@@ -122,7 +121,7 @@ export default function Dungeon() {
         if(targetTile.state.type === '') return;
         uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: [x, y] } });
         setCurrentTile(() => targetTile.state);
-        if(targetTile.state.trap) encounterTrap(targetTile.state.trap);
+        // if(targetTile.state.trap) encounterTrap(targetTile.state.trap);
         getEncounters();
     }
 
@@ -165,6 +164,7 @@ export default function Dungeon() {
 
     const applyUseTile = async (tile: TileSchema, useType: string) => {
         const type = useType === "type" ? tile.type : useType === "trap" ? tile.trap : tile.event;
+        let updatedCharacter = {...character};
         switch(type) {
             case "upstairs":
                 leaveFloor();
@@ -176,11 +176,23 @@ export default function Dungeon() {
             case "pitfall":
                 nextFloor('down', 2);
                 break;
+            case "poison_thorns":
+                updatedCharacter = assignStatus(updatedCharacter, getStatus(statusData.all, "poison").state, "poison");
+                uploadCharacterDungeon(updatedCharacter);
+                break;
+            case "thorns":
+                updatedCharacter = assignDamage(updatedCharacter, floor.number + 1);
+                uploadCharacterDungeon(updatedCharacter);
+                break;
             case "key":
                 await removeLock(floor, tile);
                 break;
             case "floor_guardian":
                 getEncounters(true);
+                break;
+            case "monster_house":
+                await getEncounters(true);
+                await enterFight();
                 break;
             case "chest":
                 await openChest();
@@ -191,9 +203,9 @@ export default function Dungeon() {
 
     const applyDisarmTile = (tile: TileSchema) => {
         const trap = getTrap(tile.trap ?? "");
+        const ran = Math.floor(Math.random() * 101);
         if(!trap) return;
         if(trap.disarmType === "random") {
-            const ran = Math.floor(Math.random() * 100);
             if(ran > 50) {
                 logMessage(`${trap.type} has been disarmed.`)
                 disarmTrap(tile, floor);
@@ -201,6 +213,14 @@ export default function Dungeon() {
                 logMessage(`you failed to disarm the trap and fell for it instead`);
                 applyUseTile(tile, 'trap');
             }
+        } else if(trap.disarmType === "fight") {
+            if(ran + character.stats.combat.speed > 100) {
+                logMessage(`${trap.type} has been disarmed.`)
+                disarmTrap(tile, floor);
+            } else { 
+                logMessage(`you failed to escape the trap`);
+                applyUseTile(tile, 'trap');
+            } 
         }
         setTrap(() => "");
     }
@@ -280,12 +300,12 @@ export default function Dungeon() {
         return newFloor;
     }
 
-    const getEncounters = (guarantee?: boolean) => {
+    const getEncounters = async (guarantee?: boolean) => {
         const encountered = guarantee ? 1 : Math.floor(Math.random() * 10);
         if(encountered === 1) {
             const amount = Math.floor(Math.random() * 4);
             const enemies = getEnemies(floor.number, floor.biome, amount);
-            uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: enemies });
+            await uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: enemies });
             logMessage(`${character.name} ran into ${amount} enemies.`);
         } else {
             setEnemies(() => []);
@@ -344,7 +364,11 @@ export default function Dungeon() {
             if(`${floor.number}` !== party.location.map) {
                 changeFloor();
             }
-            if(floor.tiles) assignMinimap(floor.tiles, party.location.XY, facing);
+            if(floor.tiles) {
+                const currentTile = getTile(floor.tiles, { XY: party.location.XY });
+                if(currentTile?.state.trap) encounterTrap(currentTile.state.trap);
+                assignMinimap(floor.tiles, party.location.XY, facing); 
+            }
             return party.location;
         });
     }, [party.location]);
@@ -520,6 +544,11 @@ export default function Dungeon() {
                 buttons={["use", "destroy"]}
                 limit={10}
                 logMessage={logMessage}
+                disarmTrap={async () => {
+                    const currentTile = getTile(floor.tiles, { XY: party.location.XY });
+                    if(!currentTile?.state) return;
+                    await disarmTrap(currentTile.state, floor);
+                }}
             /> 
             }
             { loot.length

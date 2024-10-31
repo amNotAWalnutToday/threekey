@@ -1,9 +1,30 @@
 [
     {
         "type": "pitfall",
-        "biomes": ["forest", "scrapyard", "crypt"],
+        "biomes": ["any"],
         "disarmType": "random",
         "disarmSkill": "",
-        "minFloor": -1
+        "minFloor": 3
+    },
+    {
+        "type": "monster_house",
+        "biomes": ["any"],
+        "disarmType": "fight",
+        "disarmSkill": "speed",
+        "minFloor": 5
+    },
+    {
+        "type": "poison_thorns",
+        "biomes": ["forest"],
+        "disarmType": "random",
+        "disarmSkill": "",
+        "minFloor": 0
+    },
+    {
+        "type": "thorns",
+        "biomes": ["any"],
+        "disarmType": "random",
+        "disarmSkill": "",
+        "minFloor": 0
     }
 ]

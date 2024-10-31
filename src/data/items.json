@@ -555,6 +555,31 @@
         "minFloor": 80
     },
     {
+        "id": "058",
+        "name": "Trap Tools",
+        "rarity": "uncommon",
+        "price": 500,
+        "stack": 5,
+        "usable": true,
+        "shopLevel": 1,
+        "description": "Use to disarm traps with 100% success",
+        "biomes": ["any"],
+        "minFloor": 6
+    },
+    {
+        "id": "059",
+        "name": "Repel Spray",
+        "rarity": "uncommon",
+        "price": 500,
+        "stack": 5,
+        "usable": true,
+        "chestOnly": true,
+        "shopLevel": 1,
+        "description": "Use to avoid enemies with 100% success",
+        "biomes": ["any"],
+        "minFloor": 11
+    },
+    {
         "id": "100",
         "name": "Vine",
         "rarity": "common",

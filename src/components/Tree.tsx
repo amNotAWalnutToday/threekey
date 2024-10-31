@@ -6,7 +6,6 @@ import combatFns from "../utils/combatFns";
 import Item from "./Item";
 import PlayerSchema from "../schemas/PlayerSchema";
 import AbilitySchema from "../schemas/AbilitySchema";
-import AbilityTooltip from "./AbilityTooltip";
 import Category from "./Category";
 
 const { populateItem, removeItem, getItem, getAbility, getAbilityRef, getRank, getRankValue} = combatFns;
@@ -90,7 +89,7 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
             const pre = key === "storage" ? "inn" : undefined;
             const itemIds = ["002", "003", "004", "005", "006"];
             const id = itemIds[value.level] ?? "";
-            const amount = key === "inn" && value.level === 0 ? 1 : 5;
+            const amount = (key === "inn" || key === "storage") && value.level === 0 ? 1 : 5;
             const requirements = id.length ? [{id, amount}] : [];
             const building = { level: value.level, name: key, pre, requirements };
             levelsArray.push(building);

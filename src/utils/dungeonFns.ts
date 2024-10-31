@@ -60,7 +60,7 @@ export default (() => {
         const possibleTraps = [];
         for(const trap of trapData) {
             for(const trapBiome of trap.biomes) {
-                if(biome === trapBiome && trap.minFloor <= floorNum) possibleTraps.push(trap);
+                if((biome === trapBiome || trapBiome === "any") && trap.minFloor <= floorNum) possibleTraps.push(trap);
             }
         }
 
@@ -206,10 +206,10 @@ export default (() => {
         return populatedTiles;
     }
 
-    const disarmTrap = (tile: TileSchema, floor: FloorSchema) => {
+    const disarmTrap = async (tile: TileSchema, floor: FloorSchema) => {
         const updatedTile = {...tile};
         updatedTile.trap = "";
-        uploadDungeon("tile", { tile: updatedTile, floor });
+        await uploadDungeon("tile", { tile: updatedTile, floor });
     }
 
     const removeLock = async (floor: FloorSchema, currentTile: TileSchema) => {

@@ -6,6 +6,8 @@ import UserContext from "../data/Context";
 import townFns from "../utils/townFns";
 import Item from "./Item";
 import PlayerSchema from "../schemas/PlayerSchema";
+import TileSchema from "../schemas/TileSchema";
+import FloorSchema from "../schemas/FloorSchema";
 
 const { populateItem, applyItem, removeItem, getPlayer, assignItem, getItem } = combatFns;
 const { uploadParty, syncPartyMemberToAccount } = partyFns;
@@ -19,9 +21,19 @@ type Props = {
     limit: number,
     logMessage: (message: string) => void,
     toggleOff?: () => void;
+    disarmTrap?: () => void; 
 }
 
-export default function Inventory({inventory, position, buttons, storage, limit, logMessage, toggleOff}: Props) {
+export default function Inventory({
+    inventory, 
+    position, 
+    buttons, 
+    storage, 
+    limit, 
+    logMessage, 
+    toggleOff,
+    disarmTrap,
+}: Props) {
     const { character, party, setCharacter } = useContext(UserContext);
     const [selectedItem, setSelectedItem] = useState<{state: typeof itemData[0] | null, index: number}>({state: null, index: -1});
     const [selectedAmount, setSelectedAmount] = useState(0);
@@ -95,10 +107,15 @@ export default function Inventory({inventory, position, buttons, storage, limit,
                         onClick={async () => {
                             const updatedPlayer = applyItem({ id: inventory[selectedItem.index].id, amount: selectedAmount}, { player: character } );
                             if(selectedItem?.state?.id === "041") { 
-                                uploadParty("location", { partyId: party.players[0].pid, location: { ...party.location, map: "-1" } });
-                                uploadParty("enemies", { partyId: party.players[0].pid, enemyIds: []});
+                                await uploadParty("location", { partyId: party.players[0].pid, location: { ...party.location, map: "-1" } });
+                                await uploadParty("enemies", { partyId: party.players[0].pid, enemyIds: []});
+                            } else if(selectedItem?.state?.id === "058") {
+                                if(!disarmTrap) return;
+                                await disarmTrap();
+                            } else if(selectedItem?.state?.id === "059") {
+                                await uploadParty("enemies", { partyId: party.players[0].pid, enemyIds: []});
                             }
-                            uploadCharacterInventory(updatedPlayer);
+                            await uploadCharacterInventory(updatedPlayer);
                             logMessage(`${character.name} has used a ${selectedItem.state?.name}.`);
                         }}
                         className="menu_btn"
