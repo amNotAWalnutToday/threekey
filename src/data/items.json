@@ -588,5 +588,79 @@
         "questRank": 1,
         "biomes": ["forest"],
         "minFloor": 0
+    },
+    {
+        "id": "101",
+        "name": "Screw",
+        "rarity": "common",
+        "price": 20,
+        "stack": 100,
+        "questRank": 1,
+        "biomes": ["scrapyard"],
+        "minFloor": 0
+    },
+    {
+        "id": "102",
+        "name": "Soul essence",
+        "rarity": "common",
+        "price": 20,
+        "stack": 100,
+        "questRank": 1,
+        "biomes": ["crypt"],
+        "minFloor": 0
+    },
+    {
+        "id": "103",
+        "name": "Spirit essence",
+        "rarity": "common",
+        "price": 40,
+        "stack": 100,
+        "questRank": 2,
+        "biomes": ["any"],
+        "minFloor": 0
+    },
+    {
+        "id": "104",
+        "name": "Forest Gem",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 2,
+        "questRank": 4,
+        "chestOnly": true,
+        "biomes": ["forest"],
+        "minFloor": 20
+    },
+    {
+        "id": "105",
+        "name": "Crypt Gem",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 2,
+        "questRank": 4,
+        "chestOnly": true,
+        "biomes": ["crypt"],
+        "minFloor": 20
+    },
+    {
+        "id": "106",
+        "name": "Scrapyard Gem",
+        "rarity": "rare",
+        "price": 1000,
+        "stack": 2,
+        "questRank": 4,
+        "chestOnly": true,
+        "biomes": ["scrapyard"],
+        "minFloor": 20
+    },
+    {
+        "id": "107",
+        "name": "??? Crystal",
+        "rarity": "uncommon",
+        "price": 1000,
+        "stack": 2,
+        "questRank": 3,
+        "chestOnly": true,
+        "biomes": ["realm_of_divinity"],
+        "minFloor": 20
     }
 ]

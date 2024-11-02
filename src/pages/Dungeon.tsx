@@ -77,8 +77,8 @@ export default function Dungeon() {
                     key={`tile-${index}`}
                     className={`${tile.type !== "" ? tile.type : 'wall'}`}
                 >
-                    <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p>
-                    <p>{tile.type}</p>
+                    {/* <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p> */}
+                    {/* <p>{tile.type}</p> */}
                     {index === 4 && <div className={`back ${character.role} minimap_player`} />}
                 </div>
             ) : (
@@ -175,6 +175,7 @@ export default function Dungeon() {
                 break;
             case "pitfall":
                 nextFloor('down', 2);
+                setTrap(() => "");
                 break;
             case "poison_thorns":
                 updatedCharacter = assignStatus(updatedCharacter, getStatus(statusData.all, "poison").state, "poison");
@@ -188,7 +189,7 @@ export default function Dungeon() {
                 await removeLock(floor, tile);
                 break;
             case "floor_guardian":
-                getEncounters(true);
+                getEncounters(true, true);
                 break;
             case "monster_house":
                 await getEncounters(true);
@@ -209,7 +210,8 @@ export default function Dungeon() {
             if(ran > 50) {
                 logMessage(`${trap.type} has been disarmed.`)
                 disarmTrap(tile, floor);
-            } else { 
+                setTrap(() => "");
+            } else {
                 logMessage(`you failed to disarm the trap and fell for it instead`);
                 applyUseTile(tile, 'trap');
             }
@@ -217,12 +219,12 @@ export default function Dungeon() {
             if(ran + character.stats.combat.speed > 100) {
                 logMessage(`${trap.type} has been disarmed.`)
                 disarmTrap(tile, floor);
+                setTrap(() => "");
             } else { 
                 logMessage(`you failed to escape the trap`);
                 applyUseTile(tile, 'trap');
             } 
         }
-        setTrap(() => "");
     }
 
     const enterFight = async () => {
@@ -278,7 +280,6 @@ export default function Dungeon() {
                 await syncPartyMemberToAccount(member);
             }
             uploadParty("location", { partyId: party.players[0].pid, location: {...party.location, map: "-1"} });
-            // navigate('/town');
         } else {
             nextFloor('down', 1);
         }
@@ -300,11 +301,11 @@ export default function Dungeon() {
         return newFloor;
     }
 
-    const getEncounters = async (guarantee?: boolean) => {
+    const getEncounters = async (guarantee?: boolean, isGuardian?: boolean) => {
         const encountered = guarantee ? 1 : Math.floor(Math.random() * 10);
         if(encountered === 1) {
-            const amount = Math.floor(Math.random() * 4);
-            const enemies = getEnemies(floor.number, floor.biome, amount);
+            const amount = isGuardian ? 1 : Math.ceil(Math.random() * 3);
+            const enemies = getEnemies(floor.number, floor.biome, amount, isGuardian ?? false);
             await uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: enemies });
             logMessage(`${character.name} ran into ${amount} enemies.`);
         } else {
@@ -383,6 +384,7 @@ export default function Dungeon() {
         for(const player of party.players) {
             const respawnedPlayer = await respawn(player);
             updatedPartyPlayers.push(respawnedPlayer);
+            if(player.pid === character.pid) setCharacter(() => respawnedPlayer);
         }
         await uploadParty('players', { partyId: party.players[0].pid, players: updatedPartyPlayers });
         for(const player of updatedPartyPlayers) {
@@ -406,14 +408,20 @@ export default function Dungeon() {
         return true;
     }
 
+    const checkIfYoureDead = () => {
+        if(!party || !party.players || !party.players.length) return true;
+        const you = getPlayer(party.players, character.pid);
+        if(you.state.dead || character.dead) return true;
+    }
+
     return (
         <div className={`${character.dead ? 'screen_dead' : ''}`} >
             {/* <div className="grid">{ mapFloor() }</div> */}
             <div className="dungeon_info" >
                 <p>Floor: {floor.number}</p>
-                <p>Biome: {floor.biome}</p>
-                <p>Location: [ {location.XY[0]} , {location.XY[1]} ]</p>
-                <p>Facing: {facing}</p>
+                {/* <p>Biome: {floor.biome}</p> */}
+                {/* <p>Location: [ {location.XY[0]} , {location.XY[1]} ]</p> */}
+                {/* <p>Facing: {facing}</p> */}
                 {/* <p>Size: {floor.tiles.length / 10}x{floor.tiles.length / 10}</p> */}
             </div>
             <div className="minimap_group">
@@ -577,7 +585,7 @@ export default function Dungeon() {
                     toggleOffMenus("characterProfileMenu");
                 }}
             />}
-            {character.dead
+            {checkIfYoureDead()
             &&
             <button
                 className="menu_btn center_abs_hor"

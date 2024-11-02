@@ -1,7 +1,6 @@
 import { useContext } from "react"
 import UserContext from "../data/Context"
 import TownSchema from "../schemas/TownSchema"
-import Inventory from "../components/Inventory"
 import Item from "../components/Item"
 import QuestBoard from "../components/QuestBoard"
 import itemData from '../data/items.json';

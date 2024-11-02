@@ -1,25 +1,336 @@
 {
     "all": [
         {
-            "id": "001",
-            "name": "sproutling",
+            "id": "000",
+            "name": "White Square",
             "abilities": [
-                "P01",
-                "SP01"
+                "SH03",
+                "I01",
+                "D03"
             ],
             "rank": "F",
             "shield": 0,
-            "health": 10,
-            "attack": 5,
+            "health": 100,
+            "attack": 0,
+            "defence": 0,
+            "speed": 1,
+            "status": [],
+            "inventory": [
+                {"id": "002", "amount": 1},
+                {"id": "107", "amount": 1}                
+            ],
+            "biomes": ["forest", "crypt", "scrapyard"],
+            "minFloor": 0,
+            "isGuardian": true
+        },
+        {
+            "id": "001",
+            "name": "sproutling",
+            "abilities": [
+                "P06"
+            ],
+            "rank": "F",
+            "shield": 0,
+            "health": 5,
+            "attack": 4,
             "defence": 1,
             "speed": 1,
             "status": [],
             "inventory": [
                 {"id": "001", "amount": 1}, 
-                {"id": "002", "amount": 1}
+                {"id": "100", "amount": 1},
+                {"id": "007", "amount": 1}
             ],
-            "biomes": ["forest", "scrapyard", "crypt"],
+            "biomes": ["forest"],
             "minFloor": 0
+        },
+        {
+            "id": "002",
+            "name": "Thornling",
+            "abilities": [
+                "P08",
+                "SH03"
+            ],
+            "rank": "E",
+            "shield": 0,
+            "health": 25,
+            "attack": 1,
+            "defence": 5,
+            "speed": 1,
+            "status": [],
+            "inventory": [
+                {"id": "007", "amount": 1},
+                {"id": "100", "amount": 1},
+                {"id": "032", "amount": 1}
+
+            ],
+            "biomes": ["forest"],
+            "minFloor": 3
+        },
+        {
+            "id": "003",
+            "name": "Wind Spirit",
+            "abilities": [
+                "SP06",
+                "SP01"
+            ],
+            "rank": "D",
+            "shield": 0,
+            "health": 10,
+            "attack": 10,
+            "defence": 1,
+            "speed": 16,
+            "status": [],
+            "inventory": [
+                {"id": "043", "amount": 1},
+                {"id": "103", "amount": 1},
+                {"id": "044", "amount": 1}
+            ],
+            "biomes": ["forest"],
+            "minFloor": 5
+        },
+        {
+            "id": "005",
+            "name": "bulbling",
+            "abilities": [
+                "P04",
+                "I01"
+            ],
+            "rank": "E",
+            "shield": 15,
+            "health": 15,
+            "attack": 0,
+            "defence": 0,
+            "speed": 10,
+            "status": [],
+            "inventory": [],
+            "biomes": [],
+            "minFloor": 0
+        },
+        {
+            "id": "006",
+            "name": "Treant",
+            "abilities": [
+                "SP06",
+                "P07",
+                "I04",
+                "SUM"
+            ],
+            "rank": "C",
+            "shield": 0,
+            "health": 100,
+            "attack": 10,
+            "defence": 5,
+            "speed": 1,
+            "status": [],
+            "inventory": [
+                {"id": "002", "amount": 1},
+                {"id": "007", "amount": 3},
+                {"id": "008", "amount": 1},
+                {"id": "104", "amount": 1}
+            ],
+            "biomes": ["forest"],
+            "minFloor": 5,
+            "isGuardian": true
+        },
+        {
+            "id": "007",
+            "name": "Ghost",
+            "abilities": [
+                "SP06"
+            ],
+            "rank": "F",
+            "shield": 0,
+            "health": 10,
+            "attack": 1,
+            "defence": 1,
+            "speed": 19,
+            "status": [],
+            "inventory": [
+                {"id": "048", "amount": 1},
+                {"id": "102", "amount": 1},
+                {"id": "017", "amount": 1}
+            ],
+            "biomes": ["crypt"],
+            "minFloor": 0
+        },
+        {
+            "id": "008",
+            "name": "Crypt Spider",
+            "abilities": [
+                "I06"
+            ],
+            "rank": "E",
+            "shield": 0,
+            "health": 10,
+            "attack": 5,
+            "defence": 5,
+            "speed": 10,
+            "status": [],
+            "inventory": [
+                {"id": "048", "amount": 1},
+                {"id": "012", "amount": 1}
+            ],
+            "biomes": ["crypt"],
+            "minFloor": 3
+        },
+        {
+            "id": "009",
+            "name": "Zombie",
+            "abilities": [
+                "A03"
+            ],
+            "rank": "D",
+            "shield": 0,
+            "health": 25,
+            "attack": 5,
+            "defence": 10,
+            "speed": 1,
+            "status": ["lifesteal"],
+            "inventory": [
+                {"id": "048", "amount": 1},
+                {"id": "032", "amount": 1}
+            ],
+            "biomes": ["crypt"],
+            "minFloor": 5
+        },
+        {
+            "id": "010",
+            "name": "Zombie",
+            "abilities": [
+                "A03"
+            ],
+            "rank": "D",
+            "shield": 0,
+            "health": 25,
+            "attack": 5,
+            "defence": 10,
+            "speed": 1,
+            "status": ["regeneration"],
+            "inventory": [
+                {"id": "048", "amount": 1},
+                {"id": "032", "amount": 1}
+            ],
+            "biomes": ["crypt"],
+            "minFloor": 5
+        },
+        {
+            "id": "011",
+            "name": "Vampire",
+            "abilities": [
+                "A03",
+                "I06",
+                "I07",
+                "A04",
+                "OH08"
+            ],
+            "rank": "C",
+            "shield": 0,
+            "health": 100,
+            "attack": 10,
+            "defence": 1,
+            "speed": 10,
+            "status": ["lifesteal"],
+            "inventory": [
+                {"id": "002", "amount": 1},
+                {"id": "048", "amount": 3},
+                {"id": "049", "amount": 1},
+                {"id": "105", "amount": 1}
+            ],
+            "biomes": ["crypt"],
+            "minFloor": 5,
+            "isGuardian": true
+        },
+        {
+            "id": "012",
+            "name": "Scout Drone",
+            "abilities": [
+                "OH01"
+            ],
+            "rank": "F",
+            "shield": 3,
+            "health": 3,
+            "attack": 4,
+            "defence": 1,
+            "speed": 11,
+            "status": [],
+            "inventory": [
+                {"id": "0101", "amount": 1},
+                {"id": "022", "amount": 1},
+                {"id": "027", "amount": 1}
+            ],
+            "biomes": ["scrapyard"],
+            "minFloor": 0
+        },
+        {
+            "id": "013",
+            "name": "Shieldbot",
+            "abilities": [
+                "OL03",
+                "SH01",
+                "SH02"
+            ],
+            "rank": "E",
+            "shield": 3,
+            "health": 5,
+            "attack": 1,
+            "defence": 5,
+            "speed": 1,
+            "status": [],
+            "inventory": [
+                {"id": "022", "amount": 1},
+                {"id": "0101", "amount": 1},
+                {"id": "027", "amount": 1}
+            ],
+            "biomes": ["scrapyard"],
+            "minFloor": 3
+        },
+        {
+            "id": "014",
+            "name": "Earth spirit",
+            "abilities": [
+                "SP02",
+                "SP07"
+            ],
+            "rank": "D",
+            "shield": 0,
+            "health": 10,
+            "attack": 1,
+            "defence": 10,
+            "speed": 1,
+            "status": [],
+            "inventory": [
+                {"id": "046", "amount": 1},
+                {"id": "103", "amount": 1},
+                {"id": "053", "amount": 1}
+            ],
+            "biomes": ["scrapyard"],
+            "minFloor": 5
+        },
+        {
+            "id": "015",
+            "name": "Scrap Golem",
+            "abilities": [
+                "SP07",
+                "SP02",
+                "SH03",
+                "W07"
+            ],
+            "rank": "C",
+            "shield": 50,
+            "health": 50,
+            "attack": 1,
+            "defence": 10,
+            "speed": 1,
+            "status": ["shield regeneration"],
+            "inventory": [
+                {"id": "002", "amount": 1},
+                {"id": "032", "amount": 3},
+                {"id": "033", "amount": 1},
+                {"id": "106", "amount": 1}
+            ],
+            "biomes": ["scrapyard"],
+            "minFloor": 5
         }
     ]
 }

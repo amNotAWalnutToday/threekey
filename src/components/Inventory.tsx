@@ -6,8 +6,6 @@ import UserContext from "../data/Context";
 import townFns from "../utils/townFns";
 import Item from "./Item";
 import PlayerSchema from "../schemas/PlayerSchema";
-import TileSchema from "../schemas/TileSchema";
-import FloorSchema from "../schemas/FloorSchema";
 
 const { populateItem, applyItem, removeItem, getPlayer, assignItem, getItem } = combatFns;
 const { uploadParty, syncPartyMemberToAccount } = partyFns;

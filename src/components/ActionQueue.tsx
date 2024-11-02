@@ -34,7 +34,7 @@ export default function ActionQueue({actionQueue, players, enemies}: Props) {
                 >
                     <p>{user.state.name}</p>
                     <hr />
-                    <p>{action.ability}</p>
+                    <p>{!user.state.npc ? action.ability : ""}</p>
                 </div>
             )
         });

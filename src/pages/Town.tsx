@@ -108,6 +108,9 @@ export default function Town() {
             console.log("getting party");
             getParties(character.pid, character.name, setParties, setParty, setOtherCharacterBusy); 
             setIsPartyMenuOpen(false);
+        } else {
+            const player = getPlayer(party.players, character.pid);
+            setCharacter(() => player.state);
         }
         /*eslint-disable-next-line*/
     }, [party]);

@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router-dom"
 import { useContext, useState } from "react"
 import UserContext from "../data/Context"
-import testdata from '../data/testdata.json';
+// import testdata from '../data/testdata.json';
 import accountFns from "../utils/accountFns";
-import townFns from "../utils/townFns";
+// import townFns from "../utils/townFns";
 
-const { createTown } = townFns;
+// const { createTown } = townFns;
 const { createAccountAnon } = accountFns;
 
 export default function Home() {
-    const { character, setUser, setCharacter, user } = useContext(UserContext);
+    const { setUser, user } = useContext(UserContext);
     const navigate = useNavigate();
 
     const [signingIn, setSigningIn] = useState(false);
@@ -39,7 +39,7 @@ export default function Home() {
                     </button>
                     }
                 </div>
-                <button 
+                {/* <button 
                     onClick={() => {
                         setUser(() => testdata.tsuki);
                         setCharacter(() => testdata.tsuki.characters[0]);
@@ -56,10 +56,10 @@ export default function Home() {
                     }}
                 >
                     Select Werly
-                </button>
-                <button className="menu_btn" onClick={() => createTown()}>
+                </button> */}
+                {/* <button className="menu_btn" onClick={() => createTown()}>
                     create town
-                </button>
+                </button> */}
             </div>
         </div>
     )

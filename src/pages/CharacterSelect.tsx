@@ -68,11 +68,11 @@ export default function CharacterSelect() {
                 &&
                 <CharacterCreateMenu />
             }
-            <button
+            {/* <button
                 onClick={() => navigate('../town')}
             >
                 Skip to town
-            </button>
+            </button> */}
         </div>
     )
 }

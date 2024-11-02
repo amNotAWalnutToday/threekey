@@ -134,11 +134,17 @@ export default (() => {
         return loot;
     }
 
-    const getEnemies = (floorNum: number, biome: string, amount: number) => {
+    const getEnemies = (floorNum: number, biome: string, amount: number, isGuardian?: boolean) => {
         const possibleEnemies = [];
         for(const enemy of enemyData.all) {
             for(const enemyBiome of enemy.biomes) {
-                if(enemyBiome === biome && floorNum >= enemy.minFloor) possibleEnemies.push(enemy);
+                if(enemyBiome === biome && floorNum >= enemy.minFloor) { 
+                    if(isGuardian && enemy.isGuardian) {
+                        possibleEnemies.push(enemy);
+                    } else if(!isGuardian && !enemy.isGuardian) {
+                        possibleEnemies.push(enemy);
+                    }
+                }
             }
         }
 
@@ -148,7 +154,7 @@ export default (() => {
             enemies.push(possibleEnemies[ran]);
         }
         
-        return Array.from(enemies, enemy => enemy.id);
+        return enemies.length ? Array.from(enemies, enemy => enemy.id) : [];
     }
 
     const rotate = (neighbours: number[][], middle: number[], facing: string) => {
@@ -235,7 +241,7 @@ export default (() => {
         const possibleTraps = getPossibleTraps(chosenBiome, floorNum);
         const shouldTrap = Math.floor(Math.random() * 100);
         const possibleTrapRan = Math.floor(Math.random() * possibleTraps.length);
-        if(shouldTrap >= 70) {
+        if(shouldTrap >= 75 && floorNum > 2) {
             tile.trap = possibleTraps[possibleTrapRan].type ?? "";
         }
         return tile;

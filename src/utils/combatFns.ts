@@ -89,6 +89,7 @@ export default (() => {
     }
 
     const getStatus = (statuses: StatusSchema[], name: string) => {
+        if(!statuses || !statuses.length) return {state: statusData.all[0], index: -1};
         for(let i = 0; i < statuses.length; i++) {
             if(name === statuses[i].name) return {state: statuses[i], index: i};
         }
@@ -248,6 +249,23 @@ export default (() => {
         updatedEnemy.defence = updatedEnemy.defence + totalValue;
         updatedEnemy.speed = updatedEnemy.speed + Math.floor(floorNum / 5); 
         return updatedEnemy;
+    }
+
+    
+    const summon = (currentEnemies: PlayerSchema[], enemyIds: string[], floorNum: number) => {
+        const enemyList = enemyData.all;
+        const enemies = [...currentEnemies];
+        for(let i = 0; i < enemyIds.length; i++) {
+            for(const enemy of enemyList) {
+                const updatedEnemy = assignFloorStatsToEnemy(enemy, floorNum);
+                if(enemy.id === enemyIds[i]) {
+                    const { rank, attack, defence, speed, name, health, abilities, inventory, shield } = updatedEnemy;
+                    const newEnemy = createEnemy(name, `E${enemies.length + i}`, health, abilities, attack, defence, speed, [], false, inventory, rank, floorNum, shield); 
+                    enemies.push(newEnemy);
+                }    
+            }
+        }
+        return enemies;
     }
 
     const respawn = async (player: PlayerSchema) => {
@@ -421,8 +439,9 @@ export default (() => {
         const { mana, msp, psp } = resources;
     
         if(health.cur <= 0) { 
+            const hasRevive = getStatus(player.status, "revival");
             players[index].dead = true;
-            players[index].status = [];
+            players[index].status = hasRevive.index > -1 ? [hasRevive.state] : [];
             players[index].stats.combat.health.cur = 0;
         } else if(health.cur > health.max) {
             players[index].stats.combat.health.cur = health.max;
@@ -598,7 +617,14 @@ export default (() => {
                 const updatedEnemy = assignFloorStatsToEnemy(enemy, floorNum);
                 if(enemy.id === enemyIds[i]) {
                     const { rank, attack, defence, speed, name, health, abilities, inventory, shield } = updatedEnemy;
-                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, [], false, inventory, rank, floorNum, shield); 
+                    const convertedStatus = [];
+                    for(const stateName of enemy.status) {
+                        const fullstate = getStatus(statusData.all, stateName);
+                        fullstate.state.duration = 50;
+                        fullstate.state.amount = floorNum;
+                        if(fullstate.index > -1) convertedStatus.push(fullstate.state); 
+                    }
+                    const newEnemy = createEnemy(name, `E${i}`, health, abilities, attack, defence, speed, convertedStatus, false, inventory, rank, floorNum, shield); 
                     enemies.push(newEnemy);
                 }    
             }
@@ -609,7 +635,12 @@ export default (() => {
         });
 
         field.id = players[0].pid;
-        uploadField(field, players[0].pid);
+        await uploadField(field, players[0].pid);
+
+        const battleTimer = { initTime: 0, procTime: 0, delay: 10000, done: false };
+        battleTimer.procTime = Date.now() + battleTimer.delay;
+
+        await uploadBattleTimer(battleTimer, field.id);
         return field;
     }
 
@@ -637,7 +668,7 @@ export default (() => {
     }
 
     const connectToBattle = async (
-        initialize: (players: PlayerSchema[], enemies: PlayerSchema[], actionQueue: ActionSchema[], fieldId: string, start: boolean, joinedPlayers: number, loot: {id: string, amount: number, pid: string}[]) => void,
+        initialize: (players: PlayerSchema[], enemies: PlayerSchema[], actionQueue: ActionSchema[], fieldId: string, start: boolean, joinedPlayers: number, loot: {id: string, amount: number, pid: string}[], timer: object) => void,
         party: PartySchema,
     ) => {
         try {
@@ -653,29 +684,29 @@ export default (() => {
                 const joinedPlayers = data.joinedPlayers + 1;
                 await set(child(fieldRef, '/joinedPlayers'), joinedPlayers);
                 const shouldStart = joinedPlayers === party.players.length;
-                initialize(updatedPlayers ?? [], updatedEnemies ?? [], data.actionQueue ?? [], data.id, shouldStart, joinedPlayers, data.loot ?? []);
+                initialize(updatedPlayers ?? [], updatedEnemies ?? [], data.actionQueue ?? [], data.id, shouldStart, joinedPlayers, data.loot ?? [], data.timer);
             });
             await onValue(fieldRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const shouldStart = data.joinedPlayers === party.players.length;
-                initialize([], [], [], '', shouldStart, data.joinedPlayers, data.loot ?? []);
+                initialize([], [], [], '', shouldStart, data.joinedPlayers, data.loot ?? [], data.timer);
             });
             await onValue(playersRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedPlayers = populatePlayers(data);
-                initialize(updatedPlayers ?? [], [], [], '', data.start, data.joinedPlayers, data.loot ?? []);
+                initialize(updatedPlayers ?? [], [], [], '', data.start, data.joinedPlayers, data.loot ?? [], {});
             });
             await onValue(enemyRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedEnemies = populateEnemies(data);
-                initialize([], updatedEnemies ?? [], [], '', data.start, data.joinedPlayers, data.loot ?? []);
+                initialize([], updatedEnemies ?? [], [], '', data.start, data.joinedPlayers, data.loot ?? [], {});
             });
             await onValue(actionRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedActionQueue = !data ? [] : Array.from(data ?? [], (action: ActionSchema) => {
                     return createAction(action.ability, action.user, action.targets ?? []);
                 });
-                initialize([], [], updatedActionQueue ?? [], '', data.start, data.joinedPlayers, data.loot ?? []);
+                initialize([], [], updatedActionQueue ?? [], '', data.start, data.joinedPlayers, data.loot ?? [], {});
             });
         } catch(e) {
             console.error(e);
@@ -690,10 +721,12 @@ export default (() => {
             actionQueue?: ActionSchema[],
             user?: UserSchema,
             player?: { state: PlayerSchema, index: number },
+            enemies?: PlayerSchema[],
             loot?: { id: string, amount: number, pid: string }[],
+            battleTimer?: object,
         }
     ) => {
-        const { fieldId, field, actionQueue, player, user, loot } = payload;
+        const { fieldId, field, actionQueue, player, enemies, user, loot, battleTimer } = payload;
 
         switch(type) {
             case "field":
@@ -710,9 +743,17 @@ export default (() => {
                 if(!player) return console.error("No Enemy");
                 uploadEnemy(player.state, player.index, fieldId);
                 break;
+            case "enemies":
+                if(!enemies || !enemies.length) return console.error("No Enemies");
+                uploadEnemies(enemies, fieldId);
+                break;
             case "loot":
                 if(!loot) return;
                 uploadLoot(loot, fieldId);
+                break;
+            case "battleTimer":
+                if(!battleTimer) return;
+                uploadBattleTimer(battleTimer, fieldId);
                 break;
             case "character":
                 if(!player || !user) return; 
@@ -742,10 +783,20 @@ export default (() => {
         const enemyRef = ref(db, `/fields/${fieldId}/enemies/${index}`);
         await set(enemyRef, assignMaxOrMinStat(enemy, [enemy], 0)[0]);
     }
+
+    const uploadEnemies = async (enemies: PlayerSchema[], fieldId: string) => {
+        const enemyRef = ref(db, `/fields/${fieldId}/enemies/`);
+        await set(enemyRef, enemies);
+    }
     
     const uploadLoot = async (loot: {id: string, amount: number, pid: string}[], fieldId: string) => {
         const lootRef = ref(db, `/fields/${fieldId}/loot`);
         await set(lootRef, loot);
+    }
+
+    const uploadBattleTimer = async (battleTimer, fieldId: string) => {
+        const battleTimerRef = ref(db, `/fields/${fieldId}/battleTimer`);
+        await set(battleTimerRef, battleTimer);
     }
 
     const uploadCharacter = async (user: UserSchema, player: PlayerSchema, index: number) => {
@@ -788,6 +839,7 @@ export default (() => {
         createAction,
         createStatus,
         populateItem,
+        summon,
         initiateBattle,
         connectToBattle,
         upload,

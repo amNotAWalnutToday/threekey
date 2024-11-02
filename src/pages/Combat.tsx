@@ -27,7 +27,7 @@ const {
     createAction, getTargets, createStatus, getStatus, assignBuffs, getActionValue,
     initiateBattle, connectToBattle, upload, getLoot, assignItem, getXpReceived,
     assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq, assignDamage,
-    respawn, checkIfCC, assignStatus, assignShield
+    respawn, checkIfCC, assignStatus, assignShield, summon,
 } = combatFns;
 const { db } = accountFns;
 const { uploadParty, leaveParty, syncPartyMemberToAccount } = partyFns;
@@ -46,13 +46,25 @@ const actionTimer = {
     done: true,
 }
 
-const setBattleTimer = (timer: { initTime: number, procTime: number, done: boolean, delay: number }) => {
+const setActionTimer = (timer: { initTime: number, procTime: number, done: boolean, delay: number }) => {
     const time = Date.now();
     timer.procTime = time + timer.delay;
     timer.done = false;
 }
 
-setBattleTimer(battleTimer);
+const setBattleTimer = async (timer: { initTime: number, procTime: number, done: boolean, delay: number }, isHost: boolean, fieldId: string) => {
+    if(!isHost) return;
+    const time = Date.now();
+    timer.procTime = time + timer.delay;
+    timer.done = false;
+    await upload("battleTimer", { fieldId, battleTimer: timer });
+}
+
+const forceBattleTimer = async (timer: typeof battleTimer, procTime: number, done: boolean, isHost: boolean) => {
+    if(isHost) return;
+    timer.procTime = procTime;
+    timer.done = done;
+}
 
 const cb = (
     attack: (userId: string, targets: string[], ability: AbilitySchema) => void, 
@@ -61,6 +73,8 @@ const cb = (
     actionQueue: ActionSchema[], 
     sortQueue: () => void,
     endTurn: () => void,
+    isHost: boolean,
+    fieldId: string,
 ) => {
     const { procTime } = battleTimer;
     const currentTime = Date.now();
@@ -76,7 +90,7 @@ const cb = (
         battleTimer.done = true;
     }
     if(battleTimer.initTime > 9000) checkIfBattleOver();
-    if(battleTimer.done) setBattleTimer(battleTimer);
+    if(battleTimer.done) setBattleTimer(battleTimer, isHost, fieldId);
 }
 
 const takeAction = (actionQueue: ActionSchema[], attack, sortQueue) => {
@@ -86,7 +100,7 @@ const takeAction = (actionQueue: ActionSchema[], attack, sortQueue) => {
     if(currentTime > procTime) {
         const updatedQueue = [...actionQueue];
         const thisAction = updatedQueue.shift();
-        setBattleTimer(actionTimer);
+        setActionTimer(actionTimer);
         if(thisAction?.ability === "sort") return sortQueue();
         attack(thisAction?.user, thisAction?.targets, getAbility(thisAction?.ability ?? ''));
     }
@@ -277,6 +291,7 @@ export default function Combat() {
         start: boolean,
         joinedPlayers: number,
         loot: {id: string, amount: number, pid: string}[],
+        timer: typeof battleTimer,
     ) => {
         if(players.length) dispatchPlayers({type: PLAYERS_REDUCER_ACTIONS.REPLACE_ALL, payload: { pid: '' , replaceArr: players, fieldId }});
         if(enemies.length) dispatchEnemies({type: PLAYERS_REDUCER_ACTIONS.REPLACE_ALL, payload: { pid: '' , replaceArr: enemies, fieldId }});
@@ -289,6 +304,7 @@ export default function Combat() {
         setField((prev) => {
             return Object.assign({}, prev, { id: fieldId.length ? fieldId : prev.id, start, joinedPlayers, loot: loot?.length ? loot : []});
         })
+        if(timer?.delay) forceBattleTimer(battleTimer, timer?.procTime ?? 0, timer?.done ?? true, isHost);
     }
 
     useEffect(() => {
@@ -573,7 +589,7 @@ export default function Combat() {
         }
 
         targets.forEach((targetRef: string, i: number) => {
-            if(user.dead) return;
+            if(user.dead || user.stats.combat.health.cur <= 0) return;
             const target = getPlayer([...players, ...enemies], targetRef);
             let amount = (
                 damageType === "heal" || damageType === "shield"
@@ -777,6 +793,10 @@ export default function Combat() {
             while(av > 0) {
                 const ran = Math.floor(Math.random() * enemy.abilities.length);
                 const ability = getAbility(enemy.abilities[ran].id);
+                if(enemy.abilities[ran].id === "SUM" && enemies.length < 3) {
+                    summonEnemy(["005"]);
+                    av -= 1;
+                }
                 if(!ability) continue;
                 const targets = getTargets(ability.name, ability.type === "field" ? [...players, ...enemies] : ability.type === 'ally' || ability.type === "ally_all" || ability.type === "ally_any" ? enemies : players, enemy.pid);
                 const action = createAction(ability.name, enemy.pid, [...targets]);
@@ -789,11 +809,16 @@ export default function Combat() {
                 const chance = Math.floor(Math.random() * 100);
                 if(hasDoubleAction.index > -1 && chance + hasDoubleAction.state.amount > 100) actionAmount = 2;
                 for(actionAmount; actionAmount > 0; actionAmount--) dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action, fieldId: field.id }});
-                
+
                 av -= ability.av;
             }
         });
     }, [players, enemies, isHost, field.id]);
+
+    const summonEnemy = async (enemyIds: string[]) => {
+        const enemiesToSummon = summon(field.enemies, enemyIds, Number(party.location.map));
+        await upload("enemies", { fieldId: party.players[0].pid, enemies: enemiesToSummon });
+    }
 
     const sortQueue = useCallback(() => {
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.SORT_BY_SPEED, payload: { players: [...players, ...enemies], fieldId: field.id }})
@@ -809,6 +834,7 @@ export default function Combat() {
         if(!user?.uid) return navigate('/');
         if(isHost && loading) {
             const newField = await initiateBattle([...players, character]);
+            await setBattleTimer(battleTimer, true, character.pid);
             setField((field) => Object.assign({}, field, { ...newField }));
             setLoading(() => false);
         }
@@ -824,12 +850,12 @@ export default function Combat() {
     useEffect(() => {
         if(!inProgress) return;
         const interval = setInterval(() => {
-            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn);
+            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn, isHost, field.id);
             setCurrentTime(battleTimer.initTime);
         }, 24);
 
         return () => clearInterval(interval);
-    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn]);
+    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn, isHost, field.id]);
 
     const dummyLoot = async () => {
         const loot = getLoot(field.enemies);
@@ -903,6 +929,12 @@ export default function Combat() {
         return currentTime / 10;
     }
 
+    const checkIfYoureDead = () => {
+        if(!players.length) return true;
+        const you = getPlayer(field.players, character.pid);
+        if(you.state.dead || character.dead) return true;
+    }
+
     const props = {
         selectedTargets,
         selectPlayer,
@@ -911,7 +943,7 @@ export default function Combat() {
     }
 
     return (
-        <div className={`combat_page ${character.dead ? 'screen_dead' : ''}`} >
+        <div className={`combat_page ${checkIfYoureDead() ? 'screen_dead' : ''}`} >
             <AttackMenu 
                 {...props}
                 selectedPlayer={{state: character, index: -1}}
@@ -978,7 +1010,7 @@ export default function Combat() {
                 </button>
             </div>
             }
-            {character.dead
+            {checkIfYoureDead()
             &&
             <button
                 className="menu_btn center_abs_hor"
@@ -989,15 +1021,7 @@ export default function Combat() {
                 Respawn
             </button>
             }
-            {/* <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log(actionQueue)}>action queue</button> */}
-            <button style={{position: "absolute", zIndex: 5}} onClick={() => console.log({players, enemies})}>enemies</button>
-            {/* <button style={{position: "absolute", zIndex: 5, transform: "translateY(100px)"}} onClick={() => spawnEnemy()}>spawn enemies</button> */}
-            <button style={{position: "absolute", zIndex: 5, transform: "translateY(200px)"}} onClick={() => setInProgress((e) => !e)}>pause</button>        
-            <button style={{position: "absolute", zIndex: 5, transform: "translateY(300px)"}} onClick={() => { 
-                    sortBySpeed(actionQueue, [...players, ...enemies]);
-                    console.log(actionQueue);
-                }}
-            >sort</button>        
+            <button className="menu_btn" style={{position: "absolute", zIndex: 5, transform: "translateY(200px)"}} onClick={() => setInProgress((e) => !e)}>pause</button>     
         </div>
     )
 }

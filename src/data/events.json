@@ -2,7 +2,7 @@
     {
         "type": "locked_door",
         "biomes": ["downstairs"],
-        "minFloor": 5
+        "minFloor": 3
     },
     {
         "type": "chest",

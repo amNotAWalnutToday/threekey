@@ -132,7 +132,7 @@ body {
 .minimap_player {
   width: 64px;
   height: 64px;
-  transform: translate(10px, -30px);
+  transform: translate(15px, 10px);
 }
 
 .target {
