@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 import combatFns from '../utils/combatFns';
 import PlayerSchema from "../schemas/PlayerSchema";
 import FieldSchema from "../schemas/FieldSchema";
-import testdata from '../data/testdata.json';
-import enemyData from '../data/enemies.json';
-import abiltyData from '../data/abilities.json';
 import statusData from '../data/statuses.json';
 import PlayersContainer from "../components/PlayersContainer";
 import AttackMenu from "../components/AttackMenu";
@@ -16,9 +13,7 @@ import AbilitySchema from "../schemas/AbilitySchema";
 import ActionSchema from "../schemas/ActionSchema";
 import StatusSchema from "../schemas/StatusSchema";
 import PLAYERS_REDUCER_ACTIONS from "../schemas/reducers/PLAYER_REDUCER_ACTIONS";
-import accountFns from '../utils/accountFns';
 import partyFns from "../utils/partyFns";
-import { ref, set } from "firebase/database";
 import Inventory from "../components/Inventory";
 import ResourceBar from "../components/ResourceBar";
 
@@ -29,8 +24,7 @@ const {
     assignXp, getAbilityRef, assignAbilityLevelStats, getLevelUpReq, assignDamage,
     respawn, checkIfCC, assignStatus, assignShield, summon,
 } = combatFns;
-const { db } = accountFns;
-const { uploadParty, leaveParty, syncPartyMemberToAccount } = partyFns;
+const { uploadParty, syncPartyMemberToAccount } = partyFns;
 
 const battleTimer = {
     initTime: 0,
@@ -93,7 +87,7 @@ const cb = (
     if(battleTimer.done) setBattleTimer(battleTimer, isHost, fieldId);
 }
 
-const takeAction = (actionQueue: ActionSchema[], attack, sortQueue) => {
+const takeAction = (actionQueue: ActionSchema[], attack: (userId: string, targetIds: string[], ability: AbilitySchema) => void, sortQueue: () => void) => {
     const { procTime } = actionTimer;
     const currentTime = Date.now();
 
@@ -102,7 +96,7 @@ const takeAction = (actionQueue: ActionSchema[], attack, sortQueue) => {
         const thisAction = updatedQueue.shift();
         setActionTimer(actionTimer);
         if(thisAction?.ability === "sort") return sortQueue();
-        attack(thisAction?.user, thisAction?.targets, getAbility(thisAction?.ability ?? ''));
+        attack(thisAction?.user ?? "", thisAction?.targets ?? [], getAbility(thisAction?.ability ?? '') ?? {} as AbilitySchema);
     }
 }
 
@@ -234,9 +228,7 @@ const playersReducer = (state: PlayerSchema[], action: PLAYERS_ACTIONS) => {
 }
 
 export default function Combat() {
-    const { character, party, setCharacter, user, setParty } = useContext(UserContext);
-    const enemyIds = useContext(UserContext).enemies;
-    const setEnemyIds = useContext(UserContext).setEnemies;
+    const { character, party, setCharacter, user } = useContext(UserContext);
     const navigate = useNavigate();
 
     const [currentTime, setCurrentTime] = useState(0);
@@ -263,7 +255,7 @@ export default function Combat() {
     const [selectedPlayer, setSelectedPlayer] = useState<{state: PlayerSchema, index: number} | null>({ state: players[0], index: 0 });
     const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
     const [selectedTargetType, setSelectedTargetType] = useState("");
-    const [isHost, setIsHost] = useState(user?.uid ? party.players[0].pid === character.pid : false);
+    const isHost = user?.uid ? party.players[0].pid === character.pid : false;
     const [loot, setLoot] = useState<{id: string, amount: number}[]>([]);
     const [xp, setXp] = useState(0);
     const [messages, setMessages] = useState<string[]>([]);
@@ -322,6 +314,7 @@ export default function Combat() {
     }, [party.inCombat]);
 
     const selectPlayer = (player: { state: PlayerSchema, index: number } | null) => {
+        console.log(selectedPlayer);
         setSelectedPlayer((prev) => {
             if(prev === null || player === null) return player;
             else return prev.state?.pid === player.state.pid ? null : player;

@@ -30,7 +30,7 @@ export default function Dungeon() {
     const [floor, setFloor] = useState<FloorSchema>({} as FloorSchema);
     const [minimap, setMinimap] = useState<TileSchema[]>([]);
     const [location, setLocation] = useState(character.location ?? {map: "1", XY: [1, 1]});
-    const [currentTile, setCurrentTile] = useState<TileSchema>({} as TileSchema);
+    // const [currentTile, setCurrentTile] = useState<TileSchema>({} as TileSchema);
     const [facing, setFacing] = useState('north');
 
     const [gameLog, setGameLog] = useState<string[]>([]);
@@ -44,7 +44,6 @@ export default function Dungeon() {
 
     /**MENU STATE*/
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-    const [isTreeOpen, setIsTreeOpen] = useState(false);
     const [inspectCharacter, setInspectCharacter] = useState({} as PlayerSchema);
     const [loot, setLoot] = useState<{id: string, amount: number}[]>([]);
     const [trap, setTrap] = useState("");
@@ -52,23 +51,22 @@ export default function Dungeon() {
     const toggleOffMenus = (exception: string) => {
         if(exception !== "inventoryMenu") setIsInventoryOpen(() => false);
         if(exception !== "characterProfileMenu") setInspectCharacter(() => ({} as PlayerSchema));
-        if(exception !== "treeMenu") setIsTreeOpen(() => false);
         if(exception !== "lootMenu") setLoot(() => []);
     }
     
-    const mapFloor = () => {
-        return floor?.tiles?.map((tile, index) => {
-            return (
-                <div  
-                    key={`tile-${index}`}
-                    className={`${tile.type !== "" ? tile.type : 'wall'}`}
-                >
-                    <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p>
-                    <p>{tile.type}</p>
-                </div>
-            )
-        });
-    } 
+    // const mapFloor = () => {
+    //     return floor?.tiles?.map((tile, index) => {
+    //         return (
+    //             <div  
+    //                 key={`tile-${index}`}
+    //                 className={`${tile.type !== "" ? tile.type : 'wall'}`}
+    //             >
+    //                 <p style={{fontSize: '8px'}} >{ tile.XY[0] } { tile.XY[1] }</p>
+    //                 <p>{tile.type}</p>
+    //             </div>
+    //         )
+    //     });
+    // } 
 
     const mapMinimap = () => {
         return minimap?.map((tile, index) => {
@@ -120,7 +118,7 @@ export default function Dungeon() {
         if(!targetTile) return;
         if(targetTile.state.type === '') return;
         uploadParty('location', { partyId: party.players[0].pid, location: { map: party.location.map, XY: [x, y] } });
-        setCurrentTile(() => targetTile.state);
+        // setCurrentTile(() => targetTile.state);
         // if(targetTile.state.trap) encounterTrap(targetTile.state.trap);
         getEncounters();
     }
@@ -144,11 +142,11 @@ export default function Dungeon() {
         });
     }
 
-    const getDirection = () => {
-        if(facing === 'north') return 'up';
-        else if(facing === 'east') return 'left';
-        else if(facing === 'west') return 'right';
-        else if(facing === 'south') return 'down';
+    const getDirection = (isOpposite?: boolean) => {
+        if(facing === 'north') return !isOpposite ? 'up' : 'down';
+        else if(facing === 'east') return !isOpposite ? 'left' : 'right';
+        else if(facing === 'west') return !isOpposite ? 'right' : 'left';
+        else if(facing === 'south') return !isOpposite ? 'down' : 'up';
         return '';
     }
 
@@ -415,7 +413,15 @@ export default function Dungeon() {
     }
 
     return (
-        <div className={`${character.dead ? 'screen_dead' : ''}`} >
+        <div className={`${character.dead ? 'screen_dead' : ''} dungeon`} 
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if(e.key === "w") move(getDirection());
+                else if(e.key === "a") turn("left");
+                else if(e.key === "d") turn("right");
+                else if(e.key === "s") move(getDirection(true));
+            }}
+        >
             {/* <div className="grid">{ mapFloor() }</div> */}
             <div className="dungeon_info" >
                 <p>Floor: {floor.number}</p>
@@ -483,9 +489,9 @@ export default function Dungeon() {
                             // console.log(getTile(floor.tiles, { event: 'chest' }))
                             console.log(getChestLoot(floor.biome, floor.number));
                             
-                            let updatedPlayer = {...character};
-                            updatedPlayer = assignItem(updatedPlayer, {id: "048", amount: 100});
-                            uploadCharacterDungeon(updatedPlayer);
+                            // let updatedPlayer = {...character};
+                            // updatedPlayer = assignItem(updatedPlayer, {id: "048", amount: 100});
+                            // uploadCharacterDungeon(updatedPlayer);
                         }}
                     >
                         event
@@ -540,7 +546,6 @@ export default function Dungeon() {
                     toggleOffMenus("characterProfileMenu");
                 }}
                 showTree={() => {
-                    setIsTreeOpen((prev) => !prev);
                     toggleOffMenus("treeMenu");
                 }}
             />
@@ -548,7 +553,7 @@ export default function Dungeon() {
             && 
             <Inventory 
                 inventory={character.inventory ?? []} 
-                position="center"
+                position="left"
                 buttons={["use", "destroy"]}
                 limit={10}
                 logMessage={logMessage}

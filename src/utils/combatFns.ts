@@ -6,15 +6,20 @@ import FieldSchema from "../schemas/FieldSchema";
 import enemyData from '../data/enemies.json';
 import itemData from '../data/items.json';
 import abiltyData from '../data/abilities.json';
-import classData from '../data/classes.json';
 import accountFns from '../utils/accountFns';
 import { set, ref, get, child, onValue } from "firebase/database";
-import FloorSchema from "../schemas/FloorSchema";
 import statusData from '../data/statuses.json';
 import UserSchema from "../schemas/UserSchema";
 import PartySchema from "../schemas/PartySchema";
 
 const { db, createPlayer } = accountFns;
+
+interface BattleTimer {
+    initTime: number,
+    procTime: number,
+    delay: number,
+    done: boolean,
+}
 
 export default (() => {
     const getPlayer = (players: PlayerSchema[], pid: string) => {
@@ -668,7 +673,7 @@ export default (() => {
     }
 
     const connectToBattle = async (
-        initialize: (players: PlayerSchema[], enemies: PlayerSchema[], actionQueue: ActionSchema[], fieldId: string, start: boolean, joinedPlayers: number, loot: {id: string, amount: number, pid: string}[], timer: object) => void,
+        initialize: (players: PlayerSchema[], enemies: PlayerSchema[], actionQueue: ActionSchema[], fieldId: string, start: boolean, joinedPlayers: number, loot: {id: string, amount: number, pid: string}[], timer: BattleTimer) => void,
         party: PartySchema,
     ) => {
         try {
@@ -694,19 +699,19 @@ export default (() => {
             await onValue(playersRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedPlayers = populatePlayers(data);
-                initialize(updatedPlayers ?? [], [], [], '', data.start, data.joinedPlayers, data.loot ?? [], {});
+                initialize(updatedPlayers ?? [], [], [], '', data.start, data.joinedPlayers, data.loot ?? [], {} as BattleTimer);
             });
             await onValue(enemyRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedEnemies = populateEnemies(data);
-                initialize([], updatedEnemies ?? [], [], '', data.start, data.joinedPlayers, data.loot ?? [], {});
+                initialize([], updatedEnemies ?? [], [], '', data.start, data.joinedPlayers, data.loot ?? [], {} as BattleTimer);
             });
             await onValue(actionRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const updatedActionQueue = !data ? [] : Array.from(data ?? [], (action: ActionSchema) => {
                     return createAction(action.ability, action.user, action.targets ?? []);
                 });
-                initialize([], [], updatedActionQueue ?? [], '', data.start, data.joinedPlayers, data.loot ?? [], {});
+                initialize([], [], updatedActionQueue ?? [], '', data.start, data.joinedPlayers, data.loot ?? [], {} as BattleTimer);
             });
         } catch(e) {
             console.error(e);
@@ -723,7 +728,7 @@ export default (() => {
             player?: { state: PlayerSchema, index: number },
             enemies?: PlayerSchema[],
             loot?: { id: string, amount: number, pid: string }[],
-            battleTimer?: object,
+            battleTimer?: BattleTimer,
         }
     ) => {
         const { fieldId, field, actionQueue, player, enemies, user, loot, battleTimer } = payload;
@@ -794,7 +799,7 @@ export default (() => {
         await set(lootRef, loot);
     }
 
-    const uploadBattleTimer = async (battleTimer, fieldId: string) => {
+    const uploadBattleTimer = async (battleTimer: BattleTimer, fieldId: string) => {
         const battleTimerRef = ref(db, `/fields/${fieldId}/battleTimer`);
         await set(battleTimerRef, battleTimer);
     }
@@ -822,6 +827,7 @@ export default (() => {
         getItem,
         checkIfCC,
         removeItem,
+        removeStatus,
         respawn,
         applyItem,
         assignDamage,

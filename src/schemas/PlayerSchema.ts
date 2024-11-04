@@ -1,4 +1,3 @@
-import AbilitySchema from "./AbilitySchema";
 import StatusSchema from "./StatusSchema";
 
 type Bar = {

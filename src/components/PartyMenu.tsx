@@ -15,50 +15,53 @@ export default function PartyMenu({toggleCharacterProfile}: Props) {
             return (
                 <div
                     key={`party-player-${index}`}
-                    className="party_menu_player character_btn"
+                    className="party_menu_player character_btn cen-flex"
                     onClick={() => toggleCharacterProfile(player)}
                 >
-                    <p>{player.name} Lvl.{player.stats.level} {player.stats.rank}</p>
-                    <div className="party_menu_bars">
-                        <ResourceBar
-                            max={player.stats.combat.shield.max}
-                            cur={player.stats.combat.shield.cur}
-                            type={"shield"}
-                            index={1}
-                        />
-                        <ResourceBar
-                            max={player.stats.combat.health.max}
-                            cur={player.stats.combat.health.cur}
-                            type={"health"}
-                            index={1}
-                        />
-                        <ResourceBar
-                            max={player.stats.combat.resources.mana.max}
-                            cur={player.stats.combat.resources.mana.cur}
-                            type={"mana"}
-                            index={1}
-                        />
-                        <ResourceBar
-                            max={player.stats.combat.resources.soul.max}
-                            cur={player.stats.combat.resources.soul.cur}
-                            type={"soul"}
-                            index={1}
-                        />
-                        <div style={{display: "flex"}} >
-                            <ResourceBar 
-                                max={player.stats.combat.resources?.psp?.max}
-                                cur={player.stats.combat.resources?.psp?.cur}
-                                type={"overheat"}
-                                index={5}
+                    <div>
+                        <p>{player.name} Lvl.{player.stats.level} {player.stats.rank}</p>
+                        <div className="party_menu_bars">
+                            <ResourceBar
+                                max={player.stats.combat.shield.max}
+                                cur={player.stats.combat.shield.cur}
+                                type={"shield"}
+                                index={1}
                             />
                             <ResourceBar
-                                max={player.stats.combat.resources?.msp?.max}
-                                cur={player.stats.combat.resources?.msp?.cur}
-                                type={"overload"}
-                                index={5}
+                                max={player.stats.combat.health.max}
+                                cur={player.stats.combat.health.cur}
+                                type={"health"}
+                                index={1}
                             />
+                            <ResourceBar
+                                max={player.stats.combat.resources.mana.max}
+                                cur={player.stats.combat.resources.mana.cur}
+                                type={"mana"}
+                                index={1}
+                            />
+                            <ResourceBar
+                                max={player.stats.combat.resources.soul.max}
+                                cur={player.stats.combat.resources.soul.cur}
+                                type={"soul"}
+                                index={1}
+                            />
+                            <div style={{display: "flex"}} >
+                                <ResourceBar
+                                    max={player.stats.combat.resources?.psp?.max}
+                                    cur={player.stats.combat.resources?.psp?.cur}
+                                    type={"overheat"}
+                                    index={5}
+                                />
+                                <ResourceBar
+                                    max={player.stats.combat.resources?.msp?.max}
+                                    cur={player.stats.combat.resources?.msp?.cur}
+                                    type={"overload"}
+                                    index={5}
+                                />
+                            </div>
                         </div>
                     </div>
+                    <div className={`${player.role} front minimap_player player`}/>
                 </div>
             )
         });

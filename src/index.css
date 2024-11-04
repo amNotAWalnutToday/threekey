@@ -60,12 +60,19 @@ hr {
   border: 1px double white;
 }
 
+.dungeon,
 body {
   min-height: 100vh;
   min-width: 100vw;
   background-repeat: no-repeat;
   background-size: cover;
   overflow: hidden;
+}
+
+.dungeon {
+  background: url('/src/assets/dungeon_backdrop.png');
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .sidemenu {
@@ -290,8 +297,8 @@ body {
 
 .minimap {
   display : grid;
-  grid-template-columns: repeat(3, 96px);
-  grid-template-rows: repeat(3, 96px);
+  grid-template-columns: repeat(3, 120px);
+  grid-template-rows: repeat(3, 120px);
   box-shadow: 6px 6px 12px black;
   border: 1px solid white;
 }
