@@ -136,7 +136,7 @@
             "name": "seed spread shot",
             "type": "aoe",
             "damageType": "damage",
-            "damage": 80,
+            "damage": 140,
             "cost": {
                 "health": 10
             },

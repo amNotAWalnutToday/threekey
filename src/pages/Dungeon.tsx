@@ -192,7 +192,7 @@ export default function Dungeon() {
                 getEncounters(true, true);
                 break;
             case "monster_house":
-                await getEncounters(true);
+                await getEncounters(true, false, 5);
                 await enterFight();
                 break;
             case "chest":
@@ -301,11 +301,11 @@ export default function Dungeon() {
         return newFloor;
     }
 
-    const getEncounters = async (guarantee?: boolean, isGuardian?: boolean) => {
+    const getEncounters = async (guarantee?: boolean, isGuardian?: boolean, guaranteedAmount?: number) => {
         const encountered = guarantee ? 1 : Math.floor(Math.random() * 10);
         if(encountered === 1) {
             const amount = isGuardian ? 1 : Math.ceil(Math.random() * 3);
-            const enemies = getEnemies(floor.number, floor.biome, amount, isGuardian ?? false);
+            const enemies = getEnemies(floor.number, floor.biome, guaranteedAmount ?? amount, isGuardian ?? false);
             await uploadParty('enemies', { partyId: party.players[0].pid, enemyIds: enemies });
             logMessage(`${character.name} ran into ${amount} enemies.`);
         } else {

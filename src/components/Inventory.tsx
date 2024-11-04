@@ -76,7 +76,7 @@ export default function Inventory({
     }
 
     const getMaxRange = () => {
-        if (!selectedItem?.state || !inventory.length) return 0;
+        if (!selectedItem?.state || !inventory?.length) return 0;
         const stackSize = selectedItem.state.stack;
         const amount = inventory[selectedItem.index]?.amount || 0;
         if(getButton("withdraw") || getButton("buy")) {
@@ -95,7 +95,7 @@ export default function Inventory({
                 {mapInventory()}
             </div>
             <hr />
-            <p>{inventory.length} / {limit}</p>
+            <p>{inventory?.length} / {limit}</p>
             <div className="bottom_abs inventory_btn_bar">
                 <div className="cen-flex" style={{gap: '1rem', margin: "5rem 0 0 0"}} >
                     {

@@ -231,6 +231,7 @@ export default function Tree({town, uploadCharacter, logMessage}: Props) {
 
     const checkRequirements = () => {
         let error = true;
+        if(!character.inventory || !character.inventory?.length) return error;
         for(const req of selectedSkill.requirements) {
             for(const item of character.inventory) {
                 const requiredAmount = getRequiredAmount(req.amount, req.id);

@@ -46,7 +46,7 @@ export default function Player(
 
     return (
         <div 
-            className={`${player.npc ? "enemy" : "player"} ${player.npc ? `${player.name}` : ""} ${player.role} ${status} ${checkIfTargeted() ? "target" : ""} back ${player.dead ? "dead" : ""}`} 
+            className={`${player.npc ? "enemy" : "player"} ${player.npc ? `${player.name.split(" ").join("_").toLowerCase()}` : ""} ${player.role} ${status} ${checkIfTargeted() ? "target" : ""} back ${player.dead ? "dead" : ""}`} 
             onClick={() => selectPlayer({state: player, index})}
             onContextMenu={(e) => {
                 e.preventDefault();

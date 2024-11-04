@@ -136,7 +136,7 @@ body {
 }
 
 .target {
-  box-shadow: 0px -5px 32px 4px crimson;
+  box-shadow: inset 0px 0px 50px crimson;
 }
 
 .emptyBar {
@@ -215,7 +215,7 @@ body {
 }
 
 .fill {
-  background-color: rgba(0, 174, 255, 0.754);
+  background: linear-gradient(rgba(0, 174, 255, 0.754), aquamarine);
   height: 100%;
 }
 
@@ -224,7 +224,7 @@ body {
   top: 1rem;
   width: 1000px;
   height: 15px;
-  background-color: rgba(218, 165, 32, 0.613);
+  background: linear-gradient(rgba(0, 174, 255, 0.754), black);
   z-index: 1;
   box-shadow: 4px 4px 16px black;
 }
@@ -430,6 +430,79 @@ body {
   background-repeat: no-repeat;
   background-size: contain;
 }
+
+.ghost {
+  background: url('/src/assets/ghost_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.wind_spirit {
+  background: url('/src/assets/wind_spirit_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.earth_spirit {
+  background: url('/src/assets/earth_spirit_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.scout_drone {
+  background: url('/src/assets/scout_bot_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.shieldbot {
+  background: url('/src/assets/shield_bot_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.scrap_golem {
+  background: url('/src/assets/scrap_golem_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.crypt_spider {
+  background: url('/src/assets/crypt_spider_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.thornling {
+  background: url('/src/assets/thornling_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.treant {
+  background: url('/src/assets/treant_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.zombie {
+  background: url('/src/assets/zombie_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.vampire {
+  background: url('/src/assets/vampire_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.bulbling {
+  background: url('/src/assets/bulbling_front.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 
 @keyframes sendAttackEnemy {
   0% {
