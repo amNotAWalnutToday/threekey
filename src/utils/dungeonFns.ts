@@ -327,7 +327,6 @@ export default (() => {
     const createFloor = (
         characterLocation: number[],
         floorNum: number,
-        setFloor: React.Dispatch<React.SetStateAction<FloorSchema>>,
     ) => {
         const tiles: TileSchema[] = [];
         const totalRooms: number[][] = [];

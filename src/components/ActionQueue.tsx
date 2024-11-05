@@ -27,6 +27,7 @@ export default function ActionQueue({actionQueue, players, enemies}: Props) {
         return actionQueue.map((action, index) => {
             if(index === 0) return;
             const user = getPlayer([...players, ...enemies], action.user);
+            if(!user?.state) return;
             return (
                 <div
                     key={`action-${index}`}

@@ -287,7 +287,7 @@ export default function Dungeon() {
         const newMapLocation = dir === 'up' ? Number(party.location.map) + floorsMoved : Number(party.location.map) - floorsMoved;
         let newFloor;
         newFloor = await getFloor(newMapLocation) 
-        if(!newFloor) newFloor = createFloor(party.location.XY, newMapLocation, setFloor);
+        if(!newFloor) newFloor = createFloor(party.location.XY, newMapLocation);
         newFloor.number = newMapLocation;
         setFloor(() => newFloor);
         uploadDungeon('floor', { floor: newFloor });
@@ -322,7 +322,7 @@ export default function Dungeon() {
         let newFloor;
         newFloor = await getFloor(Number(party.location.map));
         if(!newFloor) { 
-            newFloor = createFloor(party.location.XY, Number(party.location.map), setFloor);
+            newFloor = createFloor(party.location.XY, Number(party.location.map));
             newFloor.number = Number(party.location.map);
             uploadDungeon('floor', { floor: newFloor });
         }

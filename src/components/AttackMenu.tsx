@@ -39,7 +39,7 @@ export default function AttackMenu(
     }, [selectedPlayer]);
 
     const checkCanUseAbility = (ability: AbilitySchema, player: PlayerSchema) => {
-        if(player.dead) return false; 
+        if(player.dead || player.stats.combat.health.cur <= 0) return false; 
         const { health, shield, resources } = player.stats.combat;
         const { mana, psp, msp, soul } = resources;
         const usedResources = [];

@@ -9,6 +9,7 @@ import PartySchema from "../schemas/PartySchema";
 import PartyMenu from "../components/PartyMenu";
 import Inventory from "../components/Inventory";
 import TownSchema from "../schemas/TownSchema";
+import PartySchema from "../schemas/PartySchema";
 import Inn from "./Inn";
 import Tree from "../components/Tree";
 import CharacterProfile from "../components/CharacterProfile";
@@ -19,7 +20,7 @@ import Guild from "./Guild";
 
 const { 
     getParties, createParty, joinParty, leaveParty, destroyRoom, uploadParty,
-    syncPartyMemberToAccount,
+    syncPartyMemberToAccount, connectParty,
 } = partyFns;
 const { connectTown } = townFns;
 const { assignHeal, assignResource, getPlayer, getItem, removeItem } = combatFns;
@@ -32,6 +33,7 @@ export default function Town() {
     const [otherCharacterBusy, setOtherCharacterBusy] = useState(false);
     const [parties, setParties] = useState<PartySchema[]>([]);
     const [gameLog, setGameLog] = useState<string[]>([]);
+    const [connectedToParty, setConnectedToParty] = useState(false);
 
     const logMessage = (message: string) => {
         const updatedGamelog = [...gameLog];
@@ -64,8 +66,10 @@ export default function Town() {
             return party.players.length ? (
                 <div
                     key={`party-${index}`}
-                    onClick={() => {
-                        joinParty(character, party.players[0].pid, setParty);
+                    onClick={async () => {
+                        await joinParty(character, party.players[0].pid, setParty);
+                        await connectParty(party.players[0].pid, setParty);
+                        setConnectedToParty(true);
                     }}
                 >
                     <p>{ party.players[0].name }</p>
@@ -111,6 +115,9 @@ export default function Town() {
         } else {
             const player = getPlayer(party.players, character.pid);
             setCharacter(() => player.state);
+            if(connectedToParty) return;
+            connectParty(party.players[0].pid, setParty);
+            setConnectedToParty(true);
         }
         /*eslint-disable-next-line*/
     }, [party]);
@@ -151,9 +158,9 @@ export default function Town() {
                 <button
                     className="menu_btn"
                     disabled={otherCharacterBusy}
-                    onClick={() => {
-                        if(!isPartyMenuOpen) getParties(character.pid, character.name, setParties, setParty, setOtherCharacterBusy);
-                        setIsPartyMenuOpen(() => !isPartyMenuOpen)
+                    onClick={async () => {
+                        if(!isPartyMenuOpen) await getParties(character.pid, character.name, setParties, setParty, setOtherCharacterBusy);
+                        setIsPartyMenuOpen(() => !isPartyMenuOpen);
                     }}
                 >
                     Join Party
@@ -165,8 +172,9 @@ export default function Town() {
                 disabled={otherCharacterBusy}
                 onClick={() => { 
                     const isHost = party.players[0].pid === character.pid
-                    if(isHost) return destroyRoom(party.players[0].pid, setParty);
-                    else return leaveParty(party.players[0].pid, character, setParty);
+                    if(isHost) destroyRoom(party.players[0].pid, setParty);
+                    else leaveParty(party.players[0].pid, character, setParty);
+                    setParty(() => ({} as PartySchema));
                 }}
             >
                 Leave Party

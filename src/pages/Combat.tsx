@@ -54,8 +54,9 @@ const setBattleTimer = async (timer: { initTime: number, procTime: number, done:
     await upload("battleTimer", { fieldId, battleTimer: timer });
 }
 
-const forceBattleTimer = async (timer: typeof battleTimer, procTime: number, done: boolean, isHost: boolean) => {
+const forceBattleTimer = async (timer: typeof battleTimer, initTime: number, procTime: number, done: boolean, isHost: boolean) => {
     if(isHost) return;
+    timer.initTime = initTime;
     timer.procTime = procTime;
     timer.done = done;
 }
@@ -69,6 +70,7 @@ const cb = (
     endTurn: () => void,
     isHost: boolean,
     fieldId: string,
+    applySetActionValue: () => void,
 ) => {
     const { procTime } = battleTimer;
     const currentTime = Date.now();
@@ -81,9 +83,10 @@ const cb = (
         if(currentTime < actionTimer.procTime) return;
         enemySelectAttack();
         endTurn();
-        battleTimer.done = true;
+        if(isHost) battleTimer.done = true;
     }
     if(battleTimer.initTime > 9000) checkIfBattleOver();
+    if(battleTimer.initTime > 9900) applySetActionValue();
     if(battleTimer.done) setBattleTimer(battleTimer, isHost, fieldId);
 }
 
@@ -296,7 +299,9 @@ export default function Combat() {
         setField((prev) => {
             return Object.assign({}, prev, { id: fieldId.length ? fieldId : prev.id, start, joinedPlayers, loot: loot?.length ? loot : []});
         })
-        if(timer?.delay) forceBattleTimer(battleTimer, timer?.procTime ?? 0, timer?.done ?? true, isHost);
+        if(timer?.delay) {
+            forceBattleTimer(battleTimer, timer?.initTime ?? 0, timer?.procTime ?? 0, timer?.done ?? true, isHost);
+        }
     }
 
     useEffect(() => {
@@ -333,14 +338,22 @@ export default function Combat() {
     }
 
     const selectTargetByAbility = (ability: string) => {
-        const filteredPlayers = [...enemies].filter((e) => !e.dead); 
+        const filteredPlayers = [...enemies].filter((e) => !e.dead && e.stats.combat.health.cur > 0); 
         let enemyWithTaunt: string = "";
         for(const player of filteredPlayers) {
             const hasTaunt = getStatus(player.status, "taunt");
             if(hasTaunt.index > -1) enemyWithTaunt = player.pid; 
         }
 
-        if(ability === "single" && (selectedTargetType !== "single" || enemyWithTaunt)) {
+        const thisPlayer = getPlayer(enemies, selectedTargets[0] ?? "");
+        let breaker = false;
+        if(thisPlayer.index > -1 && thisPlayer.state.dead) { 
+            setSelectedTargets(() => [""]);
+            setSelectedTargetType(() => "");
+            breaker = true;
+        }
+
+        if(ability === "single" && (selectedTargetType !== "single" || breaker || enemyWithTaunt)) {
             if(!filteredPlayers.length) return;
             setSelectedTargets(() => {
                 return [enemyWithTaunt ? enemyWithTaunt : filteredPlayers[0].pid];
@@ -425,8 +438,8 @@ export default function Combat() {
         const side1 = [...enemies];
         const side2 = [...players];
         const count = [0, 0]
-        for(const p of side1) if(p.dead) count[0]++;
-        for(const p of side2) if(p.dead) count[1]++;
+        for(const p of side1) if(p.dead || p.stats.combat.health.cur <= 0) count[0]++;
+        for(const p of side2) if(p.dead || p.stats.combat.health.cur <= 0) count[1]++;
         if(count[0] >= side1.length) {
             setInProgress(() => false);
             setIsWon(() => true);
@@ -721,7 +734,6 @@ export default function Combat() {
     }, [field.id]);
 
     const endTurn = useCallback(() => {
-        setActionValue(() => getActionValue(getPlayer(players, character.pid).state));
         if(!isHost) return;
         players.forEach((player) => {
             const status = getStatus(player.status, "rain");
@@ -778,7 +790,7 @@ export default function Combat() {
     }, [players, enemies, procDot, character, isHost]);
 
     const enemySelectAttack = useCallback(() => {
-        if(!isHost) return;
+        if(!isHost || checkIfBattleOver()) return;
         dispatchActionQueue({type: ACTION_QUEUE_REDUCER_ACTIONS.target, payload: { action: {ability: 'sort', user: 'N/A', targets: [] }, fieldId: field.id }})
         enemies.forEach((enemy) => {
             if(enemy.dead || checkIfCC(enemy)) return;
@@ -807,6 +819,10 @@ export default function Combat() {
             }
         });
     }, [players, enemies, isHost, field.id]);
+
+    const applySetActionValue = useCallback(() => {
+        setActionValue(() => getActionValue(getPlayer(players, character.pid).state));
+    }, [players, character]);
 
     const summonEnemy = async (enemyIds: string[]) => {
         const enemiesToSummon = summon(field.enemies, enemyIds, Number(party.location.map));
@@ -843,12 +859,12 @@ export default function Combat() {
     useEffect(() => {
         if(!inProgress) return;
         const interval = setInterval(() => {
-            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn, isHost, field.id);
+            cb(attack, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn, isHost, field.id, applySetActionValue);
             setCurrentTime(battleTimer.initTime);
         }, 24);
 
         return () => clearInterval(interval);
-    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn, isHost, field.id]);
+    }, [attack, inProgress, enemySelectAttack, checkIfBattleOver, actionQueue, sortQueue, endTurn, isHost, field.id, applySetActionValue]);
 
     const dummyLoot = async () => {
         const loot = getLoot(field.enemies);
@@ -923,9 +939,10 @@ export default function Combat() {
     }
 
     const checkIfYoureDead = () => {
-        if(!players.length) return true;
+        if(!players?.length) return true;
         const you = getPlayer(field.players, character.pid);
-        if(you.state.dead || character.dead) return true;
+        if(you?.state?.stats?.combat?.health?.cur <= 0) return true;
+        if(you?.state?.dead || character?.dead) return true;
     }
 
     const props = {
@@ -1015,6 +1032,7 @@ export default function Combat() {
             </button>
             }
             <button className="menu_btn" style={{position: "absolute", zIndex: 5, transform: "translateY(200px)"}} onClick={() => setInProgress((e) => !e)}>pause</button>     
+            <button className="menu_btn" style={{position: "absolute", zIndex: 5, transform: "translateY(150px)"}} onClick={() => console.log(battleTimer)}>field</button>     
         </div>
     )
 }

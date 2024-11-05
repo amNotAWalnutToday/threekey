@@ -1,4 +1,4 @@
-import { onValue, ref, remove, set } from "firebase/database";
+import { onValue, ref, set } from "firebase/database";
 import TownSchema from "../schemas/TownSchema";
 import accountFns from "./accountFns";
 import itemData from '../data/items.json';

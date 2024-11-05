@@ -29,28 +29,59 @@ export default (() => {
         return {state: players[0], index: -1};
     }
 
+    // const getTargets = (abilityName: string, players: PlayerSchema[], userPid: string) => {
+    //     const ability = getAbility(abilityName);
+    //     const filteredPlayers = Array.from(players, (p) => {
+    //         if(p.dead || p.stats.combat.health.cur <= 0) return p; 
+    //     });
+        
+    //     if(ability?.type === "single" || ability?.type === "ally_any") {
+    //         for(const player of players) { 
+    //             const status = getStatus(player.status ?? [], "taunt");
+    //             if(status.index < 0) continue;
+    //             const chance = Math.floor(Math.random() * 101);
+    //             if (chance + status.state.amount > 100) return [player.pid];
+    //         }
+    //         const ran = Math.floor(Math.random() * players.length);
+    //         return [players[ran].pid];
+    //     } else if(ability?.type === "aoe" || ability?.type === "ally_all" || ability?.type === "field") {
+    //         return Array.from([...players], (p) => p.pid);
+    //     } else if(ability?.type === "self") {
+    //         return [userPid];
+    //     } else if(ability?.type === "ally") {
+    //         const ran = Math.floor(Math.random() * (players.length - 1));
+    //         const targets = [...players].filter((p) => p.pid !== userPid);
+    //         return targets.length ? [targets[ran].pid] : [];
+    //     }
+
+    //     return [];
+    // }
+
     const getTargets = (abilityName: string, players: PlayerSchema[], userPid: string) => {
         const ability = getAbility(abilityName);
+        const filteredPlayers = [...players].filter((p) => {
+            if(p.stats.combat.health.cur > 0) return p; 
+        });
         
         if(ability?.type === "single" || ability?.type === "ally_any") {
-            for(const player of players) { 
+            for(const player of filteredPlayers) { 
                 const status = getStatus(player.status ?? [], "taunt");
                 if(status.index < 0) continue;
                 const chance = Math.floor(Math.random() * 101);
                 if (chance + status.state.amount > 100) return [player.pid];
             }
-            const ran = Math.floor(Math.random() * players.length);
-            return [players[ran].pid];
+            const ran = Math.floor(Math.random() * filteredPlayers.length);
+            return [filteredPlayers[ran]?.pid ?? ""];
         } else if(ability?.type === "aoe" || ability?.type === "ally_all" || ability?.type === "field") {
-            return Array.from([...players], (p) => p.pid);
+            return Array.from([...filteredPlayers], (p) => p.pid);
         } else if(ability?.type === "self") {
             return [userPid];
         } else if(ability?.type === "ally") {
-            const ran = Math.floor(Math.random() * (players.length - 1));
-            const targets = [...players].filter((p) => p.pid !== userPid);
+            const ran = Math.floor(Math.random() * (filteredPlayers.length - 1));
+            const targets = [...filteredPlayers].filter((p) => p.pid !== userPid);
             return targets.length ? [targets[ran].pid] : [];
         }
-
+        
         return [];
     }
     
@@ -107,6 +138,7 @@ export default (() => {
     }
 
     const getActionValue = (player: PlayerSchema) => {
+        if(!player?.name) return 0;
         if(checkIfCC(player)) return 0;
         let speed = player.stats.combat.speed; 
         speed = assignBuffs(player.status, 'speed', speed);
@@ -282,6 +314,7 @@ export default (() => {
     }
 
     const checkIfCC = (player: PlayerSchema) => {
+        if(!player?.status || !player?.status?.length) return false;
         for(const status of player.status) {
             if(status.type === "cc") return true;
             if(status.name === "demon cocoon") return true;
@@ -441,7 +474,7 @@ export default (() => {
 
     const assignMaxOrMinStat = (player: PlayerSchema, players: PlayerSchema[], index: number) => {
         const { health, resources, shield } = player.stats.combat;
-        const { mana, msp, psp } = resources;
+        const { mana, msp, psp, soul } = resources;
     
         if(health.cur <= 0) { 
             const hasRevive = getStatus(player.status, "revival");
@@ -479,6 +512,12 @@ export default (() => {
             players[index].stats.combat.resources.psp.cur = psp.max;
             const status = getStatus(statusData.all, "overheat");
             players[index] = assignStatus(players[index], status.state, status.state.name);
+        }
+
+        if(soul.cur <= 0) {
+            players[index].stats.combat.resources.soul.cur = 0;
+        } else if(soul.cur >= soul.max) {
+            players[index].stats.combat.resources.soul.cur = soul.max;
         }
     
         return [...players];
@@ -677,7 +716,6 @@ export default (() => {
         party: PartySchema,
     ) => {
         try {
-            console.log(party, party.players[0].pid);
             const fieldRef = ref(db, `/fields/${party.players[0].pid}`);
             const playersRef = ref(db, `/fields/${party.players[0].pid}/players`);
             const enemyRef = ref(db, `/fields/${party.players[0].pid}/enemies`);
@@ -689,12 +727,12 @@ export default (() => {
                 const joinedPlayers = data.joinedPlayers + 1;
                 await set(child(fieldRef, '/joinedPlayers'), joinedPlayers);
                 const shouldStart = joinedPlayers === party.players.length;
-                initialize(updatedPlayers ?? [], updatedEnemies ?? [], data.actionQueue ?? [], data.id, shouldStart, joinedPlayers, data.loot ?? [], data.timer);
+                initialize(updatedPlayers ?? [], updatedEnemies ?? [], data.actionQueue ?? [], data.id, shouldStart, joinedPlayers, data.loot ?? [], data.battleTimer);
             });
             await onValue(fieldRef, async (snapshot) => {
                 const data = await snapshot.val();
                 const shouldStart = data.joinedPlayers === party.players.length;
-                initialize([], [], [], '', shouldStart, data.joinedPlayers, data.loot ?? [], data.timer);
+                initialize([], [], [], '', shouldStart, data.joinedPlayers, data.loot ?? [], data.battleTimer);
             });
             await onValue(playersRef, async (snapshot) => {
                 const data = await snapshot.val();

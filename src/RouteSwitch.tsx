@@ -3,7 +3,6 @@ import { useState } from "react";
 import UserContext from "./data/Context";
 import Home from './pages/Home';
 import Combat from "./pages/Combat";
-import Map from "./pages/Map";
 import CharacterSelect from "./pages/CharacterSelect";
 import Town from "./pages/Town";
 import Dungeon from "./pages/Dungeon";
@@ -37,12 +36,6 @@ export default function RouteSwitch() {
                         path='/characters'
                         element={
                             <CharacterSelect />
-                        }
-                    />
-                    <Route 
-                        path='/map'
-                        element={
-                            <Map />
                         }
                     />
                     <Route 

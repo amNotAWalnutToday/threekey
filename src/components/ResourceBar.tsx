@@ -5,7 +5,7 @@ type Props = {
     index: number,
 }
 
-export default function ResourceBar({max, cur, type, index}: Props) {
+export default function ResourceBar({max, cur, type}: Props) {
     const getWidth = () => {
         const updatedCur = type === "shield" ? cur * 2 : cur; 
         const updatedMaxWidth = type === "overheat" || type === "overload" ? 50 : 100
